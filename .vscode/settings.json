@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "characteristics.h": "c",
+        "homekit.h": "c",
+        "types.h": "c"
+    }
+}
