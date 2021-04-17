@@ -46,45 +46,54 @@ void cha_switch_on_setter(const homekit_value_t value) {
   ledOff();
 }
 
+String formatPage(String htmlBody) {
+  return "\
+    <!DOCTYPE HTML>\
+    <html>\
+      <head>\
+        <title>Purl Switch</title>\
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
+        <style>\
+          body { background-color: #cccccc; font-family: Arial, Sans-Serif; }\
+        </style>\
+      </head>\
+      <body>"
+      + htmlBody +
+      "</body>\
+    </html>";
+}
+
 String listSSID() {
   String list = "";
   int count = WiFi.scanNetworks();
+  String current = WiFi.SSID();
   for (int i = 0; i < count; ++i) {
     String ssid = WiFi.SSID(i);
+    String checked = ssid == current ? " checked=\"checked\"" : "";
     list += "<li>";
-    list += "<input type=\"radio\" id=\"ssid_" + String(i) + "\" name=\"ssid\" value=\"" + ssid + "\" />";
+    list += "<input type=\"radio\" id=\"ssid_" + String(i) + "\" name=\"ssid\" value=\"" + ssid + "\"" + checked + " />";
     list += "<label for=\"ssid_" + String(i) + "\">";
     list += ssid;
     list += "</label>";
     list += "</li>";
   }
   list += "</ul>";
-  String html = "<!DOCTYPE HTML>\
-  <html>\
-    <head>\
-      <title>Rulee Test</title>\
-      <style>\
-        body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
-      </style>\
-    </head>\
-    <body>\
-      <form enctype=\"application/x-www-form-urlencoded\" method=\"post\" action=\"select\">\
-        <h1>Rulee Test</h1>"
-        + list +
-        "<p><label>Password: </label><input name=\"pass\" length=\"64\" /></p>\
-        <p>ON<input type=\"radio\" name=\"gpio\" value=\"on\" checked=\"checked\" /></p>\
-        <p>OFF<input type=\"radio\" name=\"gpio\" value=\"off\" /></p>\
-        <p><input type=\"submit\" /></p>\
-      </form>\
-    </body>\
-  </html>";
-  return html;
+  String html = "\
+    <form enctype=\"text/html\" method=\"post\" action=\"select\">\
+      <h1>Purl Switch</h1>"
+      + list +
+      "<p><label>Password: </label><input name=\"pass\" length=\"64\" /></p>\
+      <p>ON<input type=\"radio\" name=\"gpio\" value=\"on\" checked=\"checked\" /></p>\
+      <p>OFF<input type=\"radio\" name=\"gpio\" value=\"off\" /></p>\
+      <p><input type=\"submit\" /></p>\
+    </form>";
+  return formatPage(html);
 }
 
 void select() {
   if (server.method() != HTTP_POST) {
     ledOn();
-    server.send(405, "text/plain", "Method Not Allowed");
+    server.send(405, "text/html", formatPage("<h2>Method Not Allowed</h2>"));
     delay(100);
     ledOff();
     return;
@@ -101,55 +110,29 @@ void select() {
   }
 
   if (WiFi.status() == WL_CONNECTED && WiFi.SSID() == ssid) {
-    Serial.println("Ignore network setup");
+    String ignoreMsg = "<h2>Ignore network setup</h2><a href=\"/\">Back</a>";
+    server.send(200, "text/html", formatPage(ignoreMsg));
     return;
   }
 
   Serial.println("SSID: " + ssid);
-  Serial.println("PAWW: " + pass);
+  Serial.println("PASS: " + pass);
   WiFi.begin(ssid, pass);
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-  Serial.print("Done");
+
+  String htmlMsg = "<p>Connected to: " + ssid + "</p>\
+    <p>IP address: " + WiFi.localIP().toString() + "</p>\
+    <a href=\"/\">Back</a>";
+  server.send(200, "text/html", formatPage(htmlMsg));
 }
 
 void handleRoot() {
   ledOn();
   server.send(200, "text/html", listSSID());
-  delay(100);
-  ledOff();
-}
-
-void handlePlain() {
-  ledOn();
-  if (server.method() != HTTP_POST) {
-    server.send(405, "text/plain", "Method Not Allowed");
-  } else {
-    server.send(200, "text/plain", "POST body was:\n" + server.arg("plain"));
-  }
-  delay(100);
-  ledOff();
-}
-
-void handleForm() {
-  ledOn();
-  if (server.method() != HTTP_POST) {
-    server.send(405, "text/plain", "Method Not Allowed");
-  } else {
-    String message = "POST form was:\n";
-    for (uint8_t i = 0; i < server.args(); i++) {
-      message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-    }
-    server.send(200, "text/plain", message);
-  }
   delay(100);
   ledOff();
 }
@@ -167,7 +150,7 @@ void handleNotFound() {
   for (uint8_t i = 0; i < server.args(); i++) {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
-  server.send(404, "text/plain", message);
+  server.send(404, "text/html", formatPage(message));
   delay(100);
   ledOff();
 }
@@ -187,8 +170,6 @@ void setup(void) {
   }
 
   server.on("/", handleRoot);
-  server.on("/postplain/", handlePlain);
-  server.on("/postform/", handleForm);
   server.on("/select", select);
   server.onNotFound(handleNotFound);
   server.begin();
