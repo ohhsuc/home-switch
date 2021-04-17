@@ -16,7 +16,6 @@ void ledOff() {
   Serial.println("LED -> ON");
 }
 
-int switchPin = 1;
 void switchOn() {
   gpio_output_set(0, BIT0, BIT0, 0);
   Serial.println("SWITCH -> ON");
@@ -157,13 +156,23 @@ void handleNotFound() {
 
 void setup(void) {
   Serial.begin(115200);
-  WiFi.mode(WIFI_AP_STA);
-
-  cha_switch_on.setter = cha_switch_on_setter;
-	arduino_homekit_setup(&config);
-
   pinMode(led, OUTPUT);
   ledOff();
+
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.setAutoConnect(true);
+  WiFi.setAutoReconnect(true);
+
+  IPAddress apIp(192, 168, 1, 33);
+  IPAddress apSubnet(255, 255, 255, 0);
+  WiFi.softAPConfig(apIp, apIp, apSubnet);
+  WiFi.softAP("Purl-Switch");
+
+  IPAddress currentApIp = WiFi.softAPIP();
+  Serial.println("AP IP address: " + currentApIp.toString());
+
+  arduino_homekit_setup(&config);
+  cha_switch_on.setter = cha_switch_on_setter;
 
   if (MDNS.begin("esp8266")) {
     Serial.println("MDNS responder started");

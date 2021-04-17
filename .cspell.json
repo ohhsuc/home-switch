@@ -1,6 +1,8 @@
 {
     "version": "0.1",
     "words": [
-      "println"
+      "println",
+      "wifi",
+      "ssid"
     ]
 }

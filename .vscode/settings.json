@@ -2,6 +2,13 @@
     "files.associations": {
         "characteristics.h": "c",
         "homekit.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "array": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "initializer_list": "cpp"
     }
 }
