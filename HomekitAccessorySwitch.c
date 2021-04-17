@@ -10,7 +10,7 @@ void my_accessory_identify(homekit_value_t _value) {
 // optional: NAME
 
 // format: bool; HAP section 9.70; write the .setter function to get the switch-event sent from iOS Home APP.
-homekit_characteristic_t cha_switch_on = HOMEKIT_CHARACTERISTIC_(ON, false);
+homekit_characteristic_t cha_switch = HOMEKIT_CHARACTERISTIC_(ON, false);
 
 // format: string; HAP section 9.62; max length 64
 homekit_characteristic_t cha_name = HOMEKIT_CHARACTERISTIC_(NAME, "PurlSwitch");
@@ -26,8 +26,8 @@ homekit_accessory_t *accessories[] = {
       HOMEKIT_CHARACTERISTIC(IDENTIFY, my_accessory_identify),
       NULL
     }),
-    HOMEKIT_SERVICE(SWITCH, .primary=true, .characteristics=(homekit_characteristic_t*[]){
-      &cha_switch_on,
+    HOMEKIT_SERVICE(SWITCH, .primary=true, .characteristics=(homekit_characteristic_t*[]) {
+      &cha_switch,
       &cha_name,
       NULL
     }),
