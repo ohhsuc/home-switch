@@ -5,28 +5,45 @@
 #include <arduino_homekit_server.h>
 
 ESP8266WebServer server(80);
+
 const int led = LED_BUILTIN;
+void ledOn() {
+  digitalWrite(led, LOW);
+  Serial.println("LED -> ON");
+}
+void ledOff() {
+  digitalWrite(led, HIGH);
+  Serial.println("LED -> ON");
+}
+
+int switchPin = 1;
+void switchOn() {
+  gpio_output_set(0, BIT0, BIT0, 0);
+  Serial.println("SWITCH -> ON");
+}
+void switchOff() {
+  gpio_output_set(BIT0, 0, BIT0, 0);
+  Serial.println("SWITCH -> OFF");
+}
 
 // access your HomeKit characteristics defined
 extern "C" homekit_server_config_t config;
 extern "C" homekit_characteristic_t cha_switch_on;
 
 void cha_switch_on_setter(const homekit_value_t value) {
+  ledOn();
+
 	bool on = value.bool_value;
 	cha_switch_on.value.bool_value = on; //sync the value
 
-  digitalWrite(led, 0);
-  delay(100);
-
   if (on) {
-    gpio_output_set(0, BIT0, BIT0, 0);
-    Serial.println("BIT0 -> ON");
+    switchOn();
   } else {
-    gpio_output_set(BIT0, 0, BIT0, 0);
-    Serial.println("BIT0 -> OFF");
+    switchOff();
   }
 
-  digitalWrite(led, 1);
+  delay(100);
+  ledOff();
 }
 
 String listSSID() {
@@ -53,9 +70,9 @@ String listSSID() {
     <body>\
       <form enctype=\"application/x-www-form-urlencoded\" method=\"post\" action=\"select\">\
         <h1>Rulee Test</h1>"
-        + list + 
+        + list +
         "<p><label>Password: </label><input name=\"pass\" length=\"64\" /></p>\
-        <p>ON<input type=\"radio\" name=\"gpio\" value=\"on\" /></p>\
+        <p>ON<input type=\"radio\" name=\"gpio\" value=\"on\" checked=\"checked\" /></p>\
         <p>OFF<input type=\"radio\" name=\"gpio\" value=\"off\" /></p>\
         <p><input type=\"submit\" /></p>\
       </form>\
@@ -66,23 +83,21 @@ String listSSID() {
 
 void select() {
   if (server.method() != HTTP_POST) {
-    digitalWrite(led, 0);
-    delay(100);
+    ledOn();
     server.send(405, "text/plain", "Method Not Allowed");
-    digitalWrite(led, 1);
+    delay(100);
+    ledOff();
     return;
   }
-  
+
   String ssid = server.arg("ssid");
   String pass = server.arg("pass");
   String gpio = server.arg("gpio");
 
   if (gpio == "on") {
-    gpio_output_set(0, BIT0, BIT0, 0);
-    Serial.println("BIT0 -> ON");
+    switchOn();
   } else if (gpio == "off") {
-    gpio_output_set(BIT0, 0, BIT0, 0);
-    Serial.println("BIT0 -> OFF");
+    switchOff();
   }
 
   if (WiFi.status() == WL_CONNECTED && WiFi.SSID() == ssid) {
@@ -107,47 +122,40 @@ void select() {
 }
 
 void handleRoot() {
-  digitalWrite(led, 0);
-  delay(100);
+  ledOn();
   server.send(200, "text/html", listSSID());
-  digitalWrite(led, 1);
+  delay(100);
+  ledOff();
 }
 
 void handlePlain() {
+  ledOn();
   if (server.method() != HTTP_POST) {
-    digitalWrite(led, 0);
-    delay(100);
     server.send(405, "text/plain", "Method Not Allowed");
-    digitalWrite(led, 1);
   } else {
-    digitalWrite(led, 0);
-    delay(100);
     server.send(200, "text/plain", "POST body was:\n" + server.arg("plain"));
-    digitalWrite(led, 1);
   }
+  delay(100);
+  ledOff();
 }
 
 void handleForm() {
+  ledOn();
   if (server.method() != HTTP_POST) {
-    digitalWrite(led, 0);
-    delay(100);
     server.send(405, "text/plain", "Method Not Allowed");
-    digitalWrite(led, 1);
   } else {
-    digitalWrite(led, 0);
-    delay(100);
     String message = "POST form was:\n";
     for (uint8_t i = 0; i < server.args(); i++) {
       message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
     }
     server.send(200, "text/plain", message);
-    digitalWrite(led, 1);
   }
+  delay(100);
+  ledOff();
 }
 
 void handleNotFound() {
-  digitalWrite(led, 0);
-  delay(100);
+  ledOn();
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += server.uri();
@@ -160,17 +168,19 @@ void handleNotFound() {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-  digitalWrite(led, 1);
+  delay(100);
+  ledOff();
 }
 
 void setup(void) {
+  Serial.begin(115200);
+  WiFi.mode(WIFI_AP_STA);
+
   cha_switch_on.setter = cha_switch_on_setter;
 	arduino_homekit_setup(&config);
 
-  // PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO0_U, FUNC_GPIO0);
   pinMode(led, OUTPUT);
-  digitalWrite(led, 1);
-  Serial.begin(115200);
+  ledOff();
 
   if (MDNS.begin("esp8266")) {
     Serial.println("MDNS responder started");
