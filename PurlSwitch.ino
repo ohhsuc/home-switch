@@ -138,18 +138,11 @@ void handleRoot() {
 
 void handleNotFound() {
   ledOn();
-  String message = "File Not Found\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-  server.send(404, "text/html", formatPage(message));
+  String method = (server.method() == HTTP_GET) ? "GET" : "POST";
+  String bodyHtml = "<h2>File Not Found</h2>\
+    <p>URI: " + server.uri() + "</p>\
+    <p>Method: " + method + "</p>";
+  server.send(404, "text/html", formatPage(bodyHtml));
   delay(100);
   ledOff();
 }
@@ -166,7 +159,7 @@ void setup(void) {
   IPAddress apIp(192, 168, 1, 33);
   IPAddress apSubnet(255, 255, 255, 0);
   WiFi.softAPConfig(apIp, apIp, apSubnet);
-  WiFi.softAP("Purl-Switch");
+  WiFi.softAP("Purl-Switch-001");
 
   IPAddress currentApIp = WiFi.softAPIP();
   Serial.println("AP IP address: " + currentApIp.toString());
