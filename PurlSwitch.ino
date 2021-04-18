@@ -1,11 +1,11 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
 #include <arduino_homekit_server.h>
 
 // create web server on port 80
 ESP8266WebServer server(80);
+const String hostName = "Purl-Switch-001";
 
 // access your HomeKit characteristics defined
 extern "C" homekit_server_config_t config;
@@ -18,7 +18,7 @@ void ledOn() {
 }
 void ledOff() {
   digitalWrite(led, HIGH);
-  Serial.println("LED -> ON");
+  Serial.println("LED -> OFF");
 }
 
 void switchOn() {
@@ -229,24 +229,17 @@ void setup(void) {
   ledOff();
 
   WiFi.mode(WIFI_AP_STA);
+  WiFi.hostname(hostName);
   WiFi.setAutoConnect(true);
   WiFi.setAutoReconnect(true);
 
-  IPAddress apIp(192, 168, 1, 33);
-  IPAddress apSubnet(255, 255, 255, 0);
-  WiFi.softAPConfig(apIp, apIp, apSubnet);
-  WiFi.softAP("Purl-Switch-001");
+  // IPAddress apIp(192, 168, 1, 33);
+  // IPAddress apSubnet(255, 255, 255, 0);
+  // WiFi.softAPConfig(apIp, apIp, apSubnet);
+  WiFi.softAP(hostName);
 
   IPAddress currentApIp = WiFi.softAPIP();
   Serial.println("AP IP address: " + currentApIp.toString());
-
-  arduino_homekit_setup(&config);
-  cha_switch.getter = cha_switch_getter;
-  cha_switch.setter = cha_switch_setter;
-
-  if (MDNS.begin("esp8266")) {
-    Serial.println("MDNS responder started");
-  }
 
   server.on("/", handleRoot);
   server.on("/select", handleSelectWiFi);
@@ -255,7 +248,11 @@ void setup(void) {
   server.onNotFound(handleNotFound);
   server.begin();
 
-  Serial.println("HTTP server started");
+  arduino_homekit_setup(&config);
+  cha_switch.getter = cha_switch_getter;
+  cha_switch.setter = cha_switch_setter;
+
+  Serial.println("Setup complete!");
 }
 
 void loop(void) {
