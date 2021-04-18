@@ -5,10 +5,6 @@ void my_accessory_identify(homekit_value_t _value) {
   printf("accessory identify\n");
 }
 
-// Switch (HAP section 8.38)
-// required: ON
-// optional: NAME
-
 // format: bool; HAP section 9.70; write the .setter function to get the switch-event sent from iOS Home APP.
 homekit_characteristic_t cha_switch = HOMEKIT_CHARACTERISTIC_(ON, false);
 

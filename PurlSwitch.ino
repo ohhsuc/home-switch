@@ -87,18 +87,18 @@ String listSsid() {
     list += "</li>";
   }
   list += "</ul>";
-  String html = "\
+  String htmlBody = "\
     <p>\
       <a href=\"/control\">Control</a>\
       <a href=\"/reset\">Reset</a>\
     </p>\
-    <h2>Select WiFi</h2>\
+    <h3>Select WiFi</h3>\
     <form enctype=\"text/html\" method=\"post\" action=\"/select\">"
       + list +
       "<p><label>Password: </label><input name=\"pass\" length=\"64\" /></p>\
       <p><input type=\"submit\" /></p>\
     </form>";
-  return formatPage(html);
+  return formatPage(htmlBody);
 }
 
 void handleRoot() {
@@ -164,9 +164,9 @@ void handleControl() {
     bool isOn = cha_switch.value.bool_value;
     String onAttribute = isOn ? " checked=\"checked\"" : "";
     String offAttribute = isOn ? "" : " checked=\"checked\"";
-    String html = "\
+    String htmlBody = "\
       <p><a href=\"/\">Back</a></p>\
-      <h2>Control Switch</h2>\
+      <h3>Control Switch</h3>\
       <form enctype=\"text/html\" method=\"post\" action=\"/control\">\
         <p>\
           <label for=\"stateOn\">ON</label>\
@@ -178,7 +178,7 @@ void handleControl() {
         </p>\
         <p><input type=\"submit\" /></p>\
       </form>";
-    server.send(200, "text/html", formatPage(html));
+    server.send(200, "text/html", formatPage(htmlBody));
   }
   delay(100);
   ledOff();
@@ -186,27 +186,32 @@ void handleControl() {
 
 void handleReset() {
   ledOn();
-  bool redirected = false;
   if (server.method() == HTTP_POST) {
-    String confirmed = server.arg("confirmed");
-    if (confirmed == "yes") {
+    String resetWifi = server.arg("ResetWifi");
+    if (resetWifi == "yes") {
       WiFi.disconnect(true);
-      redirectTo("/");
-      redirected = true;
     }
-  }
-  if (!redirected) {
-    String html = "\
+    String resetHomekit = server.arg("ResetHomekit");
+    if (resetHomekit == "yes") {
+      homekit_server_reset();
+    }
+    redirectTo("/");
+  } else {
+    String htmlBody = "\
       <p><a href=\"/\">Back</a></p>\
-      <h2>Reset WiFi</h2>\
+      <h3>Reset</h3>\
       <form enctype=\"text/html\" method=\"post\" action=\"/reset\">\
         <p>\
-          <label for=\"isConfirmed\">Confirm</label>\
-          <input type=\"checkbox\" id=\"isConfirmed\" name=\"confirmed\" value=\"yes\" />\
+          <label for=\"chkResetWifi\">Confirm reset wifi</label>\
+          <input type=\"checkbox\" id=\"chkResetWifi\" name=\"ResetWifi\" value=\"yes\" />\
+        </p>\
+        <p>\
+          <label for=\"chkResetHomekit\">Confirm reset homekit</label>\
+          <input type=\"checkbox\" id=\"chkResetHomekit\" name=\"ResetHomekit\" value=\"yes\" />\
         </p>\
         <p><input type=\"submit\" /></p>\
       </form>";
-    server.send(200, "text/html", formatPage(html));
+    server.send(200, "text/html", formatPage(htmlBody));
   }
   delay(100);
   ledOff();
@@ -215,7 +220,8 @@ void handleReset() {
 void handleNotFound() {
   ledOn();
   String method = (server.method() == HTTP_GET) ? "GET" : "POST";
-  String bodyHtml = "<h2>File Not Found</h2>\
+  String bodyHtml = "\
+    <h3>File Not Found</h3>\
     <p>URI: " + server.uri() + "</p>\
     <p>Method: " + method + "</p>";
   server.send(404, "text/html", formatPage(bodyHtml));
@@ -226,7 +232,7 @@ void handleNotFound() {
 void setup(void) {
   Serial.begin(115200);
   pinMode(led, OUTPUT);
-  ledOff();
+  ledOn();
 
   WiFi.mode(WIFI_AP_STA);
   WiFi.hostname(hostName);
@@ -248,11 +254,12 @@ void setup(void) {
   server.onNotFound(handleNotFound);
   server.begin();
 
-  arduino_homekit_setup(&config);
   cha_switch.getter = cha_switch_getter;
   cha_switch.setter = cha_switch_setter;
+  arduino_homekit_setup(&config);
 
   Serial.println("Setup complete!");
+  ledOff();
 }
 
 void loop(void) {
