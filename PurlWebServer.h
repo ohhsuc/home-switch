@@ -4,7 +4,7 @@ struct PurlWebServerState {
   bool isSwitchOn;
 };
 typedef void (*TPurlEvent)();
-typedef void (*TPurlStateEvent)(PurlWebServerState);
+typedef void (*TPurlStateEvent)(PurlWebServerState&);
 
 class PurlWebServer {
   public:
