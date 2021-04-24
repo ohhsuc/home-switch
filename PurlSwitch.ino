@@ -9,24 +9,27 @@ PurlWebServer webServer(80, productName, hostName);
 extern "C" homekit_server_config_t config;
 extern "C" homekit_characteristic_t cha_switch;
 
-const int led = LED_BUILTIN;
+// const int led = LED_BUILTIN;
+const uint8_t LedPin = 2; // IO2 (Led Builtin)
+const uint8_t RelayPin = 0; // IO0
+const uint8_t InputPin = 3; // RX
+
 void ledOn() {
-  digitalWrite(led, LOW);
+  digitalWrite(LedPin, LOW);
   Serial.println("LED -> ON");
   delay(100); // at least light for some time
 }
 void ledOff() {
-  digitalWrite(led, HIGH);
+  digitalWrite(LedPin, HIGH);
   Serial.println("LED -> OFF");
 }
 
-void setSwitch(bool isOn) {
-  cha_switch.value.bool_value = isOn;
+void setRelay(bool isOn) {
   if (isOn) {
-    gpio_output_set(0, BIT0, BIT0, 0);
+    digitalWrite(RelayPin, LOW);
     Serial.println("SWITCH -> ON");
   } else {
-    gpio_output_set(BIT0, 0, BIT0, 0);
+    digitalWrite(RelayPin, HIGH);
     Serial.println("SWITCH -> OFF");
   }
 }
@@ -37,7 +40,8 @@ homekit_value_t cha_switch_getter() {
 
 void cha_switch_setter(const homekit_value_t value) {
   ledOn();
-  setSwitch(value.bool_value);
+  cha_switch.value.bool_value = value.bool_value;
+  setRelay(value.bool_value);
   ledOff();
 }
 
@@ -46,7 +50,8 @@ void resetAccessory() {
 }
 
 void setState(PurlWebServerState state) {
-  setSwitch(state.isSwitchOn);
+  cha_switch.value.bool_value = state.isSwitchOn;
+  setRelay(state.isSwitchOn);
 }
 void getState(PurlWebServerState state) {
   bool value = cha_switch.value.bool_value;
@@ -55,7 +60,11 @@ void getState(PurlWebServerState state) {
 
 void setup(void) {
   Serial.begin(115200);
-  pinMode(led, OUTPUT);
+  pinMode(RelayPin, OUTPUT);
+  digitalWrite(RelayPin, HIGH);
+  pinMode(InputPin, INPUT);
+  digitalWrite(InputPin, HIGH);
+  pinMode(LedPin, OUTPUT);
   ledOn();
 
   webServer.onSetState = setState;

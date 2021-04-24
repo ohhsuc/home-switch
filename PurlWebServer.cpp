@@ -8,7 +8,8 @@ PurlWebServer::PurlWebServer(int port, String productName, String hostName) {
   _productName = productName;
   _hostName = hostName;
   currentState = PurlWebServerState {
-    .isSwitchOn = false,
+    // .isSwitchOn = false,
+    isSwitchOn: false,
   };
 }
 
