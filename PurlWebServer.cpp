@@ -68,19 +68,19 @@ String PurlWebServer::_formatPage(String htmlBody) {
     </html>";
 }
 
-void PurlWebServer::_triggerSetState() {
+void PurlWebServer::_dispatchSetState() {
   if (onSetState) {
     onSetState(currentState);
   }
 }
 
-void PurlWebServer::_triggerGetState() {
+void PurlWebServer::_dispatchGetState() {
   if (onGetState) {
     onGetState(currentState);
   }
 }
 
-void PurlWebServer::_triggerRequestStart() {
+void PurlWebServer::_dispatchRequestStart() {
   // set cross origin
   _server->sendHeader(F("Access-Control-Allow-Origin"), F("*"));
   _server->sendHeader(F("Access-Control-Max-Age"), F("600")); // 10 minutes
@@ -92,20 +92,20 @@ void PurlWebServer::_triggerRequestStart() {
   }
 }
 
-void PurlWebServer::_triggerRequestEnd() {
+void PurlWebServer::_dispatchRequestEnd() {
   if (onRequestEnd) {
     onRequestEnd();
   }
 }
 
-void PurlWebServer::_triggerResetAccessory() {
+void PurlWebServer::_dispatchResetAccessory() {
   if (onResetAccessory) {
     onResetAccessory();
   }
 }
 
 void PurlWebServer::_handleRoot() {
-  _triggerRequestStart();
+  _dispatchRequestStart();
   String list = "";
   int count = WiFi.scanNetworks();
   String current = WiFi.SSID();
@@ -132,11 +132,11 @@ void PurlWebServer::_handleRoot() {
       <p><input type=\"submit\" /></p>\
     </form>";
   _server->send(200, "text/html", _formatPage(htmlBody));
-  _triggerRequestEnd();
+  _dispatchRequestEnd();
 }
 
 void PurlWebServer::_handleSelectWiFi() {
-  _triggerRequestStart();
+  _dispatchRequestStart();
   String ssid = _server->arg("ssid");
   String pass = _server->arg("pass");
 
@@ -145,7 +145,7 @@ void PurlWebServer::_handleSelectWiFi() {
       <p><a href=\"/\">Back</a></p>\
       <p>Ignore network setup</p>";
     _server->send(200, "text/html", _formatPage(ignoreMsg));
-    _triggerRequestEnd();
+    _dispatchRequestEnd();
     return;
   }
 
@@ -177,18 +177,18 @@ void PurlWebServer::_handleSelectWiFi() {
       <p>Connect to: " + ssid + " failed</p>";
     _server->send(200, "text/html", _formatPage(failedMessage));
   }
-  _triggerRequestEnd();
+  _dispatchRequestEnd();
 }
 
 void PurlWebServer::_handleControl() {
-  _triggerRequestStart();
+  _dispatchRequestStart();
   if (_server->method() == HTTP_POST) {
     String state = _server->arg("state");
     currentState.isSwitchOn = (state == "on");
-    _triggerSetState();
+    _dispatchSetState();
     _redirectTo("/control");
   } else {
-    _triggerGetState();
+    _dispatchGetState();
     String onAttribute = currentState.isSwitchOn ? " checked=\"checked\"" : "";
     String offAttribute = currentState.isSwitchOn ? "" : " checked=\"checked\"";
     String htmlBody = "\
@@ -207,11 +207,11 @@ void PurlWebServer::_handleControl() {
       </form>";
     _server->send(200, "text/html", _formatPage(htmlBody));
   }
-  _triggerRequestEnd();
+  _dispatchRequestEnd();
 }
 
 void PurlWebServer::_handleReset() {
-  _triggerRequestStart();
+  _dispatchRequestStart();
   if (_server->method() == HTTP_POST) {
     String resetWifi = _server->arg("ResetWifi");
     if (resetWifi == "yes") {
@@ -219,7 +219,7 @@ void PurlWebServer::_handleReset() {
     }
     String resetAccessory = _server->arg("ResetAccessory");
     if (resetAccessory == "yes") {
-      _triggerResetAccessory();
+      _dispatchResetAccessory();
     }
     _redirectTo("/");
   } else {
@@ -239,22 +239,22 @@ void PurlWebServer::_handleReset() {
       </form>";
     _server->send(200, "text/html", _formatPage(htmlBody));
   }
-  _triggerRequestEnd();
+  _dispatchRequestEnd();
 }
 
 void PurlWebServer::_handleCrossOrigin() {
-    _triggerRequestStart();
+    _dispatchRequestStart();
     _server->send(204);
-    _triggerRequestEnd();
+    _dispatchRequestEnd();
 }
 
 void PurlWebServer::_handleNotFound() {
-  _triggerRequestStart();
+  _dispatchRequestStart();
   String method = (_server->method() == HTTP_GET) ? "GET" : "POST";
   String bodyHtml = "\
     <h3>File Not Found</h3>\
     <p>URI: " + _server->uri() + "</p>\
     <p>Method: " + method + "</p>";
   _server->send(404, "text/html", _formatPage(bodyHtml));
-  _triggerRequestEnd();
+  _dispatchRequestEnd();
 }

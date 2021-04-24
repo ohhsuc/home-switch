@@ -25,11 +25,11 @@ class PurlWebServer {
     ESP8266WebServer* _server;
     String _formatPage(String htmlBody);
     void _redirectTo(String url);
-    void _triggerGetState();
-    void _triggerSetState();
-    void _triggerRequestStart();
-    void _triggerRequestEnd();
-    void _triggerResetAccessory();
+    void _dispatchGetState();
+    void _dispatchSetState();
+    void _dispatchRequestStart();
+    void _dispatchRequestEnd();
+    void _dispatchResetAccessory();
     void _handleRoot();
     void _handleSelectWiFi();
     void _handleControl();
