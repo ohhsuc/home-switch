@@ -65,6 +65,18 @@ String PurlWebServer::_formatPage(String htmlBody) {
     </html>";
 }
 
+void PurlWebServer::_triggerSetState() {
+  if (onSetState) {
+    onSetState(currentState);
+  }
+}
+
+void PurlWebServer::_triggerGetState() {
+  if (onGetState) {
+    onGetState(currentState);
+  }
+}
+
 void PurlWebServer::_triggerRequestStart() {
   if (onRequestStart) {
     onRequestStart();
@@ -164,10 +176,10 @@ void PurlWebServer::_handleControl() {
   if (_server->method() == HTTP_POST) {
     String state = _server->arg("state");
     currentState.isSwitchOn = (state == "on");
-    onSetState(currentState);
+    _triggerSetState();
     _redirectTo("/control");
   } else {
-    onGetState(currentState);
+    _triggerGetState();
     String onAttribute = currentState.isSwitchOn ? " checked=\"checked\"" : "";
     String offAttribute = currentState.isSwitchOn ? "" : " checked=\"checked\"";
     String htmlBody = "\

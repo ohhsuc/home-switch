@@ -20,7 +20,7 @@ void ledOff() {
   Serial.println("LED -> OFF");
 }
 
-void switchOnOff(bool isOn) {
+void setSwitch(bool isOn) {
   cha_switch.value.bool_value = isOn;
   if (isOn) {
     gpio_output_set(0, BIT0, BIT0, 0);
@@ -37,7 +37,7 @@ homekit_value_t cha_switch_getter() {
 
 void cha_switch_setter(const homekit_value_t value) {
   ledOn();
-  switchOnOff(value.bool_value);
+  setSwitch(value.bool_value);
   ledOff();
 }
 
@@ -46,7 +46,7 @@ void resetAccessory() {
 }
 
 void setState(PurlWebServerState state) {
-  switchOnOff(state.isSwitchOn);
+  setSwitch(state.isSwitchOn);
 }
 void getState(PurlWebServerState state) {
   bool value = cha_switch.value.bool_value;

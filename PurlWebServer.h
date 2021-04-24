@@ -1,11 +1,10 @@
 #include <ESP8266WebServer.h>
 
-class PurlWebServer;
-  struct PurlWebServerState {
-    bool isSwitchOn;
-  };
-  typedef void (*TEvent)();
-  typedef void (*TSyncEvent)(PurlWebServerState);
+struct PurlWebServerState {
+  bool isSwitchOn;
+};
+typedef void (*TPurlEvent)();
+typedef void (*TPurlStateEvent)(PurlWebServerState);
 
 class PurlWebServer {
   public:
@@ -14,11 +13,11 @@ class PurlWebServer {
     void setup();
     void loop();
     PurlWebServerState currentState;
-    TSyncEvent onSetState;
-    TSyncEvent onGetState;
-    TEvent onRequestStart;
-    TEvent onRequestEnd;
-    TEvent onResetAccessory;
+    TPurlStateEvent onSetState;
+    TPurlStateEvent onGetState;
+    TPurlEvent onRequestStart;
+    TPurlEvent onRequestEnd;
+    TPurlEvent onResetAccessory;
 
   private:
     String _productName;
@@ -26,6 +25,8 @@ class PurlWebServer {
     ESP8266WebServer* _server;
     String _formatPage(String htmlBody);
     void _redirectTo(String url);
+    void _triggerGetState();
+    void _triggerSetState();
     void _triggerRequestStart();
     void _triggerRequestEnd();
     void _triggerResetAccessory();
