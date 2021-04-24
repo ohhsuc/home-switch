@@ -30,10 +30,12 @@ void PurlWebServer::setup() {
   IPAddress currentApIp = WiFi.softAPIP();
   Serial.println("AP IP address: " + currentApIp.toString());
 
-  _server->on("/", std::bind(&PurlWebServer::_handleRoot, this));
-  _server->on("/select", std::bind(&PurlWebServer::_handleSelectWiFi, this));
-  _server->on("/control", std::bind(&PurlWebServer::_handleControl, this));
-  _server->on("/reset", std::bind(&PurlWebServer::_handleReset, this));
+  _server->on("/", HTTP_GET, std::bind(&PurlWebServer::_handleRoot, this));
+  _server->on("/select", HTTP_POST, std::bind(&PurlWebServer::_handleSelectWiFi, this));
+  _server->on("/control", HTTP_OPTIONS, std::bind(&PurlWebServer::_handleCrossOrigin, this));
+  _server->on("/control", HTTP_ANY, std::bind(&PurlWebServer::_handleControl, this));
+  _server->on("/reset", HTTP_OPTIONS, std::bind(&PurlWebServer::_handleCrossOrigin, this));
+  _server->on("/reset", HTTP_ANY, std::bind(&PurlWebServer::_handleReset, this));
   _server->onNotFound(std::bind(&PurlWebServer::_handleNotFound, this));
   _server->begin();
 }
@@ -43,7 +45,7 @@ void PurlWebServer::loop() {
 }
 
 void PurlWebServer::_redirectTo(String url) {
-  _server->sendHeader("Location", url, true);
+  _server->sendHeader(F("Location"), url, true);
   _server->send(302, "text/plain", "");
 }
 
@@ -78,6 +80,12 @@ void PurlWebServer::_triggerGetState() {
 }
 
 void PurlWebServer::_triggerRequestStart() {
+  // set cross origin
+  _server->sendHeader(F("Access-Control-Allow-Origin"), F("*"));
+  _server->sendHeader(F("Access-Control-Max-Age"), F("600")); // 10 minutes
+  _server->sendHeader(F("Access-Control-Allow-Methods"), F("PUT,POST,GET,OPTIONS"));
+  _server->sendHeader(F("Access-Control-Allow-Headers"), F("*"));
+  // fire event
   if (onRequestStart) {
     onRequestStart();
   }
@@ -231,6 +239,12 @@ void PurlWebServer::_handleReset() {
     _server->send(200, "text/html", _formatPage(htmlBody));
   }
   _triggerRequestEnd();
+}
+
+void PurlWebServer::_handleCrossOrigin() {
+    _triggerRequestStart();
+    _server->send(204);
+    _triggerRequestEnd();
 }
 
 void PurlWebServer::_handleNotFound() {

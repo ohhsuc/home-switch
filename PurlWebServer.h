@@ -34,5 +34,6 @@ class PurlWebServer {
     void _handleSelectWiFi();
     void _handleControl();
     void _handleReset();
+    void _handleCrossOrigin();
     void _handleNotFound();
 };
