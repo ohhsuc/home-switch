@@ -19,6 +19,7 @@ void ledOff() {
   digitalWrite(led, HIGH);
   Serial.println("LED -> OFF");
 }
+
 void switchOnOff(bool isOn) {
   cha_switch.value.bool_value = isOn;
   if (isOn) {
@@ -57,11 +58,11 @@ void setup(void) {
   pinMode(led, OUTPUT);
   ledOn();
 
-  webServer.onResetAccessory = resetAccessory;
-  webServer.onRequestStart = ledOn;
-  webServer.onRequestEnd = ledOff;
   webServer.onSetState = setState;
   webServer.onGetState = getState;
+  webServer.onRequestStart = ledOn;
+  webServer.onRequestEnd = ledOff;
+  webServer.onResetAccessory = resetAccessory;
   webServer.setup();
 
   cha_switch.getter = cha_switch_getter;

@@ -65,8 +65,26 @@ String PurlWebServer::_formatPage(String htmlBody) {
     </html>";
 }
 
+void PurlWebServer::_triggerRequestStart() {
+  if (onRequestStart) {
+    onRequestStart();
+  }
+}
+
+void PurlWebServer::_triggerRequestEnd() {
+  if (onRequestEnd) {
+    onRequestEnd();
+  }
+}
+
+void PurlWebServer::_triggerResetAccessory() {
+  if (onResetAccessory) {
+    onResetAccessory();
+  }
+}
+
 void PurlWebServer::_handleRoot() {
-  onRequestStart();
+  _triggerRequestStart();
   String list = "";
   int count = WiFi.scanNetworks();
   String current = WiFi.SSID();
@@ -93,11 +111,11 @@ void PurlWebServer::_handleRoot() {
       <p><input type=\"submit\" /></p>\
     </form>";
   _server->send(200, "text/html", _formatPage(htmlBody));
-  onRequestEnd();
+  _triggerRequestEnd();
 }
 
 void PurlWebServer::_handleSelectWiFi() {
-  onRequestStart();
+  _triggerRequestStart();
   String ssid = _server->arg("ssid");
   String pass = _server->arg("pass");
 
@@ -106,7 +124,7 @@ void PurlWebServer::_handleSelectWiFi() {
       <p><a href=\"/\">Back</a></p>\
       <p>Ignore network setup</p>";
     _server->send(200, "text/html", _formatPage(ignoreMsg));
-    onRequestEnd();
+    _triggerRequestEnd();
     return;
   }
 
@@ -138,11 +156,11 @@ void PurlWebServer::_handleSelectWiFi() {
       <p>Connect to: " + ssid + " failed</p>";
     _server->send(200, "text/html", _formatPage(failedMessage));
   }
-  onRequestEnd();
+  _triggerRequestEnd();
 }
 
 void PurlWebServer::_handleControl() {
-  onRequestStart();
+  _triggerRequestStart();
   if (_server->method() == HTTP_POST) {
     String state = _server->arg("state");
     currentState.isSwitchOn = (state == "on");
@@ -168,11 +186,11 @@ void PurlWebServer::_handleControl() {
       </form>";
     _server->send(200, "text/html", _formatPage(htmlBody));
   }
-  onRequestEnd();
+  _triggerRequestEnd();
 }
 
 void PurlWebServer::_handleReset() {
-  onRequestStart();
+  _triggerRequestStart();
   if (_server->method() == HTTP_POST) {
     String resetWifi = _server->arg("ResetWifi");
     if (resetWifi == "yes") {
@@ -180,7 +198,7 @@ void PurlWebServer::_handleReset() {
     }
     String resetAccessory = _server->arg("ResetAccessory");
     if (resetAccessory == "yes") {
-      onResetAccessory();
+      _triggerResetAccessory();
     }
     _redirectTo("/");
   } else {
@@ -200,16 +218,16 @@ void PurlWebServer::_handleReset() {
       </form>";
     _server->send(200, "text/html", _formatPage(htmlBody));
   }
-  onRequestEnd();
+  _triggerRequestEnd();
 }
 
 void PurlWebServer::_handleNotFound() {
-  onRequestStart();
+  _triggerRequestStart();
   String method = (_server->method() == HTTP_GET) ? "GET" : "POST";
   String bodyHtml = "\
     <h3>File Not Found</h3>\
     <p>URI: " + _server->uri() + "</p>\
     <p>Method: " + method + "</p>";
   _server->send(404, "text/html", _formatPage(bodyHtml));
-  onRequestEnd();
+  _triggerRequestEnd();
 }
