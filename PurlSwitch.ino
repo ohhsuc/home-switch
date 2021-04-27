@@ -12,7 +12,8 @@ extern "C" homekit_characteristic_t cha_switch;
 // const int led = LED_BUILTIN;
 const uint8_t GPIO0 = 0; // GPIO-0
 const uint8_t GPIO2 = 2; // GPIO-2 (Led Builtin)
-const uint8_t RX = 3; // RX (Receiver)
+const uint8_t TXD = 1; // TXD (Transmitter)
+const uint8_t RXD = 3; // RXD (Receiver)
 
 uint8_t LedPin;
 uint8_t RelayPin;
@@ -64,8 +65,8 @@ void getState(PurlWebServerState& state) {
 
 void setup(void) {
   LedPin = GPIO2;
-  RelayPin = GPIO0;
-  InputPin = RX;
+  RelayPin = RXD;
+  InputPin = GPIO0;
 
   Serial.begin(115200);
   pinMode(RelayPin, OUTPUT);
