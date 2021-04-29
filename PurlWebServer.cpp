@@ -235,6 +235,10 @@ void PurlWebServer::_handleReset() {
     if (resetAccessory == "yes") {
       _dispatchResetAccessory();
     }
+    String restartESP = _server->arg("RestartESP");
+    if (restartESP == "yes") {
+      ESP.restart();
+    }
     _redirectTo("/");
   } else {
     String htmlBody = "\
@@ -248,6 +252,10 @@ void PurlWebServer::_handleReset() {
         <p>\
           <label for=\"chkResetAccessory\">Confirm reset accessory</label>\
           <input type=\"checkbox\" id=\"chkResetAccessory\" name=\"ResetAccessory\" value=\"yes\" />\
+        </p>\
+        <p>\
+          <label for=\"chkRestartESP\">Restart ESP</label>\
+          <input type=\"checkbox\" id=\"chkRestartESP\" name=\"RestartESP\" value=\"yes\" />\
         </p>\
         <p><input type=\"submit\" /></p>\
       </form>";
