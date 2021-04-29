@@ -31,7 +31,7 @@ class PurlWebServer {
     void _dispatchRequestEnd();
     void _dispatchResetAccessory();
     void _handleRoot();
-    void _handleSelectWiFi();
+    void _handleConnectSsid();
     void _handleControl();
     void _handleReset();
     void _handleCrossOrigin();

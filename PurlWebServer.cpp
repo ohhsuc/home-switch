@@ -18,21 +18,33 @@ PurlWebServer::~PurlWebServer() {
 }
 
 void PurlWebServer::setup() {
-  WiFi.mode(WIFI_AP_STA);
+  WiFiMode_t wifiMode = WiFi.getMode();
+  bool apEnabled = ((wifiMode & WIFI_AP) != 0);
+  bool staEnabled = ((wifiMode & WIFI_STA) != 0);
+  if (!apEnabled && !staEnabled) {
+    WiFi.mode(WIFI_AP_STA);
+    Serial.println("Wifi mode: WIFI_AP_STA");
+  }
+
   WiFi.hostname(_hostName);
   WiFi.setAutoConnect(true);
   WiFi.setAutoReconnect(true);
 
-  // IPAddress apIp(192, 168, 1, 33);
-  // IPAddress apSubnet(255, 255, 255, 0);
-  // WiFi.softAPConfig(apIp, apIp, apSubnet);
-  WiFi.softAP(_hostName);
+  bool isApEnabled = ((WiFi.getMode() & WIFI_AP) != 0);
+  if (isApEnabled) {
+    // IPAddress apIp(192, 168, 1, 33);
+    // IPAddress apSubnet(255, 255, 255, 0);
+    // WiFi.softAPConfig(apIp, apIp, apSubnet);
+    WiFi.softAP(_hostName);
 
-  IPAddress currentApIp = WiFi.softAPIP();
-  Serial.println("AP IP address: " + currentApIp.toString());
+    IPAddress currentApIp = WiFi.softAPIP();
+    if (currentApIp) {
+      Serial.println("AP IP address: " + currentApIp.toString());
+    }
+  }
 
   _server->on("/", HTTP_GET, std::bind(&PurlWebServer::_handleRoot, this));
-  _server->on("/select", HTTP_POST, std::bind(&PurlWebServer::_handleSelectWiFi, this));
+  _server->on("/connect", HTTP_POST, std::bind(&PurlWebServer::_handleConnectSsid, this));
   _server->on("/control", HTTP_OPTIONS, std::bind(&PurlWebServer::_handleCrossOrigin, this));
   _server->on("/control", HTTP_ANY, std::bind(&PurlWebServer::_handleControl, this));
   _server->on("/reset", HTTP_OPTIONS, std::bind(&PurlWebServer::_handleCrossOrigin, this));
@@ -125,8 +137,8 @@ void PurlWebServer::_handleRoot() {
       <a href=\"/control\">Control</a>\
       <a href=\"/reset\">Reset</a>\
     </p>\
-    <h3>Select WiFi</h3>\
-    <form enctype=\"text/html\" method=\"post\" action=\"/select\">"
+    <h3>Connect WiFi</h3>\
+    <form enctype=\"text/html\" method=\"post\" action=\"/connect\">"
       + list +
       "<p><label>Password: </label><input name=\"pass\" length=\"64\" /></p>\
       <p><input type=\"submit\" /></p>\
@@ -135,7 +147,7 @@ void PurlWebServer::_handleRoot() {
   _dispatchRequestEnd();
 }
 
-void PurlWebServer::_handleSelectWiFi() {
+void PurlWebServer::_handleConnectSsid() {
   _dispatchRequestStart();
   String ssid = _server->arg("ssid");
   String pass = _server->arg("pass");
@@ -216,6 +228,8 @@ void PurlWebServer::_handleReset() {
     String resetWifi = _server->arg("ResetWifi");
     if (resetWifi == "yes") {
       WiFi.disconnect(true);
+      WiFi.mode(WIFI_AP_STA);
+      Serial.println("Wifi mode: WIFI_AP_STA");
     }
     String resetAccessory = _server->arg("ResetAccessory");
     if (resetAccessory == "yes") {
