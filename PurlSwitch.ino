@@ -74,13 +74,12 @@ void setup(void) {
   LedPin = GPIO2;
   RelayPin = RXD;
   InputPin = GPIO0;
-
   Serial.begin(115200);
-  pinMode(RelayPin, OUTPUT);
-  digitalWrite(RelayPin, HIGH);
-  pinMode(InputPin, INPUT);
-  digitalWrite(InputPin, HIGH);
+
   pinMode(LedPin, OUTPUT);
+  pinMode(RelayPin, OUTPUT);
+  pinMode(InputPin, INPUT_PULLUP);
+  digitalWrite(RelayPin, HIGH);
   ledOn();
 
   webServer.onSetState = setState;

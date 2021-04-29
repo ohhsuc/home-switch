@@ -1,4 +1,3 @@
-
 typedef void (*TimesOutEvent)();
 
 class TimesTrigger {
