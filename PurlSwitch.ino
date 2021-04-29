@@ -1,9 +1,11 @@
 #include <arduino_homekit_server.h>
 #include "PurlWebServer.h"
+#include "TimesTrigger.h"
 
 const String productName = "Purl Switch";
 const String hostName = "Purl-Switch-001";
 PurlWebServer webServer(80, productName, hostName);
+TimesTrigger timesTrigger(10, 5 * 1000);
 
 // access your HomeKit characteristics defined
 extern "C" homekit_server_config_t config;
@@ -37,6 +39,7 @@ void setRelay(bool isOn) {
     digitalWrite(RelayPin, HIGH);
     Serial.println("SWITCH -> OFF");
   }
+  timesTrigger.count();
 }
 
 homekit_value_t cha_switch_getter() {
@@ -63,6 +66,10 @@ void getState(PurlWebServerState& state) {
   state.isSwitchOn = value;
 }
 
+void timesOut() {
+  Serial.println("times out!");
+}
+
 void setup(void) {
   LedPin = GPIO2;
   RelayPin = RXD;
@@ -82,6 +89,8 @@ void setup(void) {
   webServer.onRequestEnd = ledOff;
   webServer.onResetAccessory = resetAccessory;
   webServer.setup();
+
+  timesTrigger.onTimesOut = timesOut;
 
   cha_switch.getter = cha_switch_getter;
   cha_switch.setter = cha_switch_setter;
