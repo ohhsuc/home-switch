@@ -1,11 +1,14 @@
 #include <arduino_homekit_server.h>
 #include "PurlWebServer.h"
 #include "TimesTrigger.h"
+#include "ButtonEvents.h"
 
 const String productName = "Purl Switch";
 const String hostName = "Purl-Switch-001";
+
 PurlWebServer webServer(80, productName, hostName);
 TimesTrigger timesTrigger(10, 5 * 1000);
+ButtonEvents* inputEvents;
 
 // access your HomeKit characteristics defined
 extern "C" homekit_server_config_t config;
@@ -70,6 +73,30 @@ void timesOut() {
   Serial.println("times out!");
 }
 
+void buttonTrigger(ButtonEvents::ButtonState state) {
+  switch(state) {
+    case ButtonEvents::ButtonState::AWAIT_MULTI_PRESS:
+      Serial.println("button AWAIT_MULTI_PRESS");
+      break;
+    case ButtonEvents::ButtonState::AWAIT_PRESS:
+      Serial.println("button AWAIT_PRESS");
+      break;
+    case ButtonEvents::ButtonState::AWAIT_RELEASE:
+      Serial.println("button AWAIT_RELEASE");
+      break;
+    case ButtonEvents::ButtonState::DEBOUNCE_PRESS:
+      Serial.println("button DEBOUNCE_PRESS");
+      break;
+    case ButtonEvents::ButtonState::DEBOUNCE_RELEASE:
+      Serial.println("button DEBOUNCE_RELEASE");
+      break;
+    default:
+    case ButtonEvents::ButtonState::NONE_STATE:
+      Serial.println("button NONE_STATE");
+      break;
+  }
+}
+
 void setup(void) {
   LedPin = GPIO2;
   RelayPin = RXD;
@@ -78,7 +105,6 @@ void setup(void) {
 
   pinMode(LedPin, OUTPUT);
   pinMode(RelayPin, OUTPUT);
-  pinMode(InputPin, INPUT_PULLUP);
   digitalWrite(RelayPin, HIGH);
   ledOn();
 
@@ -91,6 +117,9 @@ void setup(void) {
 
   timesTrigger.onTimesOut = timesOut;
 
+  inputEvents = new ButtonEvents(InputPin);
+  inputEvents->onTrigger = buttonTrigger;
+
   cha_switch.getter = cha_switch_getter;
   cha_switch.setter = cha_switch_setter;
   arduino_homekit_setup(&config);
@@ -101,5 +130,6 @@ void setup(void) {
 
 void loop(void) {
   webServer.loop();
+  inputEvents->loop();
   arduino_homekit_loop();
 }
