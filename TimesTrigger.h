@@ -1,14 +1,14 @@
-typedef void (*TimesOutEvent)();
-
 class TimesTrigger {
   public:
-    TimesTrigger(int times, int resetMs);
+    TimesTrigger(int times, int resetMillis);
+    typedef void (*TimesOutEvent)();
     TimesOutEvent onTimesOut;
     void count();
 
   private:
     int _times;
     int _resetMillis;
-    int _count;
-    unsigned long _lastTime;
+    // state
+    int _count              = 0;
+    unsigned long _lastTime = 0;
 };

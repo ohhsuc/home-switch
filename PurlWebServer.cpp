@@ -7,10 +7,6 @@ PurlWebServer::PurlWebServer(int port, String productName, String hostName) {
   _server = new ESP8266WebServer(port);
   _productName = productName;
   _hostName = hostName;
-  currentState = PurlWebServerState {
-    // .isSwitchOn = false,
-    isSwitchOn: false,
-  };
 }
 
 PurlWebServer::~PurlWebServer() {
@@ -82,13 +78,13 @@ String PurlWebServer::_formatPage(String htmlBody) {
 
 void PurlWebServer::_dispatchSetState() {
   if (onSetState) {
-    onSetState(currentState);
+    onSetState(_currentState);
   }
 }
 
 void PurlWebServer::_dispatchGetState() {
   if (onGetState) {
-    onGetState(currentState);
+    onGetState(_currentState);
   }
 }
 
@@ -196,13 +192,13 @@ void PurlWebServer::_handleControl() {
   _dispatchRequestStart();
   if (_server->method() == HTTP_POST) {
     String state = _server->arg("state");
-    currentState.isSwitchOn = (state == "on");
+    _currentState.isSwitchOn = (state == "on");
     _dispatchSetState();
     _redirectTo("/control");
   } else {
     _dispatchGetState();
-    String onAttribute = currentState.isSwitchOn ? " checked=\"checked\"" : "";
-    String offAttribute = currentState.isSwitchOn ? "" : " checked=\"checked\"";
+    String onAttribute = _currentState.isSwitchOn ? " checked=\"checked\"" : "";
+    String offAttribute = _currentState.isSwitchOn ? "" : " checked=\"checked\"";
     String htmlBody = "\
       <p><a href=\"/\">Back</a></p>\
       <h3>Control Switch</h3>\

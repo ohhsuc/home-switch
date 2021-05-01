@@ -57,11 +57,11 @@ void resetAccessory() {
   homekit_server_reset();
 }
 
-void setState(PurlWebServerState& state) {
+void setState(PurlWebServer::AccessoryState& state) {
   cha_switch.value.bool_value = state.isSwitchOn;
   setRelay(state.isSwitchOn);
 }
-void getState(PurlWebServerState& state) {
+void getState(PurlWebServer::AccessoryState& state) {
   bool value = cha_switch.value.bool_value;
   state.isSwitchOn = value;
 }

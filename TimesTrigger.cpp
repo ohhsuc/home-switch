@@ -4,8 +4,6 @@
 TimesTrigger::TimesTrigger(int times, int resetMillis) {
   _times = times;
   _resetMillis = resetMillis;
-  _count = 0;
-  _lastTime = 0;
 }
 
 void TimesTrigger::count() {
