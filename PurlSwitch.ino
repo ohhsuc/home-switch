@@ -45,15 +45,19 @@ void setRelay(bool isOn) {
   timesTrigger.count();
 }
 
+void setAccessory(bool value) {
+  ledOn();
+  cha_switch.value.bool_value = value;
+  setRelay(value);
+  ledOff();
+}
+
 homekit_value_t cha_switch_getter() {
   return cha_switch.value;
 }
 
 void cha_switch_setter(const homekit_value_t value) {
-  ledOn();
-  cha_switch.value.bool_value = value.bool_value;
-  setRelay(value.bool_value);
-  ledOff();
+  setAccessory(value.bool_value);
 }
 
 void resetAccessory() {
@@ -61,8 +65,7 @@ void resetAccessory() {
 }
 
 void setState(PurlWebServer::AccessoryState& state) {
-  cha_switch.value.bool_value = state.isSwitchOn;
-  setRelay(state.isSwitchOn);
+  setAccessory(state.isSwitchOn);
 }
 void getState(PurlWebServer::AccessoryState& state) {
   bool value = cha_switch.value.bool_value;
@@ -73,27 +76,10 @@ void timesOut() {
   Serial.println("times out!");
 }
 
-void buttonTrigger(ButtonEvents::ButtonState state) {
-  switch(state) {
-    case ButtonEvents::ButtonState::AWAIT_MULTI_PRESS:
-      Serial.println("button AWAIT_MULTI_PRESS");
-      break;
-    case ButtonEvents::ButtonState::AWAIT_PRESS:
-      Serial.println("button AWAIT_PRESS");
-      break;
-    case ButtonEvents::ButtonState::AWAIT_RELEASE:
-      Serial.println("button AWAIT_RELEASE");
-      break;
-    case ButtonEvents::ButtonState::DEBOUNCE_PRESS:
-      Serial.println("button DEBOUNCE_PRESS");
-      break;
-    case ButtonEvents::ButtonState::DEBOUNCE_RELEASE:
-      Serial.println("button DEBOUNCE_RELEASE");
-      break;
-    default:
-    case ButtonEvents::ButtonState::NONE_STATE:
-      Serial.println("button NONE_STATE");
-      break;
+void buttonClick(int times) {
+  if (times == 1) {
+    bool value = !cha_switch.value.bool_value;
+    setAccessory(value);
   }
 }
 
@@ -118,7 +104,7 @@ void setup(void) {
   timesTrigger.onTimesOut = timesOut;
 
   inputEvents = new ButtonEvents(InputPin);
-  inputEvents->onTrigger = buttonTrigger;
+  inputEvents->onClick = buttonClick;
 
   cha_switch.getter = cha_switch_getter;
   cha_switch.setter = cha_switch_setter;

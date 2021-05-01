@@ -8,11 +8,11 @@ ButtonEvents::ButtonEvents(uint8_t pin) {
 }
 
 void ButtonEvents::loop() {
-  _loadState();
-  if (_buttonState != _lastButtonState) {
-    _lastButtonState = _buttonState;
-    if (onTrigger) {
-      onTrigger(_buttonState);
+  int state = _loadState();
+  if (state != _lastState) {
+    _lastState = state;
+    if (onClick) {
+      onClick(state);
     }
   }
 }

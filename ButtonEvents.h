@@ -1,17 +1,16 @@
 // Migrate from
 // https://www.sigmdel.ca/michel/program/esp8266/arduino/switch_debouncing_en.html
 
-#define DEFAULT_DEBOUNCE_PRESS_TIME      30
-#define DEFAULT_DEBOUNCE_RELEASE_TIME    60
+#define DEFAULT_DEBOUNCE_PRESS_TIME      15
+#define DEFAULT_DEBOUNCE_RELEASE_TIME    30
 #define DEFAULT_MULTI_CLICK_TIME        400
 #define DEFAULT_HOLD_TIME              2000
 
 class ButtonEvents {
   public:
     ButtonEvents(uint8_t pin);
-    enum ButtonState { NONE_STATE, AWAIT_PRESS, DEBOUNCE_PRESS, AWAIT_RELEASE, DEBOUNCE_RELEASE, AWAIT_MULTI_PRESS };
-    typedef void (*ButtonEvent)(ButtonState);
-    ButtonEvent onTrigger;
+    typedef void (*ClickEvent)(int);
+    ClickEvent onClick;
     void loop();
 
   private:
@@ -21,8 +20,9 @@ class ButtonEvents {
     uint16_t _multiClickTime      = DEFAULT_MULTI_CLICK_TIME;
     uint16_t _holdTime            = DEFAULT_HOLD_TIME;
     // states
+    enum ButtonState { AWAIT_PRESS, DEBOUNCE_PRESS, AWAIT_RELEASE, DEBOUNCE_RELEASE, AWAIT_MULTI_PRESS, DEBOUNCE_MULTI_PRESS };
     ButtonState _buttonState      = AWAIT_PRESS;
-    ButtonState _lastButtonState  = NONE_STATE;
+    int _lastState                = 0;
     long _eventTime               = 0;
     int _clicks                   = 0;
     // status, number of clicks since last update
