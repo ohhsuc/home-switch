@@ -1,7 +1,7 @@
 #include <functional>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#include "PurlWebServer.h";
+#include "PurlWebServer.h"
 
 PurlWebServer::PurlWebServer(int port, String productName, String hostName) {
   _server = new ESP8266WebServer(port);

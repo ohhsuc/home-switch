@@ -1,5 +1,5 @@
 #include <ESP8266WiFi.h>
-#include "TimesTrigger.h";
+#include "TimesTrigger.h"
 
 TimesTrigger::TimesTrigger(int times, int resetMillis) {
   _times = times;
