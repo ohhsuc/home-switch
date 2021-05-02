@@ -51,6 +51,7 @@ void setRelay(bool isOn) {
 void setAccessory(bool value) {
   ledOn();
   cha_switch.value.bool_value = value;
+  homekit_characteristic_notify(&cha_switch, cha_switch.value);
   setRelay(value);
   ledOff();
 }
