@@ -2,6 +2,7 @@
 #include "PurlWebServer.h"
 #include "TimesTrigger.h"
 #include "ButtonEvents.h"
+using namespace Purl::Events;
 
 const String productName = "Purl Switch";
 const String hostName = "Purl-Switch-001";

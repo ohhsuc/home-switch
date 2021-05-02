@@ -18,7 +18,6 @@ class PurlWebServer {
     ServerEvent onRequestStart;
     ServerEvent onRequestEnd;
     ServerEvent onResetAccessory;
-
   private:
     String _productName;
     String _hostName;
