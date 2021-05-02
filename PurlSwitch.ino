@@ -1,14 +1,16 @@
 #include <arduino_homekit_server.h>
-#include "PurlWebServer.h"
+#include "WebServer.h"
 #include "TimesTrigger.h"
 #include "ButtonEvents.h"
 #include "OnOffEvents.h"
+
 using namespace Purl::Events;
+using namespace Purl::Components;
 
 const String productName = "Purl Switch";
 const String hostName = "Purl-Switch-001";
 
-PurlWebServer webServer(80, productName, hostName);
+WebServer webServer(80, productName, hostName);
 TimesTrigger timesTrigger(10, 5 * 1000);
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
@@ -69,10 +71,10 @@ void resetAccessory() {
   homekit_server_reset();
 }
 
-void setState(PurlWebServer::AccessoryState& state) {
+void setState(WebServer::AccessoryState& state) {
   setAccessory(state.isSwitchOn);
 }
-void getState(PurlWebServer::AccessoryState& state) {
+void getState(WebServer::AccessoryState& state) {
   bool value = cha_switch.value.bool_value;
   state.isSwitchOn = value;
 }
