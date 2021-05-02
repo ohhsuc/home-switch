@@ -58,6 +58,7 @@ void setAccessory(bool value) {
 
 homekit_value_t cha_switch_getter() {
   return cha_switch.value;
+  // return (HOMEKIT_BOOL(cha_switch.value.bool_value));
 }
 
 void cha_switch_setter(const homekit_value_t value) {

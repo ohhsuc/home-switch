@@ -223,6 +223,7 @@ void PurlWebServer::_handleReset() {
   if (_server->method() == HTTP_POST) {
     String resetWifi = _server->arg("ResetWifi");
     if (resetWifi == "yes") {
+      // wifi_config_reset();
       WiFi.disconnect(true);
       WiFi.mode(WIFI_AP_STA);
       Serial.println("Wifi mode: WIFI_AP_STA");
@@ -233,6 +234,7 @@ void PurlWebServer::_handleReset() {
     }
     String restartESP = _server->arg("RestartESP");
     if (restartESP == "yes") {
+      // sdk_system_restart();
       ESP.restart();
     }
     _redirectTo("/");
