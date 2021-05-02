@@ -2,6 +2,7 @@
 #include "PurlWebServer.h"
 #include "TimesTrigger.h"
 #include "ButtonEvents.h"
+#include "OnOffEvents.h"
 using namespace Purl::Events;
 
 const String productName = "Purl Switch";
@@ -10,6 +11,7 @@ const String hostName = "Purl-Switch-001";
 PurlWebServer webServer(80, productName, hostName);
 TimesTrigger timesTrigger(10, 5 * 1000);
 ButtonEvents* inputEvents;
+OnOffEvents* onOffEvents;
 
 // access your HomeKit characteristics defined
 extern "C" homekit_server_config_t config;
@@ -84,6 +86,11 @@ void buttonClick(int times) {
   }
 }
 
+void inputToggle(bool isOn) {
+  Serial.print("toggle ");
+  Serial.println(isOn ? "ON" : "OFF");
+}
+
 void setup(void) {
   LedPin = GPIO2;
   RelayPin = RXD;
@@ -107,6 +114,9 @@ void setup(void) {
   inputEvents = new ButtonEvents(InputPin);
   inputEvents->onClick = buttonClick;
 
+  onOffEvents = new OnOffEvents(InputPin);
+  onOffEvents->onToggle = inputToggle;
+
   cha_switch.getter = cha_switch_getter;
   cha_switch.setter = cha_switch_setter;
   arduino_homekit_setup(&config);
@@ -118,5 +128,6 @@ void setup(void) {
 void loop(void) {
   webServer.loop();
   inputEvents->loop();
+  onOffEvents->loop();
   arduino_homekit_loop();
 }
