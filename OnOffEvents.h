@@ -1,3 +1,5 @@
+#define DEFAULT_DEBOUNCE_DELAY 50
+
 namespace Purl {
   namespace Events {
     class OnOffEvents {
@@ -9,6 +11,8 @@ namespace Purl {
       private:
         uint8_t _pin;
         bool _lastState = false;
+        long _lastTimeRead = 0;
+        uint8_t _debounceDelay = DEFAULT_DEBOUNCE_DELAY;
     };
   }
 }

@@ -12,10 +12,16 @@ namespace Purl {
 
     void OnOffEvents::loop() {
       bool isOn = digitalRead(_pin) == LOW;
-      if (_lastState != isOn) {
-        _lastState = isOn;
-        if (onToggle) {
-          onToggle(isOn);
+      if (isOn != _lastState) {
+        _lastTimeRead = millis();
+        return;
+      }
+      if (millis() - _lastTimeRead > _debounceDelay) {
+        if (isOn != _lastState) {
+          _lastState = isOn;
+          if (onToggle) {
+            onToggle(isOn);
+          }
         }
       }
     }
