@@ -8,20 +8,20 @@ namespace Purl {
         typedef void (*Callback)();
         struct Config {
           bool type; // true for setTimeout, otherwise setInterval
-          int ms; // delay or interval in milliseconds
+          unsigned short ms; // delay or interval in milliseconds
           Callback cb; // callback function
           unsigned long time; // timestamp when timer registered
         };
-        int setTimeout(int delayMillis, Callback callback);
-        int setInterval(int intervalMillis, Callback callback);
-        bool clearTimeout(int id);
-        bool clearInterval(int id);
+        unsigned int setTimeout(unsigned short delayMillis, Callback callback);
+        unsigned int setInterval(unsigned short intervalMillis, Callback callback);
+        bool clearTimeout(unsigned int id);
+        bool clearInterval(unsigned int id);
         void loop();
       private:
-        int _idSeed = 0;
-        std::map<int, Config> _config;
-        int _addConfig(bool type, int milliseconds, Callback callback);
-        bool _removeConfig(int id);
+        unsigned int _idSeed = 0;
+        std::map<unsigned int, Config> _configs;
+        unsigned int _addConfig(bool type, unsigned short milliseconds, Callback callback);
+        bool _removeConfig(unsigned int id);
         void _fireCallback(Callback callback);
     };
   }

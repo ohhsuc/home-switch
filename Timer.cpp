@@ -1,3 +1,4 @@
+#include <list>
 #include "Arduino.h"
 #include "Timer.h"
 
@@ -7,54 +8,59 @@ namespace Purl {
     Timer::Timer() {
     }
 
-    int Timer::setTimeout(int delayMillis, Callback callback) {
+    unsigned int Timer::setTimeout(unsigned short delayMillis, Callback callback) {
       return _addConfig(true, delayMillis, callback);
     }
 
-    int Timer::setInterval(int intervalMillis, Callback callback) {
+    unsigned int Timer::setInterval(unsigned short intervalMillis, Callback callback) {
       return _addConfig(false, intervalMillis, callback);
     }
 
-    bool Timer::clearTimeout(int id) {
+    bool Timer::clearTimeout(unsigned int id) {
       return _removeConfig(id);
     }
 
-    bool Timer::clearInterval(int id) {
+    bool Timer::clearInterval(unsigned int id) {
       return _removeConfig(id);
     }
 
     void Timer::loop() {
-      unsigned long now = millis();
-      for (auto it = _config.begin(); it != _config.end(); ++it) {
-        int id = it->first;
+      std::list<unsigned int> hitIds;
+      unsigned int now = millis();
+      for (auto it = _configs.begin(); it != _configs.end(); ++it) {
+        unsigned int id = it->first;
         Config config = it->second;
         if (now - config.time > config.ms) {
-          if (config.type) {
-            _removeConfig(id);
-            _fireCallback(config.cb);
-          } else {
-            config.time = now;
-            _fireCallback(config.cb);
-          }
+          hitIds.push_back(id);
         }
+      }
+      for (unsigned int id : hitIds) {
+        Config config = _configs[id];
+        if (config.type) {
+          _removeConfig(id);
+        } else {
+          config.time = now;
+          _configs[id] = config;
+        }
+        _fireCallback(config.cb);
       }
     }
 
-    int Timer::_addConfig(bool type, int milliseconds, Callback callback) {
+    unsigned int Timer::_addConfig(bool type, unsigned short milliseconds, Callback callback) {
       Config config = {
         type: type,
         ms: milliseconds,
         cb: callback,
         time: millis(),
       };
-      int id = _idSeed++;
-      _config[id] = config;
+      unsigned int id = _idSeed++;
+      _configs[id] = config;
       return id;
     }
 
-    bool Timer::_removeConfig(int id) {
-      if (_config.count(id) > 0) {
-        _config.erase(id);
+    bool Timer::_removeConfig(unsigned int id) {
+      if (_configs.count(id) > 0) {
+        _configs.erase(id);
         return true;
       }
       return false;
