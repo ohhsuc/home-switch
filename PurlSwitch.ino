@@ -1,5 +1,6 @@
 #include <arduino_homekit_server.h>
 #include "WebServer.h"
+#include "Timer.h"
 #include "TimesTrigger.h"
 #include "ButtonEvents.h"
 #include "OnOffEvents.h"
@@ -10,8 +11,9 @@ using namespace Purl::Components;
 const String productName = "Purl Switch";
 const String hostName = "Purl-Switch-001";
 
-WebServer webServer(80, productName, hostName);
-TimesTrigger timesTrigger(10, 5 * 1000);
+auto timer = Timer();
+auto timesTrigger = TimesTrigger(10, 5 * 1000);
+auto webServer = WebServer(80, productName, hostName);
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
 
@@ -50,10 +52,14 @@ void setRelay(bool isOn) {
   timesTrigger.count();
 }
 
+void homekitNotify() {
+  homekit_characteristic_notify(&cha_switch, cha_switch.value);
+}
+
 void setAccessory(bool value) {
   ledOn();
   cha_switch.value.bool_value = value;
-  homekit_characteristic_notify(&cha_switch, cha_switch.value);
+  homekitNotify();
   setRelay(value);
   ledOff();
 }
@@ -124,12 +130,14 @@ void setup(void) {
   cha_switch.getter = cha_switch_getter;
   cha_switch.setter = cha_switch_setter;
   arduino_homekit_setup(&config);
+  timer.setInterval(10 * 1000, homekitNotify); // heatbeat
 
   Serial.println("Setup complete!");
   ledOff();
 }
 
 void loop(void) {
+  timer.loop();
   webServer.loop();
   inputEvents->loop();
   onOffEvents->loop();
