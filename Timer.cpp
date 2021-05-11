@@ -26,7 +26,7 @@ namespace Purl {
 
     void Timer::loop() {
       std::list<unsigned int> hitIds;
-      unsigned int now = millis();
+      unsigned long now = millis();
       for (auto it = _configs.begin(); it != _configs.end(); ++it) {
         unsigned int id = it->first;
         Config config = it->second;

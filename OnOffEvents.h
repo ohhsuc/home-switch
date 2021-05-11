@@ -11,7 +11,7 @@ namespace Purl {
       private:
         uint8_t _pin;
         bool _lastState = false;
-        long _lastTimeRead = 0;
+        unsigned long _lastTimeRead = 0;
         uint8_t _debounceDelay = DEFAULT_DEBOUNCE_DELAY;
     };
   }

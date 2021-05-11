@@ -10,7 +10,7 @@ namespace Purl {
         int _times;
         int _resetMillis;
         // state
-        int _count              = 0;
+        int _count = 0;
         unsigned long _lastTime = 0;
     };
   }
