@@ -42,9 +42,10 @@ namespace Purl {
       }
 
       _server->on("/", HTTP_GET, std::bind(&WebServer::_handleRoot, this));
-      _server->on("/connect", HTTP_POST, std::bind(&WebServer::_handleConnectSsid, this));
-      _server->on("/control", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
-      _server->on("/control", HTTP_ANY, std::bind(&WebServer::_handleControl, this));
+      _server->on("/list-wifi", HTTP_GET, std::bind(&WebServer::_handleListWifi, this));
+      _server->on("/connect-wifi", HTTP_POST, std::bind(&WebServer::_handleConnectWifi, this));
+      _server->on("/accessory", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
+      _server->on("/accessory", HTTP_ANY, std::bind(&WebServer::_handleAccessory, this));
       _server->on("/reset", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
       _server->on("/reset", HTTP_ANY, std::bind(&WebServer::_handleReset, this));
       _server->onNotFound(std::bind(&WebServer::_handleNotFound, this));
@@ -116,6 +117,62 @@ namespace Purl {
 
     void WebServer::_handleRoot() {
       _dispatchRequestStart();
+      // mode
+      WiFiMode_t wifiMode = WiFi.getMode();
+      String strWifiMode = "WIFI_OFF";
+      if (wifiMode == WIFI_STA) {
+        strWifiMode = "WIFI_STA";
+      } else if (wifiMode == WIFI_AP) {
+        strWifiMode = "WIFI_AP";
+      } else if (wifiMode == WIFI_AP_STA) {
+        strWifiMode = "WIFI_AP_STA";
+      }
+      // ip
+      IPAddress localIP = WiFi.localIP();
+      String strLocalIP = "";
+      if (localIP) {
+        strLocalIP = localIP.toString();
+      }
+      // ap
+      bool isApEnabled = ((wifiMode & WIFI_AP) != 0);
+      String strApEnabled = isApEnabled ? "YES" : "NO";
+      String strApIP = "";
+      IPAddress apIP = WiFi.softAPIP();
+      if (apIP) {
+        strApIP = apIP.toString();
+      }
+      // content
+      String htmlBody = "\
+        <p>\
+          <a href=\"/list-wifi\">Wifi</a>\
+          <a href=\"/accessory\">Accessory</a>\
+          <a href=\"/reset\">Reset</a>\
+        </p>\
+        <h3>Home</h3>\
+        <table>\
+          <tr>\
+            <td>Wifi Mode</td>\
+            <td>" + strWifiMode + "</td>\
+          </tr>\
+          <tr>\
+            <td>IP Address</td>\
+            <td>" + strLocalIP + "</td>\
+          </tr>\
+          <tr>\
+            <td>AP Enabled</td>\
+            <td>" + strApEnabled + "</td>\
+          </tr>\
+          <tr>\
+            <td>AP Address</td>\
+            <td>" + strApIP + "</td>\
+          </tr>\
+        </table>";
+      _server->send(200, "text/html", _formatPage(htmlBody));
+      _dispatchRequestEnd();
+    }
+
+    void WebServer::_handleListWifi() {
+      _dispatchRequestStart();
       String list = "";
       int count = WiFi.scanNetworks();
       String current = WiFi.SSID();
@@ -131,12 +188,9 @@ namespace Purl {
       }
       list += "</ul>";
       String htmlBody = "\
-        <p>\
-          <a href=\"/control\">Control</a>\
-          <a href=\"/reset\">Reset</a>\
-        </p>\
+        <p><a href=\"/\">Back</a></p>\
         <h3>Connect WiFi</h3>\
-        <form enctype=\"text/html\" method=\"post\" action=\"/connect\">"
+        <form enctype=\"text/html\" method=\"post\" action=\"/connect-wifi\">"
           + list +
           "<p><label>Password: </label><input name=\"pass\" length=\"64\" /></p>\
           <p><input type=\"submit\" /></p>\
@@ -145,7 +199,7 @@ namespace Purl {
       _dispatchRequestEnd();
     }
 
-    void WebServer::_handleConnectSsid() {
+    void WebServer::_handleConnectWifi() {
       _dispatchRequestStart();
       String ssid = _server->arg("ssid");
       String pass = _server->arg("pass");
@@ -190,21 +244,21 @@ namespace Purl {
       _dispatchRequestEnd();
     }
 
-    void WebServer::_handleControl() {
+    void WebServer::_handleAccessory() {
       _dispatchRequestStart();
       if (_server->method() == HTTP_POST) {
         String state = _server->arg("state");
         _currentState.isSwitchOn = (state == "on");
         _dispatchSetState();
-        _redirectTo("/control");
+        _redirectTo("/accessory");
       } else {
         _dispatchGetState();
         String onAttribute = _currentState.isSwitchOn ? " checked=\"checked\"" : "";
         String offAttribute = _currentState.isSwitchOn ? "" : " checked=\"checked\"";
         String htmlBody = "\
           <p><a href=\"/\">Back</a></p>\
-          <h3>Control Switch</h3>\
-          <form enctype=\"text/html\" method=\"post\" action=\"/control\">\
+          <h3>Accessory</h3>\
+          <form enctype=\"text/html\" method=\"post\" action=\"/accessory\">\
             <p>\
               <label for=\"stateOn\">ON</label>\
               <input type=\"radio\" id=\"stateOn\" name=\"state\" value=\"on\"" + onAttribute + " />\

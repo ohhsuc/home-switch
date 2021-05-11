@@ -36,8 +36,9 @@ namespace Purl {
         void _dispatchRequestEnd();
         void _dispatchResetAccessory();
         void _handleRoot();
-        void _handleConnectSsid();
-        void _handleControl();
+        void _handleListWifi();
+        void _handleConnectWifi();
+        void _handleAccessory();
         void _handleReset();
         void _handleCrossOrigin();
         void _handleNotFound();
