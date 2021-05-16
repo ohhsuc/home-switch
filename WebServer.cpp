@@ -190,7 +190,7 @@ namespace Victoria {
       String htmlBody = "\
         <p><a href=\"/\">Back</a></p>\
         <h3>Connect WiFi</h3>\
-        <form enctype=\"text/html\" method=\"post\" action=\"/connect-wifi\">"
+        <form method=\"post\" action=\"/connect-wifi\">"
           + list +
           "<p><label>Password: </label><input name=\"pass\" length=\"64\" /></p>\
           <p><input type=\"submit\" /></p>\
@@ -258,7 +258,7 @@ namespace Victoria {
         String htmlBody = "\
           <p><a href=\"/\">Back</a></p>\
           <h3>Accessory</h3>\
-          <form enctype=\"text/html\" method=\"post\" action=\"/accessory\">\
+          <form method=\"post\" action=\"/accessory\">\
             <p>\
               <label for=\"stateOn\">ON</label>\
               <input type=\"radio\" id=\"stateOn\" name=\"state\" value=\"on\"" + onAttribute + " />\
@@ -298,7 +298,7 @@ namespace Victoria {
         String htmlBody = "\
           <p><a href=\"/\">Back</a></p>\
           <h3>Reset</h3>\
-          <form enctype=\"text/html\" method=\"post\" action=\"/reset\">\
+          <form method=\"post\" action=\"/reset\">\
             <p>\
               <label for=\"chkResetWifi\">Confirm reset wifi</label>\
               <input type=\"checkbox\" id=\"chkResetWifi\" name=\"ResetWifi\" value=\"yes\" />\
