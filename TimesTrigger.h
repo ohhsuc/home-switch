@@ -1,4 +1,4 @@
-namespace Purl {
+namespace Victoria {
   namespace Events {
     class TimesTrigger {
       public:

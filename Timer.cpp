@@ -2,7 +2,7 @@
 #include "Arduino.h"
 #include "Timer.h"
 
-namespace Purl {
+namespace Victoria {
   namespace Events {
 
     Timer::Timer() {

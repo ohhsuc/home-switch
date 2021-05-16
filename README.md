@@ -1,5 +1,5 @@
-# PurlSwitch
-Homekit switch for Victoria 9#
+# Victoria
+HomeKit for Victoria 9#
 
 ### Development Tools
 - [Arduino](https://www.arduino.cc/en/software)

@@ -2,7 +2,7 @@
 #include <ESP8266WebServer.h>
 #include "WebServer.h"
 
-namespace Purl {
+namespace Victoria {
   namespace Components {
 
     WebServer::WebServer(int port, String productName, String hostName) {
@@ -73,7 +73,7 @@ namespace Purl {
             </style>\
           </head>\
           <body>\
-            <h1>Purl Switch</h1>"
+            <h1>Victoria Switch</h1>"
           + htmlBody +
           "</body>\
         </html>";

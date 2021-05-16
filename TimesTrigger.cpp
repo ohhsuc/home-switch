@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "TimesTrigger.h"
 
-namespace Purl {
+namespace Victoria {
   namespace Events {
 
     TimesTrigger::TimesTrigger(int times, int resetMillis) {

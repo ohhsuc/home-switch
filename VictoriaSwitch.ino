@@ -5,11 +5,11 @@
 #include "ButtonEvents.h"
 #include "OnOffEvents.h"
 
-using namespace Purl::Events;
-using namespace Purl::Components;
+using namespace Victoria::Events;
+using namespace Victoria::Components;
 
-const String productName = "Purl Switch";
-const String hostName = "Purl-Switch-001";
+const String productName = "Victoria Switch";
+const String hostName = "Victoria-Switch-001";
 
 auto timer = Timer();
 auto timesTrigger = TimesTrigger(10, 5 * 1000);

@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "OnOffEvents.h"
 
-namespace Purl {
+namespace Victoria {
   namespace Events {
 
     OnOffEvents::OnOffEvents(uint8_t pin) {

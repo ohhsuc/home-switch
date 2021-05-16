@@ -1,6 +1,6 @@
 #define DEFAULT_DEBOUNCE_DELAY 50
 
-namespace Purl {
+namespace Victoria {
   namespace Events {
     class OnOffEvents {
       public:

@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "ButtonEvents.h"
 
-namespace Purl {
+namespace Victoria {
   namespace Events {
 
     ButtonEvents::ButtonEvents(uint8_t pin) {

@@ -1,6 +1,6 @@
 #include <map>
 
-namespace Purl {
+namespace Victoria {
   namespace Events {
     class Timer {
       public:

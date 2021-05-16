@@ -6,7 +6,7 @@
 #define DEFAULT_MULTI_CLICK_TIME        400
 #define DEFAULT_HOLD_TIME              2000
 
-namespace Purl {
+namespace Victoria {
   namespace Events {
     class ButtonEvents {
       public:

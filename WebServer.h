@@ -1,6 +1,6 @@
 #include <ESP8266WebServer.h>
 
-namespace Purl {
+namespace Victoria {
   namespace Components {
     class WebServer {
       public:

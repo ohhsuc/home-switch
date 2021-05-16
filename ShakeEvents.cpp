@@ -3,12 +3,12 @@
 
 #define DEFAULT_DEBOUNCE_MILLIS 2000
 
-namespace Purl {
+namespace Victoria {
   namespace Events {
 
     ShakeEvents::ShakeEvents(uint8_t pin) {
       _pin = pin;
-      pinMode(_pin, INPUT); 
+      pinMode(_pin, INPUT);
       _state = digitalRead(_pin);
     }
 
