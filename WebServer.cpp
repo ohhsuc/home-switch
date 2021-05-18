@@ -73,7 +73,7 @@ namespace Victoria {
             </style>\
           </head>\
           <body>\
-            <h1>Victoria Switch</h1>"
+            <h1>" + _productName + "</h1>"
           + htmlBody +
           "</body>\
         </html>";

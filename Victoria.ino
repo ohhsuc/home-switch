@@ -8,8 +8,8 @@
 using namespace Victoria::Events;
 using namespace Victoria::Components;
 
-const String productName = "Victoria Switch";
-const String hostName = "Victoria-Switch-001";
+const String productName = "Victoria";
+const String hostName = "Victoria-91002";
 
 auto timer = Timer();
 auto timesTrigger = TimesTrigger(10, 5 * 1000);
@@ -33,21 +33,21 @@ uint8_t InputPin;
 
 void ledOn() {
   digitalWrite(LedPin, LOW);
-  Serial.println("LED -> ON");
+  Serial.println("led -> ON");
   delay(100); // at least light for some time
 }
 void ledOff() {
   digitalWrite(LedPin, HIGH);
-  Serial.println("LED -> OFF");
+  Serial.println("led -> OFF");
 }
 
 void setRelay(bool isOn) {
   if (isOn) {
     digitalWrite(RelayPin, LOW);
-    Serial.println("SWITCH -> ON");
+    Serial.println("relay -> LOW");
   } else {
     digitalWrite(RelayPin, HIGH);
-    Serial.println("SWITCH -> OFF");
+    Serial.println("relay -> HIGH");
   }
   timesTrigger.count();
 }
