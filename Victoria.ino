@@ -5,6 +5,7 @@
 #include "ButtonEvents.h"
 #include "OnOffEvents.h"
 
+using namespace Victoria;
 using namespace Victoria::Events;
 using namespace Victoria::Components;
 
@@ -77,12 +78,16 @@ void resetAccessory() {
   homekit_server_reset();
 }
 
-void setState(WebServer::AccessoryState& state) {
-  setAccessory(state.isSwitchOn);
+void setState(AccessoryState& state) {
+  if (state.accessoryType == BooleanAccessoryType) {
+    setAccessory(state.booleanValue);
+  }
 }
-void getState(WebServer::AccessoryState& state) {
-  bool value = cha_switch.value.bool_value;
-  state.isSwitchOn = value;
+void getState(AccessoryState& state) {
+  state.accessoryType = BooleanAccessoryType; //TODO: load from config
+  if (state.accessoryType == BooleanAccessoryType) {
+    state.booleanValue = cha_switch.value.bool_value;
+  }
 }
 
 void timesOut() {

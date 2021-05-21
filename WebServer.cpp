@@ -21,14 +21,15 @@ namespace Victoria {
       bool staEnabled = ((wifiMode & WIFI_STA) != 0);
       if (!apEnabled && !staEnabled) {
         WiFi.mode(WIFI_AP_STA);
-        Serial.println("Wifi mode: WIFI_AP_STA");
+        wifiMode = WIFI_AP_STA;
       }
+      Serial.println("Wifi mode: WIFI_AP_STA");
 
       WiFi.hostname(_hostName);
       WiFi.setAutoConnect(true);
       WiFi.setAutoReconnect(true);
 
-      bool isApEnabled = ((WiFi.getMode() & WIFI_AP) != 0);
+      bool isApEnabled = ((wifiMode & WIFI_AP) != 0);
       if (isApEnabled) {
         // IPAddress apIp(192, 168, 1, 33);
         // IPAddress apSubnet(255, 255, 255, 0);
@@ -73,10 +74,11 @@ namespace Victoria {
             </style>\
           </head>\
           <body>\
-            <h1>" + _productName + "</h1>"
-          + htmlBody +
-          "</body>\
-        </html>";
+            <h1>" + _productName + "</h1>\
+            " + htmlBody + "\
+          </body>\
+        </html>\
+      ";
     }
 
     void WebServer::_dispatchSetState() {
@@ -166,7 +168,8 @@ namespace Victoria {
             <td>AP Address</td>\
             <td>" + strApIP + "</td>\
           </tr>\
-        </table>";
+        </table>\
+      ";
       _server->send(200, "text/html", _formatPage(htmlBody));
       _dispatchRequestEnd();
     }
@@ -179,22 +182,22 @@ namespace Victoria {
       for (int i = 0; i < count; ++i) {
         String ssid = WiFi.SSID(i);
         String checked = ssid == current ? " checked=\"checked\"" : "";
-        list += "<li>";
-        list += "<input type=\"radio\" id=\"ssid_" + String(i) + "\" name=\"ssid\" value=\"" + ssid + "\"" + checked + " />";
-        list += "<label for=\"ssid_" + String(i) + "\">";
-        list += ssid;
-        list += "</label>";
-        list += "</li>";
+        list += "\
+          <li>\
+            <input type=\"radio\" id=\"ssid_" + String(i) + "\" name=\"ssid\" value=\"" + ssid + "\"" + checked + " />\
+            <label for=\"ssid_" + String(i) + "\">" + ssid + "</label>\
+          </li>\
+        ";
       }
-      list += "</ul>";
       String htmlBody = "\
-        <p><a href=\"/\">Back</a></p>\
+        <p><a href=\"/\">Home</a></p>\
         <h3>Connect WiFi</h3>\
-        <form method=\"post\" action=\"/connect-wifi\">"
-          + list +
-          "<p><label>Password: </label><input name=\"pass\" length=\"64\" /></p>\
+        <form method=\"post\" action=\"/connect-wifi\">\
+          <ul>" + list + "</ul>\
+          <p><label>Password: </label><input name=\"pass\" length=\"64\" /></p>\
           <p><input type=\"submit\" /></p>\
-        </form>";
+        </form>\
+      ";
       _server->send(200, "text/html", _formatPage(htmlBody));
       _dispatchRequestEnd();
     }
@@ -206,8 +209,9 @@ namespace Victoria {
 
       if (WiFi.status() == WL_CONNECTED && WiFi.SSID() == ssid) {
         String ignoreMsg = "\
-          <p><a href=\"/\">Back</a></p>\
-          <p>Ignore network setup</p>";
+          <p><a href=\"/\">Home</a></p>\
+          <p>Ignore network setup</p>\
+        ";
         _server->send(200, "text/html", _formatPage(ignoreMsg));
         _dispatchRequestEnd();
         return;
@@ -231,14 +235,16 @@ namespace Victoria {
       bool isConnected = WiFi.status() == WL_CONNECTED;
       if (isConnected) {
         String successMessage = "\
-          <p><a href=\"/\">Back</a></p>\
+          <p><a href=\"/\">Home</a></p>\
           <p>Connected to: " + ssid + "</p>\
-          <p>IP address: " + WiFi.localIP().toString() + "</p>";
+          <p>IP address: " + WiFi.localIP().toString() + "</p>\
+        ";
         _server->send(200, "text/html", _formatPage(successMessage));
       } else {
         String failedMessage = "\
-          <p><a href=\"/\">Back</a></p>\
-          <p>Connect to: " + ssid + " failed</p>";
+          <p><a href=\"/\">Home</a></p>\
+          <p>Connect to: " + ssid + " failed</p>\
+        ";
         _server->send(200, "text/html", _formatPage(failedMessage));
       }
       _dispatchRequestEnd();
@@ -247,31 +253,83 @@ namespace Victoria {
     void WebServer::_handleAccessory() {
       _dispatchRequestStart();
       if (_server->method() == HTTP_POST) {
-        String state = _server->arg("state");
-        _currentState.isSwitchOn = (state == "on");
+        String accessoryType = _server->arg("AccessoryType");
+        String booleanValue = _server->arg("BooleanValue");
+        String integerValue = _server->arg("IntegerValue");
+        _currentState.accessoryType =
+          accessoryType == "boolean" ? BooleanAccessoryType :
+          accessoryType == "integer" ? IntegerAccessoryType : EmptyAccessoryType;
+        _currentState.booleanValue = (booleanValue == "true");
+        _currentState.integerValue = integerValue.toInt();
         _dispatchSetState();
         _redirectTo("/accessory");
       } else {
         _dispatchGetState();
-        String onAttribute = _currentState.isSwitchOn ? " checked=\"checked\"" : "";
-        String offAttribute = _currentState.isSwitchOn ? "" : " checked=\"checked\"";
         String htmlBody = "\
-          <p><a href=\"/\">Back</a></p>\
+          <p><a href=\"/\">Home</a></p>\
           <h3>Accessory</h3>\
           <form method=\"post\" action=\"/accessory\">\
-            <p>\
-              <label for=\"stateOn\">ON</label>\
-              <input type=\"radio\" id=\"stateOn\" name=\"state\" value=\"on\"" + onAttribute + " />\
-            </p>\
-            <p>\
-              <label for=\"stateOff\">OFF</label>\
-              <input type=\"radio\" id=\"stateOff\" name=\"state\" value=\"off\"" + offAttribute + " />\
-            </p>\
+            <fieldset>\
+              <legend>Accessory Type</legend>\
+              " + _getTypeHtml() + "\
+            </fieldset>\
+            <fieldset>\
+              <legend>Boolean Settings</legend>\
+              " + _getBooleanHtml() + "\
+            </fieldset>\
+            <fieldset>\
+              <legend>Integer Settings</legend>\
+              " + _getIntegerHtml() + "\
+            </fieldset>\
             <p><input type=\"submit\" /></p>\
-          </form>";
+          </form>\
+        ";
         _server->send(200, "text/html", _formatPage(htmlBody));
       }
       _dispatchRequestEnd();
+    }
+
+    String WebServer::_getTypeHtml() {
+      String booleanAttribute = (_currentState.accessoryType == BooleanAccessoryType) ? " checked=\"checked\"" : "";
+      String integerAttribute = (_currentState.accessoryType == IntegerAccessoryType) ? " checked=\"checked\"" : "";
+      String html = "\
+        <p>\
+          <input type=\"radio\" id=\"booleanType\" name=\"AccessoryType\" value=\"boolean\"" + booleanAttribute + " />\
+          <label for=\"booleanType\">Accessory with boolean value such as switcher(on/off), shake sensor(yes/no)</label>\
+        </p>\
+        <p>\
+          <input type=\"radio\" id=\"integerType\" name=\"AccessoryType\" value=\"integer\"" + integerAttribute + " />\
+          <label for=\"integerType\">Accessory with integer value such as temperature， humidness</label>\
+        </p>\
+      ";
+      return html;
+    }
+
+    String WebServer::_getBooleanHtml() {
+      String trueAttribute = _currentState.booleanValue ? " checked=\"checked\"" : "";
+      String falseAttribute = _currentState.booleanValue ? "" : " checked=\"checked\"";
+      String html = "\
+        <p>\
+          <input type=\"radio\" id=\"booleanTrue\" name=\"BooleanValue\" value=\"true\"" + trueAttribute + " />\
+          <label for=\"booleanTrue\">On/Yes/True</label>\
+        </p>\
+        <p>\
+          <input type=\"radio\" id=\"booleanFalse\" name=\"BooleanValue\" value=\"false\"" + falseAttribute + " />\
+          <label for=\"booleanFalse\">Off/No/False</label>\
+        </p>\
+      ";
+      return html;
+    }
+
+    String WebServer::_getIntegerHtml() {
+      String value = String(_currentState.integerValue);
+      String html = "\
+        <p>\
+          <label for=\"integerInput\">Value</label>\
+          <input type=\"input\" id=\"integerInput\" name=\"IntegerValue\" value=\"" + value + "\"/>\
+        </p>\
+      ";
+      return html;
     }
 
     void WebServer::_handleReset() {
@@ -296,7 +354,7 @@ namespace Victoria {
         _redirectTo("/");
       } else {
         String htmlBody = "\
-          <p><a href=\"/\">Back</a></p>\
+          <p><a href=\"/\">Home</a></p>\
           <h3>Reset</h3>\
           <form method=\"post\" action=\"/reset\">\
             <p>\
@@ -312,16 +370,17 @@ namespace Victoria {
               <input type=\"checkbox\" id=\"chkRestartESP\" name=\"RestartESP\" value=\"yes\" />\
             </p>\
             <p><input type=\"submit\" /></p>\
-          </form>";
+          </form>\
+        ";
         _server->send(200, "text/html", _formatPage(htmlBody));
       }
       _dispatchRequestEnd();
     }
 
     void WebServer::_handleCrossOrigin() {
-        _dispatchRequestStart();
-        _server->send(204);
-        _dispatchRequestEnd();
+      _dispatchRequestStart();
+      _server->send(204);
+      _dispatchRequestEnd();
     }
 
     void WebServer::_handleNotFound() {
@@ -330,7 +389,8 @@ namespace Victoria {
       String bodyHtml = "\
         <h3>File Not Found</h3>\
         <p>URI: " + _server->uri() + "</p>\
-        <p>Method: " + method + "</p>";
+        <p>Method: " + method + "</p>\
+      ";
       _server->send(404, "text/html", _formatPage(bodyHtml));
       _dispatchRequestEnd();
     }

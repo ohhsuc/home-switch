@@ -1,6 +1,19 @@
 #include <ESP8266WebServer.h>
 
 namespace Victoria {
+  enum AccessoryType {
+    EmptyAccessoryType,
+    BooleanAccessoryType,
+    IntegerAccessoryType,
+  };
+
+  struct AccessoryState {
+    bool booleanValue;
+    int integerValue;
+    String stringValue;
+    AccessoryType accessoryType;
+  };
+
   namespace Components {
     class WebServer {
       public:
@@ -9,9 +22,6 @@ namespace Victoria {
         void setup();
         void loop();
         // accessory events
-        struct AccessoryState {
-          bool isSwitchOn;
-        };
         typedef void (*AccessoryStateEvent)(AccessoryState&);
         AccessoryStateEvent onSetState;
         AccessoryStateEvent onGetState;
@@ -25,8 +35,8 @@ namespace Victoria {
         String _hostName;
         ESP8266WebServer* _server;
         AccessoryState _currentState = {
-          // .isSwitchOn = false,
-          isSwitchOn: false,
+          // .booleanValue = false,
+          booleanValue: false,
         };
         String _formatPage(String htmlBody);
         void _redirectTo(String url);
@@ -39,6 +49,9 @@ namespace Victoria {
         void _handleListWifi();
         void _handleConnectWifi();
         void _handleAccessory();
+        String _getTypeHtml();
+        String _getBooleanHtml();
+        String _getIntegerHtml();
         void _handleReset();
         void _handleCrossOrigin();
         void _handleNotFound();
