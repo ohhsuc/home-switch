@@ -10,12 +10,12 @@ namespace Victoria {
   namespace Events {
     class ButtonEvents {
       public:
-        ButtonEvents(uint8_t pin);
+        ButtonEvents(uint8_t inputPin);
         typedef void (*ClickEvent)(int);
         ClickEvent onClick;
         void loop();
       private:
-        uint8_t _pin;
+        uint8_t _inputPin;
         uint16_t _debouncePressTime   = DEFAULT_DEBOUNCE_PRESS_TIME;
         uint16_t _debounceReleaseTime = DEFAULT_DEBOUNCE_RELEASE_TIME;
         uint16_t _multiClickTime      = DEFAULT_MULTI_CLICK_TIME;

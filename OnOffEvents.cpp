@@ -4,14 +4,14 @@
 namespace Victoria {
   namespace Events {
 
-    OnOffEvents::OnOffEvents(uint8_t pin) {
-      _pin = pin;
-      pinMode(_pin, INPUT_PULLUP);
-      digitalWrite(_pin, HIGH);
+    OnOffEvents::OnOffEvents(uint8_t inputPin) {
+      _inputPin = inputPin;
+      pinMode(_inputPin, INPUT_PULLUP);
+      digitalWrite(_inputPin, HIGH);
     }
 
     void OnOffEvents::loop() {
-      bool isOn = digitalRead(_pin) == LOW;
+      bool isOn = digitalRead(_inputPin) == LOW;
       if (isOn != _lastState) {
         _lastTimeRead = millis();
         return;
