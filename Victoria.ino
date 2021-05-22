@@ -79,6 +79,7 @@ void resetAccessory() {
 }
 
 void setState(AccessoryState& state) {
+  //TODO: save to config
   if (state.accessoryType == BooleanAccessoryType) {
     setAccessory(state.booleanValue);
   }

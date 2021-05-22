@@ -49,6 +49,7 @@ namespace Victoria {
         void _handleListWifi();
         void _handleConnectWifi();
         void _handleAccessory();
+        static String _getCheckedAttr(bool checked);
         String _getTypeHtml();
         String _getBooleanHtml();
         String _getIntegerHtml();

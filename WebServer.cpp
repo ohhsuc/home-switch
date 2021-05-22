@@ -71,6 +71,8 @@ namespace Victoria {
             <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
             <style>\
               body { background-color: #cccccc; font-family: Arial, Sans-Serif; }\
+              ul { padding: 0; list-style-type: none; }\
+              td { border-bottom: 1px solid #aaaaaa; }\
             </style>\
           </head>\
           <body>\
@@ -181,11 +183,11 @@ namespace Victoria {
       String current = WiFi.SSID();
       for (int i = 0; i < count; ++i) {
         String ssid = WiFi.SSID(i);
-        String checked = ssid == current ? " checked=\"checked\"" : "";
+        String checked = _getCheckedAttr(ssid == current);
         list += "\
           <li>\
-            <input type=\"radio\" id=\"ssid_" + String(i) + "\" name=\"ssid\" value=\"" + ssid + "\"" + checked + " />\
-            <label for=\"ssid_" + String(i) + "\">" + ssid + "</label>\
+            <input type=\"radio\" id=\"rdoSsid" + String(i) + "\" name=\"ssid\" value=\"" + ssid + "\"" + checked + " />\
+            <label for=\"rdoSsid" + String(i) + "\">" + ssid + "</label>\
           </li>\
         ";
       }
@@ -194,7 +196,10 @@ namespace Victoria {
         <h3>Connect WiFi</h3>\
         <form method=\"post\" action=\"/connect-wifi\">\
           <ul>" + list + "</ul>\
-          <p><label>Password: </label><input name=\"pass\" length=\"64\" /></p>\
+          <p>\
+            <label for=\"txtPassword\">Password:</label>\
+            <input id=\"txtPassword\" name=\"password\" length=\"64\" />\
+          </p>\
           <p><input type=\"submit\" /></p>\
         </form>\
       ";
@@ -205,21 +210,24 @@ namespace Victoria {
     void WebServer::_handleConnectWifi() {
       _dispatchRequestStart();
       String ssid = _server->arg("ssid");
-      String pass = _server->arg("pass");
+      String password = _server->arg("password");
 
       if (WiFi.status() == WL_CONNECTED && WiFi.SSID() == ssid) {
-        String ignoreMsg = "\
+        String ignoreMessage = "\
           <p><a href=\"/\">Home</a></p>\
-          <p>Ignore network setup</p>\
+          <fieldset>\
+            <legend>Ignore</legend>\
+            <p>Ignore network setup</p>\
+          </fieldset>\
         ";
-        _server->send(200, "text/html", _formatPage(ignoreMsg));
+        _server->send(200, "text/html", _formatPage(ignoreMessage));
         _dispatchRequestEnd();
         return;
       }
 
       Serial.println("SSID: " + ssid);
-      Serial.println("PASS: " + pass);
-      WiFi.begin(ssid, pass);
+      Serial.println("PASSWORD: " + password);
+      WiFi.begin(ssid, password);
       // Wait for connection
       int checkTimes = 5;
       while (WiFi.status() != WL_CONNECTED) {
@@ -236,14 +244,20 @@ namespace Victoria {
       if (isConnected) {
         String successMessage = "\
           <p><a href=\"/\">Home</a></p>\
-          <p>Connected to: " + ssid + "</p>\
-          <p>IP address: " + WiFi.localIP().toString() + "</p>\
+          <fieldset>\
+            <legend>Success</legend>\
+            <p>Connected to <b>" + ssid + "</b></p>\
+            <p>IP address <b>" + WiFi.localIP().toString() + "</b></p>\
+          </fieldset>\
         ";
         _server->send(200, "text/html", _formatPage(successMessage));
       } else {
         String failedMessage = "\
           <p><a href=\"/\">Home</a></p>\
-          <p>Connect to: " + ssid + " failed</p>\
+          <fieldset>\
+            <legend>Failed</legend>\
+            <p>Connect <b>" + ssid + "</b> failed</p>\
+          </fieldset>\
         ";
         _server->send(200, "text/html", _formatPage(failedMessage));
       }
@@ -274,11 +288,11 @@ namespace Victoria {
               " + _getTypeHtml() + "\
             </fieldset>\
             <fieldset>\
-              <legend>Boolean Settings</legend>\
+              <legend>Boolean Value</legend>\
               " + _getBooleanHtml() + "\
             </fieldset>\
             <fieldset>\
-              <legend>Integer Settings</legend>\
+              <legend>Integer Value</legend>\
               " + _getIntegerHtml() + "\
             </fieldset>\
             <p><input type=\"submit\" /></p>\
@@ -289,33 +303,37 @@ namespace Victoria {
       _dispatchRequestEnd();
     }
 
+    String WebServer::_getCheckedAttr(bool checked) {
+      return checked ? " checked=\"checked\"" : "";
+    }
+
     String WebServer::_getTypeHtml() {
-      String booleanAttribute = (_currentState.accessoryType == BooleanAccessoryType) ? " checked=\"checked\"" : "";
-      String integerAttribute = (_currentState.accessoryType == IntegerAccessoryType) ? " checked=\"checked\"" : "";
+      String booleanAttribute = _getCheckedAttr(_currentState.accessoryType == BooleanAccessoryType);
+      String integerAttribute = _getCheckedAttr(_currentState.accessoryType == IntegerAccessoryType);
       String html = "\
         <p>\
-          <input type=\"radio\" id=\"booleanType\" name=\"AccessoryType\" value=\"boolean\"" + booleanAttribute + " />\
-          <label for=\"booleanType\">Accessory with boolean value such as switcher(on/off), shake sensor(yes/no)</label>\
+          <input type=\"radio\" id=\"rdoBooleanType\" name=\"AccessoryType\" value=\"boolean\"" + booleanAttribute + " />\
+          <label for=\"rdoBooleanType\">Boolean - Accessory with boolean value such as switcher(on/off), shake sensor(yes/no)</label>\
         </p>\
         <p>\
-          <input type=\"radio\" id=\"integerType\" name=\"AccessoryType\" value=\"integer\"" + integerAttribute + " />\
-          <label for=\"integerType\">Accessory with integer value such as temperature， humidness</label>\
+          <input type=\"radio\" id=\"rdoIntegerType\" name=\"AccessoryType\" value=\"integer\"" + integerAttribute + " />\
+          <label for=\"rdoIntegerType\">Integer - Accessory with integer value such as temperature, humidness</label>\
         </p>\
       ";
       return html;
     }
 
     String WebServer::_getBooleanHtml() {
-      String trueAttribute = _currentState.booleanValue ? " checked=\"checked\"" : "";
-      String falseAttribute = _currentState.booleanValue ? "" : " checked=\"checked\"";
+      String trueAttribute = _getCheckedAttr(_currentState.booleanValue);
+      String falseAttribute = _getCheckedAttr(_currentState.booleanValue);
       String html = "\
         <p>\
-          <input type=\"radio\" id=\"booleanTrue\" name=\"BooleanValue\" value=\"true\"" + trueAttribute + " />\
-          <label for=\"booleanTrue\">On/Yes/True</label>\
+          <input type=\"radio\" id=\"rdoBooleanTrue\" name=\"BooleanValue\" value=\"true\"" + trueAttribute + " />\
+          <label for=\"rdoBooleanTrue\">On/Yes/True</label>\
         </p>\
         <p>\
-          <input type=\"radio\" id=\"booleanFalse\" name=\"BooleanValue\" value=\"false\"" + falseAttribute + " />\
-          <label for=\"booleanFalse\">Off/No/False</label>\
+          <input type=\"radio\" id=\"rdoBooleanFalse\" name=\"BooleanValue\" value=\"false\"" + falseAttribute + " />\
+          <label for=\"rdoBooleanFalse\">Off/No/False</label>\
         </p>\
       ";
       return html;
@@ -325,8 +343,8 @@ namespace Victoria {
       String value = String(_currentState.integerValue);
       String html = "\
         <p>\
-          <label for=\"integerInput\">Value</label>\
-          <input type=\"input\" id=\"integerInput\" name=\"IntegerValue\" value=\"" + value + "\"/>\
+          <label for=\"txtIntegerValue\">Value</label>\
+          <input type=\"number\" id=\"txtIntegerValue\" name=\"IntegerValue\" value=\"" + value + "\"/>\
         </p>\
       ";
       return html;
@@ -358,16 +376,16 @@ namespace Victoria {
           <h3>Reset</h3>\
           <form method=\"post\" action=\"/reset\">\
             <p>\
-              <label for=\"chkResetWifi\">Confirm reset wifi</label>\
               <input type=\"checkbox\" id=\"chkResetWifi\" name=\"ResetWifi\" value=\"yes\" />\
+              <label for=\"chkResetWifi\">Confirm reset wifi</label>\
             </p>\
             <p>\
-              <label for=\"chkResetAccessory\">Confirm reset accessory</label>\
               <input type=\"checkbox\" id=\"chkResetAccessory\" name=\"ResetAccessory\" value=\"yes\" />\
+              <label for=\"chkResetAccessory\">Confirm reset accessory</label>\
             </p>\
             <p>\
-              <label for=\"chkRestartESP\">Restart ESP</label>\
               <input type=\"checkbox\" id=\"chkRestartESP\" name=\"RestartESP\" value=\"yes\" />\
+              <label for=\"chkRestartESP\">Restart ESP</label>\
             </p>\
             <p><input type=\"submit\" /></p>\
           </form>\
@@ -387,9 +405,12 @@ namespace Victoria {
       _dispatchRequestStart();
       String method = (_server->method() == HTTP_GET) ? "GET" : "POST";
       String bodyHtml = "\
-        <h3>File Not Found</h3>\
-        <p>URI: " + _server->uri() + "</p>\
-        <p>Method: " + method + "</p>\
+        <p><a href=\"/\">Home</a></p>\
+        <fieldset>\
+          <legend>File Not Found</legend>\
+          <p>URI: " + _server->uri() + "</p>\
+          <p>Method: " + method + "</p>\
+        </fieldset>\
       ";
       _server->send(404, "text/html", _formatPage(bodyHtml));
       _dispatchRequestEnd();
