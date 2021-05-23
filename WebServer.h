@@ -1,3 +1,4 @@
+#include <vector>
 #include <ESP8266WebServer.h>
 
 namespace Victoria {
@@ -8,10 +9,11 @@ namespace Victoria {
   };
 
   struct AccessoryState {
-    bool booleanValue;
-    int integerValue;
-    String stringValue;
-    AccessoryType accessoryType;
+    String id;
+    String name;
+    AccessoryType type;
+    bool boolValue;
+    int intValue;
   };
 
   namespace Components {
@@ -22,9 +24,11 @@ namespace Victoria {
         void setup();
         void loop();
         // accessory events
-        typedef void (*AccessoryStateEvent)(AccessoryState&);
-        AccessoryStateEvent onSetState;
-        AccessoryStateEvent onGetState;
+        typedef std::vector<AccessoryState> (*LoadAccessoryStatesEvent)(void);
+        typedef void (*UpdateAccessoryStateEvent)(AccessoryState&);
+        LoadAccessoryStatesEvent onLoadStates;
+        UpdateAccessoryStateEvent onSaveState;
+        UpdateAccessoryStateEvent onDeleteState;
         // server events
         typedef void (*ServerEvent)();
         ServerEvent onRequestStart;
@@ -34,25 +38,18 @@ namespace Victoria {
         String _productName;
         String _hostName;
         ESP8266WebServer* _server;
-        AccessoryState _currentState = {
-          // .booleanValue = false,
-          booleanValue: false,
-        };
         String _formatPage(String htmlBody);
         void _redirectTo(String url);
-        void _dispatchGetState();
-        void _dispatchSetState();
         void _dispatchRequestStart();
         void _dispatchRequestEnd();
-        void _dispatchResetAccessory();
         void _handleRoot();
         void _handleListWifi();
         void _handleConnectWifi();
         void _handleAccessory();
         static String _getCheckedAttr(bool checked);
-        String _getTypeHtml();
-        String _getBooleanHtml();
-        String _getIntegerHtml();
+        static String _getTypeHtml(AccessoryState state);
+        static String _getBooleanHtml(AccessoryState state);
+        static String _getIntegerHtml(AccessoryState state);
         void _handleReset();
         void _handleCrossOrigin();
         void _handleNotFound();

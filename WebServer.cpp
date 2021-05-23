@@ -1,3 +1,4 @@
+#include <vector>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include "WebServer.h"
@@ -83,18 +84,6 @@ namespace Victoria {
       ";
     }
 
-    void WebServer::_dispatchSetState() {
-      if (onSetState) {
-        onSetState(_currentState);
-      }
-    }
-
-    void WebServer::_dispatchGetState() {
-      if (onGetState) {
-        onGetState(_currentState);
-      }
-    }
-
     void WebServer::_dispatchRequestStart() {
       // set cross origin
       _server->sendHeader(F("Access-Control-Allow-Origin"), F("*"));
@@ -110,12 +99,6 @@ namespace Victoria {
     void WebServer::_dispatchRequestEnd() {
       if (onRequestEnd) {
         onRequestEnd();
-      }
-    }
-
-    void WebServer::_dispatchResetAccessory() {
-      if (onResetAccessory) {
-        onResetAccessory();
       }
     }
 
@@ -145,11 +128,24 @@ namespace Victoria {
       if (apIP) {
         strApIP = apIP.toString();
       }
+      // mac
+      String macAddr = WiFi.macAddress();
+      // states
+      String accessoryLinks = "";
+      if (onLoadStates) {
+        std::vector<AccessoryState> states = onLoadStates();
+        for (AccessoryState state : states) {
+          String url = ("/accessory?id=" + state.id);
+          accessoryLinks += "\
+            <a href=\"" + url + "\">Accessory (" + state.name + ")</a>\
+          ";
+        }
+      }
       // content
       String htmlBody = "\
         <p>\
+          " + accessoryLinks + "\
           <a href=\"/list-wifi\">Wifi</a>\
-          <a href=\"/accessory\">Accessory</a>\
           <a href=\"/reset\">Reset</a>\
         </p>\
         <h3>Home</h3>\
@@ -169,6 +165,10 @@ namespace Victoria {
           <tr>\
             <td>AP Address</td>\
             <td>" + strApIP + "</td>\
+          </tr>\
+          <tr>\
+            <td>MAC Address</td>\
+            <td>" + macAddr + "</td>\
           </tr>\
         </table>\
       ";
@@ -198,9 +198,9 @@ namespace Victoria {
           <ul>" + list + "</ul>\
           <p>\
             <label for=\"txtPassword\">Password:</label>\
-            <input id=\"txtPassword\" name=\"password\" length=\"64\" />\
+            <input type=\"text\" id=\"txtPassword\" name=\"password\" length=\"64\" />\
           </p>\
-          <p><input type=\"submit\" /></p>\
+          <p><input type=\"submit\" value=\"Connect\" /></p>\
         </form>\
       ";
       _server->send(200, "text/html", _formatPage(htmlBody));
@@ -266,39 +266,83 @@ namespace Victoria {
 
     void WebServer::_handleAccessory() {
       _dispatchRequestStart();
-      if (_server->method() == HTTP_POST) {
-        String accessoryType = _server->arg("AccessoryType");
-        String booleanValue = _server->arg("BooleanValue");
-        String integerValue = _server->arg("IntegerValue");
-        _currentState.accessoryType =
-          accessoryType == "boolean" ? BooleanAccessoryType :
-          accessoryType == "integer" ? IntegerAccessoryType : EmptyAccessoryType;
-        _currentState.booleanValue = (booleanValue == "true");
-        _currentState.integerValue = integerValue.toInt();
-        _dispatchSetState();
-        _redirectTo("/accessory");
-      } else {
-        _dispatchGetState();
-        String htmlBody = "\
+      String accessoryId = _server->arg("id");
+      String currentUrl = "/accessory?id=" + accessoryId;
+      AccessoryState currentState;
+      if (onLoadStates) {
+        std::vector<AccessoryState> states = onLoadStates();
+        if (states.size() > 0) {
+          currentState = states[0];
+          for (AccessoryState state : states) {
+            if (state.id == accessoryId) {
+              currentState = state;
+            }
+          }
+        }
+      }
+      if (!currentState.id) {
+        String notfound = "\
           <p><a href=\"/\">Home</a></p>\
-          <h3>Accessory</h3>\
-          <form method=\"post\" action=\"/accessory\">\
-            <fieldset>\
-              <legend>Accessory Type</legend>\
-              " + _getTypeHtml() + "\
-            </fieldset>\
-            <fieldset>\
-              <legend>Boolean Value</legend>\
-              " + _getBooleanHtml() + "\
-            </fieldset>\
-            <fieldset>\
-              <legend>Integer Value</legend>\
-              " + _getIntegerHtml() + "\
-            </fieldset>\
-            <p><input type=\"submit\" /></p>\
-          </form>\
+          <fieldset>\
+            <legend>Oops...</legend>\
+            <p>Accessory Not Found</p>\
+            <p>Accessory ID: " + accessoryId + "</p>\
+          </fieldset>\
         ";
-        _server->send(200, "text/html", _formatPage(htmlBody));
+        _server->send(200, "text/html", _formatPage(notfound));
+      } else {
+        if (_server->method() == HTTP_POST) {
+          String submit = _server->arg("Submit");
+          String accessoryName = _server->arg("AccessoryName");
+          String accessoryType = _server->arg("AccessoryType");
+          String booleanValue = _server->arg("BooleanValue");
+          String integerValue = _server->arg("IntegerValue");
+          if (submit == "Delete") {
+            if (onDeleteState) {
+              onDeleteState(currentState);
+            }
+            _redirectTo("/");
+          } else {
+            currentState.name = accessoryName;
+            currentState.type =
+              accessoryType == "boolean" ? BooleanAccessoryType :
+              accessoryType == "integer" ? IntegerAccessoryType : EmptyAccessoryType;
+            currentState.boolValue = (booleanValue == "true");
+            currentState.intValue = integerValue.toInt();
+            if (onSaveState) {
+              onSaveState(currentState);
+            }
+            _redirectTo(currentUrl);
+          }
+        } else {
+          String htmlBody = "\
+            <p><a href=\"/\">Home</a></p>\
+            <h3>Accessory (" + currentState.name + ")</h3>\
+            <form method=\"post\" action=\"" + currentUrl + "\">\
+              <p>\
+                <label for=\"txtAccessoryName\">Name</label>\
+                <input type=\"text\" id=\"txtAccessoryName\" name=\"AccessoryName\" value=\"" + currentState.name + "\" />\
+              </p>\
+              <fieldset>\
+                <legend>Accessory Type</legend>\
+                " + _getTypeHtml(currentState) + "\
+              </fieldset>\
+              <fieldset>\
+                <legend>Boolean Value</legend>\
+                " + _getBooleanHtml(currentState) + "\
+              </fieldset>\
+              <fieldset>\
+                <legend>Integer Value</legend>\
+                " + _getIntegerHtml(currentState) + "\
+              </fieldset>\
+              <p>\
+                <input type=\"submit\" name=\"Submit\" value=\"Save\" />\
+                <input type=\"submit\" name=\"Submit\" value=\"Delete\" />\
+              </p>\
+            </form>\
+          ";
+          _server->send(200, "text/html", _formatPage(htmlBody));
+        }
       }
       _dispatchRequestEnd();
     }
@@ -307,9 +351,9 @@ namespace Victoria {
       return checked ? " checked=\"checked\"" : "";
     }
 
-    String WebServer::_getTypeHtml() {
-      String booleanAttribute = _getCheckedAttr(_currentState.accessoryType == BooleanAccessoryType);
-      String integerAttribute = _getCheckedAttr(_currentState.accessoryType == IntegerAccessoryType);
+    String WebServer::_getTypeHtml(AccessoryState state) {
+      String booleanAttribute = _getCheckedAttr(state.type == BooleanAccessoryType);
+      String integerAttribute = _getCheckedAttr(state.type == IntegerAccessoryType);
       String html = "\
         <p>\
           <input type=\"radio\" id=\"rdoBooleanType\" name=\"AccessoryType\" value=\"boolean\"" + booleanAttribute + " />\
@@ -323,9 +367,9 @@ namespace Victoria {
       return html;
     }
 
-    String WebServer::_getBooleanHtml() {
-      String trueAttribute = _getCheckedAttr(_currentState.booleanValue);
-      String falseAttribute = _getCheckedAttr(_currentState.booleanValue);
+    String WebServer::_getBooleanHtml(AccessoryState state) {
+      String trueAttribute = _getCheckedAttr(state.boolValue);
+      String falseAttribute = _getCheckedAttr(state.boolValue);
       String html = "\
         <p>\
           <input type=\"radio\" id=\"rdoBooleanTrue\" name=\"BooleanValue\" value=\"true\"" + trueAttribute + " />\
@@ -339,8 +383,8 @@ namespace Victoria {
       return html;
     }
 
-    String WebServer::_getIntegerHtml() {
-      String value = String(_currentState.integerValue);
+    String WebServer::_getIntegerHtml(AccessoryState state) {
+      String value = String(state.intValue);
       String html = "\
         <p>\
           <label for=\"txtIntegerValue\">Value</label>\
@@ -361,8 +405,8 @@ namespace Victoria {
           Serial.println("Wifi mode: WIFI_AP_STA");
         }
         String resetAccessory = _server->arg("ResetAccessory");
-        if (resetAccessory == "yes") {
-          _dispatchResetAccessory();
+        if (resetAccessory == "yes" && onResetAccessory) {
+          onResetAccessory();
         }
         String restartESP = _server->arg("RestartESP");
         if (restartESP == "yes") {
@@ -377,17 +421,17 @@ namespace Victoria {
           <form method=\"post\" action=\"/reset\">\
             <p>\
               <input type=\"checkbox\" id=\"chkResetWifi\" name=\"ResetWifi\" value=\"yes\" />\
-              <label for=\"chkResetWifi\">Confirm reset wifi</label>\
+              <label for=\"chkResetWifi\">Reset Wifi</label>\
             </p>\
             <p>\
               <input type=\"checkbox\" id=\"chkResetAccessory\" name=\"ResetAccessory\" value=\"yes\" />\
-              <label for=\"chkResetAccessory\">Confirm reset accessory</label>\
+              <label for=\"chkResetAccessory\">Reset Accessory</label>\
             </p>\
             <p>\
               <input type=\"checkbox\" id=\"chkRestartESP\" name=\"RestartESP\" value=\"yes\" />\
               <label for=\"chkRestartESP\">Restart ESP</label>\
             </p>\
-            <p><input type=\"submit\" /></p>\
+            <p><input type=\"submit\" value=\"Submit\" /></p>\
           </form>\
         ";
         _server->send(200, "text/html", _formatPage(htmlBody));
@@ -407,7 +451,8 @@ namespace Victoria {
       String bodyHtml = "\
         <p><a href=\"/\">Home</a></p>\
         <fieldset>\
-          <legend>File Not Found</legend>\
+          <legend>Oops...</legend>\
+          <p>Resource Not Found</p>\
           <p>URI: " + _server->uri() + "</p>\
           <p>Method: " + method + "</p>\
         </fieldset>\

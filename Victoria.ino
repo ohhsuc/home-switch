@@ -1,3 +1,4 @@
+#include <vector>
 #include <arduino_homekit_server.h>
 #include "WebServer.h"
 #include "Timer.h"
@@ -78,17 +79,26 @@ void resetAccessory() {
   homekit_server_reset();
 }
 
-void setState(AccessoryState& state) {
+std::vector<AccessoryState> loadStates() {
+  //TODO: load from config
+  std::vector<AccessoryState> states(5); // default capacity 5
+  states.push_back({
+    id: "abc123",
+    name: "Switch",
+    type: BooleanAccessoryType,
+    boolValue: cha_switch.value.bool_value,
+    intValue: 0,
+  });
+  return states;
+}
+void saveState(AccessoryState& state) {
   //TODO: save to config
-  if (state.accessoryType == BooleanAccessoryType) {
-    setAccessory(state.booleanValue);
+  if (state.type == BooleanAccessoryType) {
+    setAccessory(state.boolValue);
   }
 }
-void getState(AccessoryState& state) {
-  state.accessoryType = BooleanAccessoryType; //TODO: load from config
-  if (state.accessoryType == BooleanAccessoryType) {
-    state.booleanValue = cha_switch.value.bool_value;
-  }
+void deleteState(AccessoryState& state) {
+  //TODO: update config
 }
 
 void timesOut() {
@@ -118,8 +128,9 @@ void setup(void) {
   digitalWrite(RelayPin, HIGH);
   ledOn();
 
-  webServer.onSetState = setState;
-  webServer.onGetState = getState;
+  webServer.onLoadStates = loadStates;
+  webServer.onSaveState = saveState;
+  webServer.onDeleteState = deleteState;
   webServer.onRequestStart = ledOn;
   webServer.onRequestEnd = ledOff;
   webServer.onResetAccessory = resetAccessory;
