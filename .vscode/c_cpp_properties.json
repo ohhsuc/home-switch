@@ -21,6 +21,8 @@
                 "/Users/rulee.chen/Library/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/cores/esp8266",
                 "/Users/rulee.chen/Library/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/variants/generic",
                 "/Users/rulee.chen/Documents/Arduino/libraries/HomeKit-ESP8266/src",
+                "/Users/rulee.chen/Documents/Arduino/libraries/ArduinoJson/src",
+                "/Users/rulee.chen/Library/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/libraries/LittleFS/src",
                 "/Users/rulee.chen/Library/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/libraries/ESP8266WiFi/src",
                 "/Users/rulee.chen/Library/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/libraries/ESP8266WebServer/src",
                 "/Users/rulee.chen/Library/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/libraries/ESP8266mDNS/src",

@@ -5,6 +5,7 @@
 #include "TimesTrigger.h"
 #include "ButtonEvents.h"
 #include "OnOffEvents.h"
+#include "ConfigStore.h"
 
 using namespace Victoria;
 using namespace Victoria::Events;
@@ -16,6 +17,7 @@ const String hostName = "Victoria-91002";
 auto timer = Timer();
 auto timesTrigger = TimesTrigger(10, 5 * 1000);
 auto webServer = WebServer(80, productName, hostName);
+ConfigStore* configStore;
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
 
@@ -79,26 +81,56 @@ void resetAccessory() {
   homekit_server_reset();
 }
 
+SettingModel loadConfig() {
+  auto model = configStore->load();
+  if (model.states.size() == 0) {
+    model.states.push_back({
+      id: "abc123",
+      name: "Switch",
+      type: BooleanAccessoryType,
+      outputIO: RXD,
+      inputIO: GPIO0,
+    });
+  }
+  return model;
+}
 std::vector<AccessoryState> loadStates() {
-  //TODO: load from config
-  std::vector<AccessoryState> states(5); // default capacity 5
-  states.push_back({
-    id: "abc123",
-    name: "Switch",
-    type: BooleanAccessoryType,
-    boolValue: cha_switch.value.bool_value,
-    intValue: 0,
-  });
-  return states;
+  auto model = loadConfig();
+  for (AccessoryState& current : model.states) {
+    if (current.type == BooleanAccessoryType) {
+      current.boolValue = cha_switch.value.bool_value;
+      break;
+    }
+  }
+  return model.states;
 }
 void saveState(AccessoryState& state) {
-  //TODO: save to config
+  auto model = loadConfig();
+  for (AccessoryState& current : model.states) {
+    if (current.id == state.id) {
+      current.name = state.name;
+      current.type = state.type;
+      current.outputIO = state.outputIO;
+      current.inputIO = state.inputIO;
+      // current.boolValue = state.boolValue;
+      // current.intValue = state.intValue;
+      break;
+    }
+  }
   if (state.type == BooleanAccessoryType) {
     setAccessory(state.boolValue);
   }
+  configStore->save(model);
 }
 void deleteState(AccessoryState& state) {
-  //TODO: update config
+  auto model = loadConfig();
+  for (auto current = model.states.begin(); current != model.states.end();) {
+    if ((*current).id == state.id) {
+      model.states.erase(current);
+      break;
+    }
+  }
+  configStore->save(model);
 }
 
 void timesOut() {
@@ -118,15 +150,18 @@ void inputToggle(bool isOn) {
 }
 
 void setup(void) {
-  LedPin = GPIO2;
-  RelayPin = RXD;
-  InputPin = GPIO0;
   Serial.begin(115200);
+  configStore = new ConfigStore();
+  auto states = loadStates();
 
+  LedPin = GPIO2;
   pinMode(LedPin, OUTPUT);
+  ledOn();
+
+  InputPin = states[0].inputIO;
+  RelayPin = states[0].outputIO;
   pinMode(RelayPin, OUTPUT);
   digitalWrite(RelayPin, HIGH);
-  ledOn();
 
   webServer.onLoadStates = loadStates;
   webServer.onSaveState = saveState;

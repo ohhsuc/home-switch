@@ -295,6 +295,8 @@ namespace Victoria {
           String submit = _server->arg("Submit");
           String accessoryName = _server->arg("AccessoryName");
           String accessoryType = _server->arg("AccessoryType");
+          String outputIO = _server->arg("OutputIO");
+          String inputIO = _server->arg("InputIO");
           String booleanValue = _server->arg("BooleanValue");
           String integerValue = _server->arg("IntegerValue");
           if (submit == "Delete") {
@@ -307,6 +309,8 @@ namespace Victoria {
             currentState.type =
               accessoryType == "boolean" ? BooleanAccessoryType :
               accessoryType == "integer" ? IntegerAccessoryType : EmptyAccessoryType;
+            currentState.outputIO = outputIO.toInt();
+            currentState.inputIO = inputIO.toInt();
             currentState.boolValue = (booleanValue == "true");
             currentState.intValue = integerValue.toInt();
             if (onSaveState) {
@@ -322,6 +326,14 @@ namespace Victoria {
               <p>\
                 <label for=\"txtAccessoryName\">Name</label>\
                 <input type=\"text\" id=\"txtAccessoryName\" name=\"AccessoryName\" value=\"" + currentState.name + "\" />\
+              </p>\
+              <p>\
+                <label for=\"txtOutputIO\">Output IO</label>\
+                <input type=\"text\" id=\"txtOutputIO\" name=\"OutputIO\" value=\"" + currentState.outputIO + "\" />\
+              </p>\
+              <p>\
+                <label for=\"txtInputIO\">Input IO</label>\
+                <input type=\"text\" id=\"txtInputIO\" name=\"InputIO\" value=\"" + currentState.inputIO + "\" />\
               </p>\
               <fieldset>\
                 <legend>Accessory Type</legend>\
