@@ -1,3 +1,6 @@
+#ifndef Timer_h
+#define Timer_h
+
 #include <map>
 
 namespace Victoria {
@@ -26,3 +29,5 @@ namespace Victoria {
     };
   }
 }
+
+#endif //Timer_h

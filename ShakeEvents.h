@@ -1,3 +1,6 @@
+#ifndef ShakeEvents_h
+#define ShakeEvents_h
+
 namespace Victoria {
   namespace Events {
     class ShakeEvents {
@@ -14,3 +17,5 @@ namespace Victoria {
     };
   }
 }
+
+#endif //ShakeEvents_h

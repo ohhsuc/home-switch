@@ -1,3 +1,6 @@
+#ifndef WebServer_h
+#define WebServer_h
+
 #include <vector>
 #include <ESP8266WebServer.h>
 
@@ -56,3 +59,5 @@ namespace Victoria {
     };
   }
 }
+
+#endif //WebServer_h

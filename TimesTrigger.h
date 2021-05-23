@@ -1,3 +1,6 @@
+#ifndef TimesTrigger_h
+#define TimesTrigger_h
+
 namespace Victoria {
   namespace Events {
     class TimesTrigger {
@@ -15,3 +18,5 @@ namespace Victoria {
     };
   }
 }
+
+#endif //TimesTrigger_h

@@ -1,3 +1,6 @@
+#ifndef OnOffEvents_h
+#define OnOffEvents_h
+
 #define DEFAULT_DEBOUNCE_DELAY 50
 
 namespace Victoria {
@@ -16,3 +19,5 @@ namespace Victoria {
     };
   }
 }
+
+#endif //OnOffEvents_h
