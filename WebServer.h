@@ -3,22 +3,9 @@
 
 #include <vector>
 #include <ESP8266WebServer.h>
+#include "Commons.h"
 
 namespace Victoria {
-  enum AccessoryType {
-    EmptyAccessoryType,
-    BooleanAccessoryType,
-    IntegerAccessoryType,
-  };
-
-  struct AccessoryState {
-    String id;
-    String name;
-    AccessoryType type;
-    bool boolValue;
-    int intValue;
-  };
-
   namespace Components {
     class WebServer {
       public:
