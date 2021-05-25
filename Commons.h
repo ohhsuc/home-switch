@@ -27,7 +27,7 @@ namespace Victoria {
     std::vector<AccessoryState> states;
     // ... other items
 
-    void deserializeFrom(StaticJsonDocument<256> doc) {
+    void deserializeFrom(StaticJsonDocument<256>& doc) {
       auto statesDoc = doc["s"];
       if (statesDoc) {
         int index = -1;

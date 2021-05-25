@@ -29,18 +29,17 @@ namespace Victoria {
       unsigned long now = millis();
       for (auto it = _configs.begin(); it != _configs.end(); ++it) {
         unsigned int id = it->first;
-        Config config = it->second;
+        Config& config = it->second;
         if (now - config.time > config.ms) {
           hitIds.push_back(id);
         }
       }
       for (unsigned int id : hitIds) {
-        Config config = _configs[id];
+        Config& config = _configs[id];
         if (config.type) {
           _removeConfig(id);
         } else {
           config.time = now;
-          _configs[id] = config;
         }
         _fireCallback(config.cb);
       }
