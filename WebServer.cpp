@@ -319,13 +319,11 @@ namespace Victoria {
         _server->send(200, "text/html", _formatPage(notFound));
       } else {
         if (_server->method() == HTTP_POST) {
-          String submit = _server->arg("Submit");
           String accessoryName = _server->arg("AccessoryName");
           String accessoryType = _server->arg("AccessoryType");
           String outputIO = _server->arg("OutputIO");
           String inputIO = _server->arg("InputIO");
-          String booleanValue = _server->arg("BooleanValue");
-          String integerValue = _server->arg("IntegerValue");
+          String submit = _server->arg("Submit");
           if (submit == "Delete") {
             if (onDeleteSetting) {
               onDeleteSetting(accessoryId, currentSetting);
@@ -338,8 +336,6 @@ namespace Victoria {
               accessoryType == "integer" ? IntegerAccessoryType : EmptyAccessoryType;
             currentSetting.outputIO = outputIO.toInt();
             currentSetting.inputIO = inputIO.toInt();
-            currentSetting.boolValue = (booleanValue == "true");
-            currentSetting.intValue = integerValue.toInt();
             if (onSaveSetting) {
               onSaveSetting(accessoryId, currentSetting);
             }
@@ -354,22 +350,8 @@ namespace Victoria {
                 <label for=\"txtAccessoryName\">Name</label>\
                 <input type=\"text\" id=\"txtAccessoryName\" name=\"AccessoryName\" value=\"" + currentSetting.name + "\" />\
               </p>\
-              <fieldset>\
-                <legend>Accessory Type</legend>\
-                " + _getTypeHtml(currentSetting) + "\
-              </fieldset>\
-              <fieldset>\
-                <legend>IO Pins</legend>\
-                " + _getIOHtml(currentSetting) + "\
-              </fieldset>\
-              <fieldset>\
-                <legend>Boolean Value</legend>\
-                " + _getBooleanHtml(currentSetting) + "\
-              </fieldset>\
-              <fieldset>\
-                <legend>Integer Value</legend>\
-                " + _getIntegerHtml(currentSetting) + "\
-              </fieldset>\
+              " + _getTypeHtml(currentSetting) + "\
+              " + _getIOHtml(currentSetting) + "\
               <p>\
                 <input type=\"submit\" name=\"Submit\" value=\"Save\" />\
                 <input type=\"submit\" name=\"Submit\" value=\"Delete\" />\
@@ -408,54 +390,66 @@ namespace Victoria {
       String booleanAttribute = _getCheckedAttr(setting.type == BooleanAccessoryType);
       String integerAttribute = _getCheckedAttr(setting.type == IntegerAccessoryType);
       String html = "\
-        <p>\
-          <input type=\"radio\" id=\"rdoBooleanType\" name=\"AccessoryType\" value=\"boolean\"" + booleanAttribute + " />\
-          <label for=\"rdoBooleanType\">Boolean - Accessory with boolean value such as switcher(on/off), shake sensor(yes/no)</label>\
-        </p>\
-        <p>\
-          <input type=\"radio\" id=\"rdoIntegerType\" name=\"AccessoryType\" value=\"integer\"" + integerAttribute + " />\
-          <label for=\"rdoIntegerType\">Integer - Accessory with integer value such as temperature, humidness</label>\
-        </p>\
+        <fieldset>\
+          <legend>Accessory Type</legend>\
+          <p>\
+            <input type=\"radio\" id=\"rdoBooleanType\" name=\"AccessoryType\" value=\"boolean\"" + booleanAttribute + " />\
+            <label for=\"rdoBooleanType\">Boolean - Accessory with boolean value such as switcher(on/off), shake sensor(yes/no)</label>\
+          </p>\
+          <p>\
+            <input type=\"radio\" id=\"rdoIntegerType\" name=\"AccessoryType\" value=\"integer\"" + integerAttribute + " />\
+            <label for=\"rdoIntegerType\">Integer - Accessory with integer value such as temperature, humidness</label>\
+          </p>\
+        </fieldset>\
       ";
       return html;
     }
 
     String WebServer::_getIOHtml(AccessorySetting setting) {
       String html = "\
-        <p>\
-          <label for=\"txtOutputIO\">Output</label>\
-          <input type=\"number\" id=\"txtOutputIO\" name=\"OutputIO\" value=\"" + String(setting.outputIO) + "\" />\
-        </p>\
-        <p>\
-          <label for=\"txtInputIO\">Input</label>\
-          <input type=\"number\" id=\"txtInputIO\" name=\"InputIO\" value=\"" + String(setting.inputIO) + "\" />\
-        </p>\
+        <fieldset>\
+          <legend>IO Pins</legend>\
+          <p>\
+            <label for=\"txtOutputIO\">Output</label>\
+            <input type=\"number\" id=\"txtOutputIO\" name=\"OutputIO\" value=\"" + String(setting.outputIO) + "\" />\
+          </p>\
+          <p>\
+            <label for=\"txtInputIO\">Input</label>\
+            <input type=\"number\" id=\"txtInputIO\" name=\"InputIO\" value=\"" + String(setting.inputIO) + "\" />\
+          </p>\
+        </fieldset>\
       ";
       return html;
     }
 
-    String WebServer::_getBooleanHtml(AccessorySetting setting) {
-      String trueAttribute = _getCheckedAttr(setting.boolValue);
-      String falseAttribute = _getCheckedAttr(setting.boolValue);
+    String WebServer::_getBooleanHtml(AccessoryState state) {
+      String trueAttribute = _getCheckedAttr(state.boolValue);
+      String falseAttribute = _getCheckedAttr(state.boolValue);
       String html = "\
-        <p>\
-          <input type=\"radio\" id=\"rdoBooleanTrue\" name=\"BooleanValue\" value=\"true\"" + trueAttribute + " />\
-          <label for=\"rdoBooleanTrue\">On/Yes/True</label>\
-        </p>\
-        <p>\
-          <input type=\"radio\" id=\"rdoBooleanFalse\" name=\"BooleanValue\" value=\"false\"" + falseAttribute + " />\
-          <label for=\"rdoBooleanFalse\">Off/No/False</label>\
-        </p>\
+        <fieldset>\
+          <legend>Boolean Value</legend>\
+          <p>\
+            <input type=\"radio\" id=\"rdoBooleanTrue\" name=\"BooleanValue\" value=\"true\"" + trueAttribute + " />\
+            <label for=\"rdoBooleanTrue\">On/Yes/True</label>\
+          </p>\
+          <p>\
+            <input type=\"radio\" id=\"rdoBooleanFalse\" name=\"BooleanValue\" value=\"false\"" + falseAttribute + " />\
+            <label for=\"rdoBooleanFalse\">Off/No/False</label>\
+          </p>\
+        </fieldset>\
       ";
       return html;
     }
 
-    String WebServer::_getIntegerHtml(AccessorySetting setting) {
+    String WebServer::_getIntegerHtml(AccessoryState state) {
       String html = "\
-        <p>\
-          <label for=\"txtIntegerValue\">Value</label>\
-          <input type=\"number\" id=\"txtIntegerValue\" name=\"IntegerValue\" value=\"" + String(setting.intValue) + "\"/>\
-        </p>\
+        <fieldset>\
+          <legend>Integer Value</legend>\
+          <p>\
+            <label for=\"txtIntegerValue\">Value</label>\
+            <input type=\"number\" id=\"txtIntegerValue\" name=\"IntegerValue\" value=\"" + String(state.intValue) + "\"/>\
+          </p>\
+        </fieldset>\
       ";
       return html;
     }

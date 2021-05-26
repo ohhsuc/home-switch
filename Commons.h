@@ -18,6 +18,9 @@ namespace Victoria {
     AccessoryType type;
     uint8_t outputIO;
     uint8_t inputIO;
+  };
+
+  struct AccessoryState {
     bool boolValue;
     int intValue;
   };

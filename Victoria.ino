@@ -83,27 +83,24 @@ void resetAccessory() {
 
 std::map<String, AccessorySetting> loadSettings() {
   auto model = configStore->load();
-  for (auto& pair : model.settings) {
-    if (pair.second.type == BooleanAccessoryType) {
-      //TODO: bugs
-      pair.second.boolValue = cha_switch.value.bool_value;
-      break;
-    }
-  }
   return model.settings;
 }
 void saveSetting(String id, AccessorySetting& setting) {
   auto model = configStore->load();
   model.settings[id] = setting;
-  if (setting.type == BooleanAccessoryType) {
-    setAccessory(setting.boolValue);
-  }
   configStore->save(model);
 }
 void deleteSetting(String id, AccessorySetting& setting) {
   auto model = configStore->load();
   model.settings.erase(id);
   configStore->save(model);
+}
+
+void getState(String id, AccessoryState& state) {
+  state.boolValue = cha_switch.value.bool_value;
+}
+void setState(String id, AccessoryState& state) {
+  setAccessory(state.boolValue);
 }
 
 void timesOut() {
@@ -140,6 +137,8 @@ void setup(void) {
   webServer.onLoadSettings = loadSettings;
   webServer.onSaveSetting = saveSetting;
   webServer.onDeleteSetting = deleteSetting;
+  webServer.onGetState = getState;
+  webServer.onSetState = setState;
   webServer.onRequestStart = ledOn;
   webServer.onRequestEnd = ledOff;
   webServer.onResetAccessory = resetAccessory;

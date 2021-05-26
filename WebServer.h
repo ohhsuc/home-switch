@@ -19,6 +19,9 @@ namespace Victoria {
         LoadAccessorySettingsEvent onLoadSettings;
         UpdateAccessorySettingEvent onSaveSetting;
         UpdateAccessorySettingEvent onDeleteSetting;
+        typedef void (*AccessoryStateEvent)(String, AccessoryState&);
+        AccessoryStateEvent onGetState;
+        AccessoryStateEvent onSetState;
         // server events
         typedef void (*ServerEvent)();
         ServerEvent onRequestStart;
@@ -42,8 +45,8 @@ namespace Victoria {
         static String _getCheckedAttr(bool checked);
         static String _getTypeHtml(AccessorySetting setting);
         static String _getIOHtml(AccessorySetting setting);
-        static String _getBooleanHtml(AccessorySetting setting);
-        static String _getIntegerHtml(AccessorySetting setting);
+        static String _getBooleanHtml(AccessoryState state);
+        static String _getIntegerHtml(AccessoryState state);
         void _handleReset();
         void _handleCrossOrigin();
         void _handleNotFound();
