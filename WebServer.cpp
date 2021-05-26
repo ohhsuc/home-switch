@@ -267,14 +267,16 @@ namespace Victoria {
       _dispatchRequestStart();
       String accessoryId = _server->arg("id");
       String currentUrl = "/accessory?id=" + accessoryId;
+      bool foundSetting = false;
       AccessorySetting currentSetting;
       if (onLoadSettings) {
         std::map<String, AccessorySetting> settings = onLoadSettings();
         if (settings.count(accessoryId) > 0) {
           currentSetting = settings[accessoryId];
+          foundSetting = true;
         }
       }
-      if (!currentSetting.name) {
+      if (!foundSetting) {
         String notfound = "\
           <p><a href=\"/\">Home</a></p>\
           <fieldset>\
@@ -321,17 +323,13 @@ namespace Victoria {
                 <label for=\"txtAccessoryName\">Name</label>\
                 <input type=\"text\" id=\"txtAccessoryName\" name=\"AccessoryName\" value=\"" + currentSetting.name + "\" />\
               </p>\
-              <p>\
-                <label for=\"txtOutputIO\">Output IO</label>\
-                <input type=\"text\" id=\"txtOutputIO\" name=\"OutputIO\" value=\"" + currentSetting.outputIO + "\" />\
-              </p>\
-              <p>\
-                <label for=\"txtInputIO\">Input IO</label>\
-                <input type=\"text\" id=\"txtInputIO\" name=\"InputIO\" value=\"" + currentSetting.inputIO + "\" />\
-              </p>\
               <fieldset>\
                 <legend>Accessory Type</legend>\
                 " + _getTypeHtml(currentSetting) + "\
+              </fieldset>\
+              <fieldset>\
+                <legend>IO Pins</legend>\
+                " + _getIOHtml(currentSetting) + "\
               </fieldset>\
               <fieldset>\
                 <legend>Boolean Value</legend>\
@@ -373,6 +371,20 @@ namespace Victoria {
       return html;
     }
 
+    String WebServer::_getIOHtml(AccessorySetting setting) {
+      String html = "\
+        <p>\
+          <label for=\"txtOutputIO\">Output</label>\
+          <input type=\"number\" id=\"txtOutputIO\" name=\"OutputIO\" value=\"" + String(setting.outputIO) + "\" />\
+        </p>\
+        <p>\
+          <label for=\"txtInputIO\">Input</label>\
+          <input type=\"number\" id=\"txtInputIO\" name=\"InputIO\" value=\"" + String(setting.inputIO) + "\" />\
+        </p>\
+      ";
+      return html;
+    }
+
     String WebServer::_getBooleanHtml(AccessorySetting setting) {
       String trueAttribute = _getCheckedAttr(setting.boolValue);
       String falseAttribute = _getCheckedAttr(setting.boolValue);
@@ -390,11 +402,10 @@ namespace Victoria {
     }
 
     String WebServer::_getIntegerHtml(AccessorySetting setting) {
-      String value = String(setting.intValue);
       String html = "\
         <p>\
           <label for=\"txtIntegerValue\">Value</label>\
-          <input type=\"number\" id=\"txtIntegerValue\" name=\"IntegerValue\" value=\"" + value + "\"/>\
+          <input type=\"number\" id=\"txtIntegerValue\" name=\"IntegerValue\" value=\"" + String(setting.intValue) + "\"/>\
         </p>\
       ";
       return html;

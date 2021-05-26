@@ -38,6 +38,7 @@ namespace Victoria {
         void _handleAccessory();
         static String _getCheckedAttr(bool checked);
         static String _getTypeHtml(AccessorySetting setting);
+        static String _getIOHtml(AccessorySetting setting);
         static String _getBooleanHtml(AccessorySetting setting);
         static String _getIntegerHtml(AccessorySetting setting);
         void _handleReset();

@@ -85,7 +85,7 @@ SettingModel loadConfig() {
   auto model = configStore->load();
   if (model.settings.size() == 0) {
     model.settings["abc123"] = {
-      name: "Switch",
+      name: "Default",
       type: BooleanAccessoryType,
       outputIO: RXD,
       inputIO: GPIO0,
@@ -97,6 +97,7 @@ std::map<String, AccessorySetting> loadSettings() {
   auto model = loadConfig();
   for (auto& pair : model.settings) {
     if (pair.second.type == BooleanAccessoryType) {
+      //TODO: bugs
       pair.second.boolValue = cha_switch.value.bool_value;
       break;
     }
