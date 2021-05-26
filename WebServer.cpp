@@ -298,12 +298,112 @@ namespace Victoria {
       _dispatchRequestStart();
       String accessoryId = _server->arg("id");
       String currentUrl = "/accessory?id=" + accessoryId;
+      std::pair<bool, AccessorySetting> found = _getAccessorySetting(accessoryId);
+      AccessorySetting setting = found.second;
+      if (!found.first) {
+        _dispatchRequestEnd();
+        return;
+      }
+      if (_server->method() == HTTP_POST) {
+        String accessoryName = _server->arg("AccessoryName");
+        String accessoryType = _server->arg("AccessoryType");
+        String outputIO = _server->arg("OutputIO");
+        String inputIO = _server->arg("InputIO");
+        String submit = _server->arg("Submit");
+        if (submit == "Delete") {
+          if (onDeleteSetting) {
+            onDeleteSetting(accessoryId, setting);
+          }
+          _redirectTo("/");
+        } else {
+          setting.name = accessoryName;
+          setting.type =
+            accessoryType == "boolean" ? BooleanAccessoryType :
+            accessoryType == "integer" ? IntegerAccessoryType : EmptyAccessoryType;
+          setting.outputIO = outputIO.toInt();
+          setting.inputIO = inputIO.toInt();
+          if (onSaveSetting) {
+            onSaveSetting(accessoryId, setting);
+          }
+          _redirectTo(currentUrl);
+        }
+      } else {
+        String htmlBody = "\
+          <p>\
+            <a href=\"/\">Home</a>\
+            <a href=\"/accessory/state?id=" + accessoryId + "\">State</a>\
+          </p>\
+          <h3>Setting (" + setting.name + ")</h3>\
+          <form method=\"post\" action=\"" + currentUrl + "\">\
+            <p>\
+              <label for=\"txtAccessoryName\">Name</label>\
+              <input type=\"text\" id=\"txtAccessoryName\" name=\"AccessoryName\" value=\"" + setting.name + "\" />\
+            </p>\
+            " + _getTypeHtml(setting) + "\
+            " + _getIOHtml(setting) + "\
+            <p>\
+              <input type=\"submit\" name=\"Submit\" value=\"Save\" />\
+              <input type=\"submit\" name=\"Submit\" value=\"Delete\" />\
+            </p>\
+          </form>\
+        ";
+        _server->send(200, "text/html", _formatPage(htmlBody));
+      }
+      _dispatchRequestEnd();
+    }
+
+    void WebServer::_handleAccessoryState() {
+      _dispatchRequestStart();
+      String accessoryId = _server->arg("id");
+      String currentUrl = "/accessory/state?id=" + accessoryId;
+      std::pair<bool, AccessorySetting> found = _getAccessorySetting(accessoryId);
+      AccessorySetting setting = found.second;
+      if (!found.first) {
+        _dispatchRequestEnd();
+        return;
+      }
+      AccessoryState state = {
+        boolValue: false,
+        intValue: 0,
+      };
+      if (_server->method() == HTTP_POST) {
+        String booleanValue = _server->arg("BooleanValue");
+        String integerValue = _server->arg("IntegerValue");
+        state.boolValue = (booleanValue == "true");
+        state.intValue = integerValue.toInt();
+        if (onSetState) {
+          onSetState(accessoryId, setting, state);
+        }
+        _redirectTo(currentUrl);
+      } else {
+        if (onGetState) {
+          onGetState(accessoryId, setting, state);
+        }
+        String stateHtml =
+          setting.type == BooleanAccessoryType ? _getBooleanHtml(state) :
+          setting.type == IntegerAccessoryType ? _getIntegerHtml(state) : "";
+        String htmlBody = "\
+          <p><a href=\"/\">Home</a></p>\
+          <h3>State (" + setting.name + ")</h3>\
+          <form method=\"post\" action=\"" + currentUrl + "\">\
+            " + stateHtml + "\
+            <p>\
+              <input type=\"submit\" name=\"Submit\" value=\"Save\" />\
+            </p>\
+          </form>\
+        ";
+        _server->send(200, "text/html", _formatPage(htmlBody));
+      }
+      _dispatchRequestEnd();
+    }
+
+    std::pair<bool, AccessorySetting> WebServer::_getAccessorySetting(String id) {
       bool foundSetting = false;
-      AccessorySetting currentSetting;
+      AccessorySetting setting;
       if (onLoadSettings) {
         std::map<String, AccessorySetting> settings = onLoadSettings();
-        if (settings.count(accessoryId) > 0) {
-          currentSetting = settings[accessoryId];
+        if (settings.count(id) > 0) {
+          setting = settings[id];
           foundSetting = true;
         }
       }
@@ -313,58 +413,12 @@ namespace Victoria {
           <fieldset>\
             <legend>Oops...</legend>\
             <p>Accessory Not Found</p>\
-            <p>Accessory ID: " + accessoryId + "</p>\
+            <p>Accessory ID: " + id + "</p>\
           </fieldset>\
         ";
         _server->send(200, "text/html", _formatPage(notFound));
-      } else {
-        if (_server->method() == HTTP_POST) {
-          String accessoryName = _server->arg("AccessoryName");
-          String accessoryType = _server->arg("AccessoryType");
-          String outputIO = _server->arg("OutputIO");
-          String inputIO = _server->arg("InputIO");
-          String submit = _server->arg("Submit");
-          if (submit == "Delete") {
-            if (onDeleteSetting) {
-              onDeleteSetting(accessoryId, currentSetting);
-            }
-            _redirectTo("/");
-          } else {
-            currentSetting.name = accessoryName;
-            currentSetting.type =
-              accessoryType == "boolean" ? BooleanAccessoryType :
-              accessoryType == "integer" ? IntegerAccessoryType : EmptyAccessoryType;
-            currentSetting.outputIO = outputIO.toInt();
-            currentSetting.inputIO = inputIO.toInt();
-            if (onSaveSetting) {
-              onSaveSetting(accessoryId, currentSetting);
-            }
-            _redirectTo(currentUrl);
-          }
-        } else {
-          String htmlBody = "\
-            <p><a href=\"/\">Home</a></p>\
-            <h3>Accessory (" + currentSetting.name + ")</h3>\
-            <form method=\"post\" action=\"" + currentUrl + "\">\
-              <p>\
-                <label for=\"txtAccessoryName\">Name</label>\
-                <input type=\"text\" id=\"txtAccessoryName\" name=\"AccessoryName\" value=\"" + currentSetting.name + "\" />\
-              </p>\
-              " + _getTypeHtml(currentSetting) + "\
-              " + _getIOHtml(currentSetting) + "\
-              <p>\
-                <input type=\"submit\" name=\"Submit\" value=\"Save\" />\
-                <input type=\"submit\" name=\"Submit\" value=\"Delete\" />\
-              </p>\
-            </form>\
-          ";
-          _server->send(200, "text/html", _formatPage(htmlBody));
-        }
       }
-      _dispatchRequestEnd();
-    }
-
-    void WebServer::_handleAccessoryState() {
+      return std::make_pair(foundSetting, setting);
     }
 
     String WebServer::_randomString(int length) {
@@ -424,7 +478,7 @@ namespace Victoria {
 
     String WebServer::_getBooleanHtml(AccessoryState state) {
       String trueAttribute = _getCheckedAttr(state.boolValue);
-      String falseAttribute = _getCheckedAttr(state.boolValue);
+      String falseAttribute = _getCheckedAttr(!state.boolValue);
       String html = "\
         <fieldset>\
           <legend>Boolean Value</legend>\

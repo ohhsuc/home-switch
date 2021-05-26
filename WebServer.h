@@ -19,7 +19,7 @@ namespace Victoria {
         LoadAccessorySettingsEvent onLoadSettings;
         UpdateAccessorySettingEvent onSaveSetting;
         UpdateAccessorySettingEvent onDeleteSetting;
-        typedef void (*AccessoryStateEvent)(String, AccessoryState&);
+        typedef void (*AccessoryStateEvent)(String, AccessorySetting&, AccessoryState&);
         AccessoryStateEvent onGetState;
         AccessoryStateEvent onSetState;
         // server events
@@ -41,6 +41,7 @@ namespace Victoria {
         void _handleNewAccessory();
         void _handleAccessory();
         void _handleAccessoryState();
+        std::pair<bool, AccessorySetting> _getAccessorySetting(String id);
         static String _randomString(int length);
         static String _getCheckedAttr(bool checked);
         static String _getTypeHtml(AccessorySetting setting);

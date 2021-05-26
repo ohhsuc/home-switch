@@ -96,10 +96,10 @@ void deleteSetting(String id, AccessorySetting& setting) {
   configStore->save(model);
 }
 
-void getState(String id, AccessoryState& state) {
+void getState(String id, AccessorySetting& setting, AccessoryState& state) {
   state.boolValue = cha_switch.value.bool_value;
 }
-void setState(String id, AccessoryState& state) {
+void setState(String id, AccessorySetting& setting, AccessoryState& state) {
   setAccessory(state.boolValue);
 }
 
