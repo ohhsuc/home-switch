@@ -129,11 +129,11 @@ namespace Victoria {
       }
       // mac
       String macAddr = WiFi.macAddress();
-      // states
+      // settings
       String accessoryLinks = "";
-      if (onLoadStates) {
-        std::map<String, AccessoryState> states = onLoadStates();
-        for (auto pair : states) {
+      if (onLoadSettings) {
+        std::map<String, AccessorySetting> settings = onLoadSettings();
+        for (const auto& pair : settings) {
           String url = ("/accessory?id=" + pair.first);
           accessoryLinks += "\
             <a href=\"" + url + "\">Accessory (" + pair.second.name + ")</a>\
@@ -267,14 +267,14 @@ namespace Victoria {
       _dispatchRequestStart();
       String accessoryId = _server->arg("id");
       String currentUrl = "/accessory?id=" + accessoryId;
-      AccessoryState currentState;
-      if (onLoadStates) {
-        std::map<String, AccessoryState> states = onLoadStates();
-        if (states.count(accessoryId) > 0) {
-          currentState = states[accessoryId];
+      AccessorySetting currentSetting;
+      if (onLoadSettings) {
+        std::map<String, AccessorySetting> settings = onLoadSettings();
+        if (settings.count(accessoryId) > 0) {
+          currentSetting = settings[accessoryId];
         }
       }
-      if (!currentState.name) {
+      if (!currentSetting.name) {
         String notfound = "\
           <p><a href=\"/\">Home</a></p>\
           <fieldset>\
@@ -294,52 +294,52 @@ namespace Victoria {
           String booleanValue = _server->arg("BooleanValue");
           String integerValue = _server->arg("IntegerValue");
           if (submit == "Delete") {
-            if (onDeleteState) {
-              onDeleteState(accessoryId, currentState);
+            if (onDeleteSetting) {
+              onDeleteSetting(accessoryId, currentSetting);
             }
             _redirectTo("/");
           } else {
-            currentState.name = accessoryName;
-            currentState.type =
+            currentSetting.name = accessoryName;
+            currentSetting.type =
               accessoryType == "boolean" ? BooleanAccessoryType :
               accessoryType == "integer" ? IntegerAccessoryType : EmptyAccessoryType;
-            currentState.outputIO = outputIO.toInt();
-            currentState.inputIO = inputIO.toInt();
-            currentState.boolValue = (booleanValue == "true");
-            currentState.intValue = integerValue.toInt();
-            if (onSaveState) {
-              onSaveState(accessoryId, currentState);
+            currentSetting.outputIO = outputIO.toInt();
+            currentSetting.inputIO = inputIO.toInt();
+            currentSetting.boolValue = (booleanValue == "true");
+            currentSetting.intValue = integerValue.toInt();
+            if (onSaveSetting) {
+              onSaveSetting(accessoryId, currentSetting);
             }
             _redirectTo(currentUrl);
           }
         } else {
           String htmlBody = "\
             <p><a href=\"/\">Home</a></p>\
-            <h3>Accessory (" + currentState.name + ")</h3>\
+            <h3>Accessory (" + currentSetting.name + ")</h3>\
             <form method=\"post\" action=\"" + currentUrl + "\">\
               <p>\
                 <label for=\"txtAccessoryName\">Name</label>\
-                <input type=\"text\" id=\"txtAccessoryName\" name=\"AccessoryName\" value=\"" + currentState.name + "\" />\
+                <input type=\"text\" id=\"txtAccessoryName\" name=\"AccessoryName\" value=\"" + currentSetting.name + "\" />\
               </p>\
               <p>\
                 <label for=\"txtOutputIO\">Output IO</label>\
-                <input type=\"text\" id=\"txtOutputIO\" name=\"OutputIO\" value=\"" + currentState.outputIO + "\" />\
+                <input type=\"text\" id=\"txtOutputIO\" name=\"OutputIO\" value=\"" + currentSetting.outputIO + "\" />\
               </p>\
               <p>\
                 <label for=\"txtInputIO\">Input IO</label>\
-                <input type=\"text\" id=\"txtInputIO\" name=\"InputIO\" value=\"" + currentState.inputIO + "\" />\
+                <input type=\"text\" id=\"txtInputIO\" name=\"InputIO\" value=\"" + currentSetting.inputIO + "\" />\
               </p>\
               <fieldset>\
                 <legend>Accessory Type</legend>\
-                " + _getTypeHtml(currentState) + "\
+                " + _getTypeHtml(currentSetting) + "\
               </fieldset>\
               <fieldset>\
                 <legend>Boolean Value</legend>\
-                " + _getBooleanHtml(currentState) + "\
+                " + _getBooleanHtml(currentSetting) + "\
               </fieldset>\
               <fieldset>\
                 <legend>Integer Value</legend>\
-                " + _getIntegerHtml(currentState) + "\
+                " + _getIntegerHtml(currentSetting) + "\
               </fieldset>\
               <p>\
                 <input type=\"submit\" name=\"Submit\" value=\"Save\" />\
@@ -357,9 +357,9 @@ namespace Victoria {
       return checked ? " checked=\"checked\"" : "";
     }
 
-    String WebServer::_getTypeHtml(AccessoryState state) {
-      String booleanAttribute = _getCheckedAttr(state.type == BooleanAccessoryType);
-      String integerAttribute = _getCheckedAttr(state.type == IntegerAccessoryType);
+    String WebServer::_getTypeHtml(AccessorySetting setting) {
+      String booleanAttribute = _getCheckedAttr(setting.type == BooleanAccessoryType);
+      String integerAttribute = _getCheckedAttr(setting.type == IntegerAccessoryType);
       String html = "\
         <p>\
           <input type=\"radio\" id=\"rdoBooleanType\" name=\"AccessoryType\" value=\"boolean\"" + booleanAttribute + " />\
@@ -373,9 +373,9 @@ namespace Victoria {
       return html;
     }
 
-    String WebServer::_getBooleanHtml(AccessoryState state) {
-      String trueAttribute = _getCheckedAttr(state.boolValue);
-      String falseAttribute = _getCheckedAttr(state.boolValue);
+    String WebServer::_getBooleanHtml(AccessorySetting setting) {
+      String trueAttribute = _getCheckedAttr(setting.boolValue);
+      String falseAttribute = _getCheckedAttr(setting.boolValue);
       String html = "\
         <p>\
           <input type=\"radio\" id=\"rdoBooleanTrue\" name=\"BooleanValue\" value=\"true\"" + trueAttribute + " />\
@@ -389,8 +389,8 @@ namespace Victoria {
       return html;
     }
 
-    String WebServer::_getIntegerHtml(AccessoryState state) {
-      String value = String(state.intValue);
+    String WebServer::_getIntegerHtml(AccessorySetting setting) {
+      String value = String(setting.intValue);
       String html = "\
         <p>\
           <label for=\"txtIntegerValue\">Value</label>\

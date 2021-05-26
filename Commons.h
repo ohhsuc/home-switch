@@ -13,7 +13,7 @@ namespace Victoria {
     IntegerAccessoryType,
   };
 
-  struct AccessoryState {
+  struct AccessorySetting {
     String name;
     AccessoryType type;
     uint8_t outputIO;
@@ -23,42 +23,42 @@ namespace Victoria {
   };
 
   struct SettingModel {
-    std::map<String, AccessoryState> states;
+    std::map<String, AccessorySetting> settings;
     // ... other items
 
     void deserializeFrom(StaticJsonDocument<256>& doc) {
-      auto statesDoc = doc["s"];
-      if (statesDoc) {
+      auto settingsDoc = doc["s"];
+      if (settingsDoc) {
         int index = -1;
         while (true) {
-          auto item = statesDoc[++index];
+          auto item = settingsDoc[++index];
           if (!item || !item[0]) {
             break;
           }
           int type = item[2];
-          AccessoryState state = {
+          AccessorySetting setting = {
             name: item[1],
             type: AccessoryType(type), // convert int to enum
             outputIO: item[3],
             inputIO: item[4],
           };
           String id = item[0];
-          states[id] = state;
+          settings[id] = setting;
         }
       }
     }
 
     void serializeTo(StaticJsonDocument<256>& doc) {
       int i = 0;
-      for (auto pair : states) {
+      for (const auto& pair : settings) {
         String id = pair.first;
-        AccessoryState state = pair.second;
-        int type = state.type; // convert enum to int
+        AccessorySetting setting = pair.second;
+        int type = setting.type; // convert enum to int
         doc["s"][i][0] = id;
-        doc["s"][i][1] = state.name;
+        doc["s"][i][1] = setting.name;
         doc["s"][i][2] = type;
-        doc["s"][i][3] = state.outputIO;
-        doc["s"][i][4] = state.inputIO;
+        doc["s"][i][3] = setting.outputIO;
+        doc["s"][i][4] = setting.inputIO;
         i++;
       }
     }

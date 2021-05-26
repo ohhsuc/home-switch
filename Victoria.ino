@@ -83,8 +83,8 @@ void resetAccessory() {
 
 SettingModel loadConfig() {
   auto model = configStore->load();
-  if (model.states.size() == 0) {
-    model.states["abc123"] = {
+  if (model.settings.size() == 0) {
+    model.settings["abc123"] = {
       name: "Switch",
       type: BooleanAccessoryType,
       outputIO: RXD,
@@ -93,28 +93,28 @@ SettingModel loadConfig() {
   }
   return model;
 }
-std::map<String, AccessoryState> loadStates() {
+std::map<String, AccessorySetting> loadSettings() {
   auto model = loadConfig();
-  for (auto& pair : model.states) {
+  for (auto& pair : model.settings) {
     if (pair.second.type == BooleanAccessoryType) {
       pair.second.boolValue = cha_switch.value.bool_value;
       break;
     }
   }
-  return model.states;
+  return model.settings;
 }
-void saveState(String id, AccessoryState& state) {
+void saveSetting(String id, AccessorySetting& setting) {
   auto model = loadConfig();
-  model.states.erase(id);
-  model.states[id] = state;
-  if (state.type == BooleanAccessoryType) {
-    setAccessory(state.boolValue);
+  model.settings.erase(id);
+  model.settings[id] = setting;
+  if (setting.type == BooleanAccessoryType) {
+    setAccessory(setting.boolValue);
   }
   configStore->save(model);
 }
-void deleteState(String id, AccessoryState& state) {
+void deleteSetting(String id, AccessorySetting& setting) {
   auto model = loadConfig();
-  model.states.erase(id);
+  model.settings.erase(id);
   configStore->save(model);
 }
 
@@ -137,21 +137,21 @@ void inputToggle(bool isOn) {
 void setup(void) {
   Serial.begin(115200);
   configStore = new ConfigStore();
-  auto states = loadStates();
-  auto state = states["abc123"];
+  auto settings = loadSettings();
+  auto setting = settings["abc123"];
 
   LedPin = GPIO2;
   pinMode(LedPin, OUTPUT);
   ledOn();
 
-  InputPin = state.inputIO;
-  RelayPin = state.outputIO;
+  InputPin = setting.inputIO;
+  RelayPin = setting.outputIO;
   pinMode(RelayPin, OUTPUT);
   digitalWrite(RelayPin, HIGH);
 
-  webServer.onLoadStates = loadStates;
-  webServer.onSaveState = saveState;
-  webServer.onDeleteState = deleteState;
+  webServer.onLoadSettings = loadSettings;
+  webServer.onSaveSetting = saveSetting;
+  webServer.onDeleteSetting = deleteSetting;
   webServer.onRequestStart = ledOn;
   webServer.onRequestEnd = ledOff;
   webServer.onResetAccessory = resetAccessory;

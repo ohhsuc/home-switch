@@ -15,9 +15,9 @@ namespace Victoria {
 
     SettingModel ConfigStore::load() {
       // [default result]
-      std::map<String, AccessoryState> states;
+      std::map<String, AccessorySetting> settings;
       SettingModel model = {
-        states: states,
+        settings: settings,
       };
 
       // [open file]

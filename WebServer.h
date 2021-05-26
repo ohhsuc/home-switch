@@ -14,11 +14,11 @@ namespace Victoria {
         void setup();
         void loop();
         // accessory events
-        typedef std::map<String, AccessoryState> (*LoadAccessoryStatesEvent)(void);
-        typedef void (*UpdateAccessoryStateEvent)(String, AccessoryState&);
-        LoadAccessoryStatesEvent onLoadStates;
-        UpdateAccessoryStateEvent onSaveState;
-        UpdateAccessoryStateEvent onDeleteState;
+        typedef std::map<String, AccessorySetting> (*LoadAccessorySettingsEvent)(void);
+        typedef void (*UpdateAccessorySettingEvent)(String, AccessorySetting&);
+        LoadAccessorySettingsEvent onLoadSettings;
+        UpdateAccessorySettingEvent onSaveSetting;
+        UpdateAccessorySettingEvent onDeleteSetting;
         // server events
         typedef void (*ServerEvent)();
         ServerEvent onRequestStart;
@@ -37,9 +37,9 @@ namespace Victoria {
         void _handleConnectWifi();
         void _handleAccessory();
         static String _getCheckedAttr(bool checked);
-        static String _getTypeHtml(AccessoryState state);
-        static String _getBooleanHtml(AccessoryState state);
-        static String _getIntegerHtml(AccessoryState state);
+        static String _getTypeHtml(AccessorySetting setting);
+        static String _getBooleanHtml(AccessorySetting setting);
+        static String _getIntegerHtml(AccessorySetting setting);
         void _handleReset();
         void _handleCrossOrigin();
         void _handleNotFound();
