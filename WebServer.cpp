@@ -43,11 +43,13 @@ namespace Victoria {
       }
 
       _server->on("/", HTTP_GET, std::bind(&WebServer::_handleRoot, this));
-      _server->on("/list-wifi", HTTP_GET, std::bind(&WebServer::_handleListWifi, this));
-      _server->on("/connect-wifi", HTTP_POST, std::bind(&WebServer::_handleConnectWifi, this));
-      _server->on("/new-accessory", HTTP_GET, std::bind(&WebServer::_handleNewAccessory, this));
+      _server->on("/wifi/list", HTTP_GET, std::bind(&WebServer::_handleWifiList, this));
+      _server->on("/wifi/connect", HTTP_POST, std::bind(&WebServer::_handleWifiConnect, this));
+      _server->on("/accessory/new", HTTP_GET, std::bind(&WebServer::_handleNewAccessory, this));
       _server->on("/accessory", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
       _server->on("/accessory", HTTP_ANY, std::bind(&WebServer::_handleAccessory, this));
+      _server->on("/accessory/state", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
+      _server->on("/accessory/state", HTTP_ANY, std::bind(&WebServer::_handleAccessoryState, this));
       _server->on("/reset", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
       _server->on("/reset", HTTP_ANY, std::bind(&WebServer::_handleReset, this));
       _server->onNotFound(std::bind(&WebServer::_handleNotFound, this));
@@ -135,7 +137,7 @@ namespace Victoria {
       if (onLoadSettings) {
         std::map<String, AccessorySetting> settings = onLoadSettings();
         String randomId = _randomString(4);
-        String newAccessoryUrl = "/new-accessory?id=" + randomId + "&index=" + String(settings.size() + 1);
+        String newAccessoryUrl = "/accessory/new?id=" + randomId + "&index=" + String(settings.size() + 1);
         accessoryLinks += "\
           <a href=\"" + newAccessoryUrl + "\">Add+</a>\
         ";
@@ -149,7 +151,7 @@ namespace Victoria {
       // content
       String htmlBody = "\
         <p>\
-          <a href=\"/list-wifi\">Wifi</a>\
+          <a href=\"/wifi/list\">Wifi</a>\
           <a href=\"/reset\">Reset</a>\
         </p>\
         <h3>Accessories</h3>\
@@ -184,7 +186,7 @@ namespace Victoria {
       _dispatchRequestEnd();
     }
 
-    void WebServer::_handleListWifi() {
+    void WebServer::_handleWifiList() {
       _dispatchRequestStart();
       String list = "";
       int count = WiFi.scanNetworks();
@@ -202,7 +204,7 @@ namespace Victoria {
       String htmlBody = "\
         <p><a href=\"/\">Home</a></p>\
         <h3>Connect WiFi</h3>\
-        <form method=\"post\" action=\"/connect-wifi\">\
+        <form method=\"post\" action=\"/wifi/connect\">\
           <ul>" + list + "</ul>\
           <p>\
             <label for=\"txtPassword\">Password:</label>\
@@ -215,7 +217,7 @@ namespace Victoria {
       _dispatchRequestEnd();
     }
 
-    void WebServer::_handleConnectWifi() {
+    void WebServer::_handleWifiConnect() {
       _dispatchRequestStart();
       String ssid = _server->arg("ssid");
       String password = _server->arg("password");
@@ -378,6 +380,9 @@ namespace Victoria {
         }
       }
       _dispatchRequestEnd();
+    }
+
+    void WebServer::_handleAccessoryState() {
     }
 
     String WebServer::_randomString(int length) {

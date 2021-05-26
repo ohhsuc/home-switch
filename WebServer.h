@@ -33,10 +33,11 @@ namespace Victoria {
         void _dispatchRequestStart();
         void _dispatchRequestEnd();
         void _handleRoot();
-        void _handleListWifi();
-        void _handleConnectWifi();
+        void _handleWifiList();
+        void _handleWifiConnect();
         void _handleNewAccessory();
         void _handleAccessory();
+        void _handleAccessoryState();
         static String _randomString(int length);
         static String _getCheckedAttr(bool checked);
         static String _getTypeHtml(AccessorySetting setting);
