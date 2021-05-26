@@ -15,7 +15,7 @@ namespace Victoria {
 
     SettingModel ConfigStore::load() {
       // [default result]
-      std::vector<AccessoryState> states;
+      std::map<String, AccessoryState> states;
       SettingModel model = {
         states: states,
       };

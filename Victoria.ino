@@ -1,4 +1,4 @@
-#include <vector>
+#include <map>
 #include <arduino_homekit_server.h>
 #include "WebServer.h"
 #include "Timer.h"
@@ -84,52 +84,37 @@ void resetAccessory() {
 SettingModel loadConfig() {
   auto model = configStore->load();
   if (model.states.size() == 0) {
-    model.states.push_back({
-      id: "abc123",
+    model.states["abc123"] = {
       name: "Switch",
       type: BooleanAccessoryType,
       outputIO: RXD,
       inputIO: GPIO0,
-    });
+    };
   }
   return model;
 }
-std::vector<AccessoryState> loadStates() {
+std::map<String, AccessoryState> loadStates() {
   auto model = loadConfig();
-  for (AccessoryState& current : model.states) {
-    if (current.type == BooleanAccessoryType) {
-      current.boolValue = cha_switch.value.bool_value;
+  for (auto& pair : model.states) {
+    if (pair.second.type == BooleanAccessoryType) {
+      pair.second.boolValue = cha_switch.value.bool_value;
       break;
     }
   }
   return model.states;
 }
-void saveState(AccessoryState& state) {
+void saveState(String id, AccessoryState& state) {
   auto model = loadConfig();
-  for (AccessoryState& current : model.states) {
-    if (current.id == state.id) {
-      current.name = state.name;
-      current.type = state.type;
-      current.outputIO = state.outputIO;
-      current.inputIO = state.inputIO;
-      // current.boolValue = state.boolValue;
-      // current.intValue = state.intValue;
-      break;
-    }
-  }
+  model.states.erase(id);
+  model.states[id] = state;
   if (state.type == BooleanAccessoryType) {
     setAccessory(state.boolValue);
   }
   configStore->save(model);
 }
-void deleteState(AccessoryState& state) {
+void deleteState(String id, AccessoryState& state) {
   auto model = loadConfig();
-  for (auto current = model.states.begin(); current != model.states.end();) {
-    if ((*current).id == state.id) {
-      model.states.erase(current);
-      break;
-    }
-  }
+  model.states.erase(id);
   configStore->save(model);
 }
 
@@ -153,13 +138,14 @@ void setup(void) {
   Serial.begin(115200);
   configStore = new ConfigStore();
   auto states = loadStates();
+  auto state = states["abc123"];
 
   LedPin = GPIO2;
   pinMode(LedPin, OUTPUT);
   ledOn();
 
-  InputPin = states[0].inputIO;
-  RelayPin = states[0].outputIO;
+  InputPin = state.inputIO;
+  RelayPin = state.outputIO;
   pinMode(RelayPin, OUTPUT);
   digitalWrite(RelayPin, HIGH);
 

@@ -27,10 +27,10 @@ namespace Victoria {
     void Timer::loop() {
       std::list<unsigned int> hitIds;
       unsigned long now = millis();
-      for (auto it = _configs.begin(); it != _configs.end(); ++it) {
-        unsigned int id = it->first;
-        Config& config = it->second;
+      for (auto item : _configs) {
+        Config config = it.second;
         if (now - config.time > config.ms) {
+          unsigned int id = it.first;
           hitIds.push_back(id);
         }
       }

@@ -1,7 +1,7 @@
 #ifndef WebServer_h
 #define WebServer_h
 
-#include <vector>
+#include <map>
 #include <ESP8266WebServer.h>
 #include "Commons.h"
 
@@ -14,8 +14,8 @@ namespace Victoria {
         void setup();
         void loop();
         // accessory events
-        typedef std::vector<AccessoryState> (*LoadAccessoryStatesEvent)(void);
-        typedef void (*UpdateAccessoryStateEvent)(AccessoryState&);
+        typedef std::map<String, AccessoryState> (*LoadAccessoryStatesEvent)(void);
+        typedef void (*UpdateAccessoryStateEvent)(String, AccessoryState&);
         LoadAccessoryStatesEvent onLoadStates;
         UpdateAccessoryStateEvent onSaveState;
         UpdateAccessoryStateEvent onDeleteState;

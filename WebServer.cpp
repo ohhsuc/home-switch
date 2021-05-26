@@ -1,4 +1,3 @@
-#include <vector>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include "WebServer.h"
@@ -133,11 +132,11 @@ namespace Victoria {
       // states
       String accessoryLinks = "";
       if (onLoadStates) {
-        std::vector<AccessoryState> states = onLoadStates();
-        for (AccessoryState state : states) {
-          String url = ("/accessory?id=" + state.id);
+        std::map<String, AccessoryState> states = onLoadStates();
+        for (auto pair : states) {
+          String url = ("/accessory?id=" + pair.first);
           accessoryLinks += "\
-            <a href=\"" + url + "\">Accessory (" + state.name + ")</a>\
+            <a href=\"" + url + "\">Accessory (" + pair.second.name + ")</a>\
           ";
         }
       }
@@ -270,17 +269,12 @@ namespace Victoria {
       String currentUrl = "/accessory?id=" + accessoryId;
       AccessoryState currentState;
       if (onLoadStates) {
-        std::vector<AccessoryState> states = onLoadStates();
-        if (states.size() > 0) {
-          currentState = states[0];
-          for (AccessoryState state : states) {
-            if (state.id == accessoryId) {
-              currentState = state;
-            }
-          }
+        std::map<String, AccessoryState> states = onLoadStates();
+        if (states.count(accessoryId) > 0) {
+          currentState = states[accessoryId];
         }
       }
-      if (!currentState.id) {
+      if (!currentState.name) {
         String notfound = "\
           <p><a href=\"/\">Home</a></p>\
           <fieldset>\
@@ -301,7 +295,7 @@ namespace Victoria {
           String integerValue = _server->arg("IntegerValue");
           if (submit == "Delete") {
             if (onDeleteState) {
-              onDeleteState(currentState);
+              onDeleteState(accessoryId, currentState);
             }
             _redirectTo("/");
           } else {
@@ -314,7 +308,7 @@ namespace Victoria {
             currentState.boolValue = (booleanValue == "true");
             currentState.intValue = integerValue.toInt();
             if (onSaveState) {
-              onSaveState(currentState);
+              onSaveState(accessoryId, currentState);
             }
             _redirectTo(currentUrl);
           }

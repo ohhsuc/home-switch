@@ -1,7 +1,7 @@
 #ifndef Commons_h
 #define Commons_h
 
-#include <vector>
+#include <map>
 #include "Arduino.h"
 #include <ArduinoJson.h>
 
@@ -14,7 +14,6 @@ namespace Victoria {
   };
 
   struct AccessoryState {
-    String id;
     String name;
     AccessoryType type;
     uint8_t outputIO;
@@ -24,7 +23,7 @@ namespace Victoria {
   };
 
   struct SettingModel {
-    std::vector<AccessoryState> states;
+    std::map<String, AccessoryState> states;
     // ... other items
 
     void deserializeFrom(StaticJsonDocument<256>& doc) {
@@ -37,26 +36,30 @@ namespace Victoria {
             break;
           }
           int type = item[2];
-          states.push_back({
-            id: item[0],
+          AccessoryState state = {
             name: item[1],
             type: AccessoryType(type), // convert int to enum
             outputIO: item[3],
             inputIO: item[4],
-          });
+          };
+          String id = item[0];
+          states[id] = state;
         }
       }
     }
 
     void serializeTo(StaticJsonDocument<256>& doc) {
-      for (int i = 0; i < states.size(); i++) {
-        AccessoryState item = states[i];
-        int type = item.type; // convert enum to int
-        doc["s"][i][0] = item.id;
-        doc["s"][i][1] = item.name;
+      int i = 0;
+      for (auto pair : states) {
+        String id = pair.first;
+        AccessoryState state = pair.second;
+        int type = state.type; // convert enum to int
+        doc["s"][i][0] = id;
+        doc["s"][i][1] = state.name;
         doc["s"][i][2] = type;
-        doc["s"][i][3] = item.outputIO;
-        doc["s"][i][4] = item.inputIO;
+        doc["s"][i][3] = state.outputIO;
+        doc["s"][i][4] = state.inputIO;
+        i++;
       }
     }
   };
