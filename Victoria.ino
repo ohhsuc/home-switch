@@ -123,7 +123,7 @@ void setup(void) {
   Serial.begin(115200);
   configStore = new ConfigStore();
   auto settings = loadSettings();
-  auto setting = settings["abc123"];
+  auto setting = settings.begin()->second;
 
   LedPin = GPIO2;
   pinMode(LedPin, OUTPUT);

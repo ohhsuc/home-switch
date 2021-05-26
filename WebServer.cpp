@@ -166,7 +166,7 @@ namespace Victoria {
           </tr>\
           <tr>\
             <td>IP Address</td>\
-            <td>" + strLocalIP + "</td>\
+            <td><a href=\"http://" + strLocalIP + "\">" + strLocalIP + "</a></td>\
           </tr>\
           <tr>\
             <td>AP Enabled</td>\
@@ -174,7 +174,7 @@ namespace Victoria {
           </tr>\
           <tr>\
             <td>AP Address</td>\
-            <td>" + strApIP + "</td>\
+            <td><a href=\"http://" + strApIP + "\">" + strApIP + "</a></td>\
           </tr>\
           <tr>\
             <td>MAC Address</td>\
