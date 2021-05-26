@@ -81,20 +81,8 @@ void resetAccessory() {
   homekit_server_reset();
 }
 
-SettingModel loadConfig() {
-  auto model = configStore->load();
-  if (model.settings.size() == 0) {
-    model.settings["abc123"] = {
-      name: "Default",
-      type: BooleanAccessoryType,
-      outputIO: RXD,
-      inputIO: GPIO0,
-    };
-  }
-  return model;
-}
 std::map<String, AccessorySetting> loadSettings() {
-  auto model = loadConfig();
+  auto model = configStore->load();
   for (auto& pair : model.settings) {
     if (pair.second.type == BooleanAccessoryType) {
       //TODO: bugs
@@ -105,8 +93,7 @@ std::map<String, AccessorySetting> loadSettings() {
   return model.settings;
 }
 void saveSetting(String id, AccessorySetting& setting) {
-  auto model = loadConfig();
-  model.settings.erase(id);
+  auto model = configStore->load();
   model.settings[id] = setting;
   if (setting.type == BooleanAccessoryType) {
     setAccessory(setting.boolValue);
@@ -114,7 +101,7 @@ void saveSetting(String id, AccessorySetting& setting) {
   configStore->save(model);
 }
 void deleteSetting(String id, AccessorySetting& setting) {
-  auto model = loadConfig();
+  auto model = configStore->load();
   model.settings.erase(id);
   configStore->save(model);
 }

@@ -45,6 +45,7 @@ namespace Victoria {
       _server->on("/", HTTP_GET, std::bind(&WebServer::_handleRoot, this));
       _server->on("/list-wifi", HTTP_GET, std::bind(&WebServer::_handleListWifi, this));
       _server->on("/connect-wifi", HTTP_POST, std::bind(&WebServer::_handleConnectWifi, this));
+      _server->on("/new-accessory", HTTP_GET, std::bind(&WebServer::_handleNewAccessory, this));
       _server->on("/accessory", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
       _server->on("/accessory", HTTP_ANY, std::bind(&WebServer::_handleAccessory, this));
       _server->on("/reset", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
@@ -133,19 +134,27 @@ namespace Victoria {
       String accessoryLinks = "";
       if (onLoadSettings) {
         std::map<String, AccessorySetting> settings = onLoadSettings();
+        String randomId = _randomString(4);
+        String newAccessoryUrl = "/new-accessory?id=" + randomId + "&index=" + String(settings.size() + 1);
+        accessoryLinks += "\
+          <a href=\"" + newAccessoryUrl + "\">Add+</a>\
+        ";
         for (const auto& pair : settings) {
           String url = ("/accessory?id=" + pair.first);
           accessoryLinks += "\
-            <a href=\"" + url + "\">Accessory (" + pair.second.name + ")</a>\
+            <a href=\"" + url + "\">" + pair.second.name + "</a>\
           ";
         }
       }
       // content
       String htmlBody = "\
         <p>\
-          " + accessoryLinks + "\
           <a href=\"/list-wifi\">Wifi</a>\
           <a href=\"/reset\">Reset</a>\
+        </p>\
+        <h3>Accessories</h3>\
+        <p>\
+          " + accessoryLinks + "\
         </p>\
         <h3>Home</h3>\
         <table>\
@@ -263,6 +272,26 @@ namespace Victoria {
       _dispatchRequestEnd();
     }
 
+    void WebServer::_handleNewAccessory() {
+      _dispatchRequestStart();
+      String accessoryId = _server->arg("id");
+      String accessoryIndex = _server->arg("index");
+      if (onSaveSetting) {
+        // save
+        AccessorySetting newSetting = {
+          name: "New" + accessoryIndex,
+          type: BooleanAccessoryType,
+          outputIO: 0,
+          inputIO: 1,
+        };
+        onSaveSetting(accessoryId, newSetting);
+        // redirect
+        String accessoryUrl = "/accessory?id=" + accessoryId;
+        _redirectTo(accessoryUrl);
+      }
+      _dispatchRequestEnd();
+    }
+
     void WebServer::_handleAccessory() {
       _dispatchRequestStart();
       String accessoryId = _server->arg("id");
@@ -277,7 +306,7 @@ namespace Victoria {
         }
       }
       if (!foundSetting) {
-        String notfound = "\
+        String notFound = "\
           <p><a href=\"/\">Home</a></p>\
           <fieldset>\
             <legend>Oops...</legend>\
@@ -285,7 +314,7 @@ namespace Victoria {
             <p>Accessory ID: " + accessoryId + "</p>\
           </fieldset>\
         ";
-        _server->send(200, "text/html", _formatPage(notfound));
+        _server->send(200, "text/html", _formatPage(notFound));
       } else {
         if (_server->method() == HTTP_POST) {
           String submit = _server->arg("Submit");
@@ -349,6 +378,21 @@ namespace Victoria {
         }
       }
       _dispatchRequestEnd();
+    }
+
+    String WebServer::_randomString(int length) {
+      String result = "";
+      int generated = 0;
+      while (generated < length) {
+        byte randomValue = random(0, 26);
+        char letter = randomValue + 'a';
+        if (randomValue > 26) {
+          letter = (randomValue - 26);
+        }
+        result += letter;
+        generated++;
+      }
+      return result;
     }
 
     String WebServer::_getCheckedAttr(bool checked) {
