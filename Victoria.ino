@@ -7,6 +7,7 @@
 #include "ButtonEvents.h"
 #include "OnOffEvents.h"
 #include "ConfigStore.h"
+#include "Mesher.h"
 
 using namespace Victoria;
 using namespace Victoria::Events;
@@ -160,6 +161,10 @@ void setup(void) {
 
   Serial.println("Setup complete!");
   ledOff();
+
+  auto mesher = Mesher();
+  auto loader = RadioFrequencyMeshLoader(10);
+  mesher.setLoader(&loader);
 }
 
 void loop(void) {
