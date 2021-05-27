@@ -1,4 +1,3 @@
-#include "Arduino.h"
 #include "OnOffEvents.h"
 
 namespace Victoria {

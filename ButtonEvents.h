@@ -1,6 +1,8 @@
 #ifndef ButtonEvents_h
 #define ButtonEvents_h
 
+#include "Arduino.h"
+
 // Migrate from
 // https://www.sigmdel.ca/michel/program/esp8266/arduino/switch_debouncing_en.html
 

@@ -1,6 +1,8 @@
 #ifndef ShakeEvents_h
 #define ShakeEvents_h
 
+#include "Arduino.h"
+
 namespace Victoria {
   namespace Events {
     class ShakeEvents {

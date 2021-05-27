@@ -1,4 +1,3 @@
-#include "Arduino.h"
 #include "ShakeEvents.h"
 
 #define DEFAULT_DEBOUNCE_MILLIS 2000

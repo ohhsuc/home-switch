@@ -1,6 +1,8 @@
 #ifndef OnOffEvents_h
 #define OnOffEvents_h
 
+#include "Arduino.h"
+
 #define DEFAULT_DEBOUNCE_DELAY 50
 
 namespace Victoria {
