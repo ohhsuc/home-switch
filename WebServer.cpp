@@ -367,10 +367,14 @@ namespace Victoria {
         intValue: 0,
       };
       if (_server->method() == HTTP_POST) {
-        String booleanValue = _server->arg("BooleanValue");
-        String integerValue = _server->arg("IntegerValue");
-        state.boolValue = (booleanValue == "true");
-        state.intValue = integerValue.toInt();
+        if (_server->hasArg("BooleanValue")) {
+          String booleanValue = _server->arg("BooleanValue");
+          state.boolValue = (booleanValue == "true");
+        }
+        if (_server->hasArg("IntegerValue")) {
+          String integerValue = _server->arg("IntegerValue");
+          state.intValue = integerValue.toInt();
+        }
         if (onSetState) {
           onSetState(accessoryId, setting, state);
         }
