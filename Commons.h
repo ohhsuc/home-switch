@@ -67,6 +67,23 @@ namespace Victoria {
     }
   };
 
+  class CommonHelpers {
+    public:
+      static String randomString(int length) {
+        String result = "";
+        int generated = 0;
+        while (generated < length) {
+          byte randomValue = random(0, 26);
+          char letter = randomValue + 'a';
+          if (randomValue > 26) {
+            letter = (randomValue - 26);
+          }
+          result += letter;
+          generated++;
+        }
+        return result;
+      }
+  };
 }
 
 #endif //Commons_h

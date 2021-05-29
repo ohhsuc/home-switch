@@ -134,7 +134,7 @@ namespace Victoria {
       String accessoryLinks = "";
       if (onLoadSettings) {
         std::map<String, AccessorySetting> settings = onLoadSettings();
-        String randomId = _randomString(4);
+        String randomId = CommonHelpers::randomString(4);
         String newAccessoryUrl = "/accessory/new?id=" + randomId + "&index=" + String(settings.size() + 1);
         accessoryLinks += "\
           <a href=\"" + newAccessoryUrl + "\">Add+</a>\
@@ -421,21 +421,6 @@ namespace Victoria {
         _server->send(200, "text/html", _formatPage(notFound));
       }
       return std::make_pair(foundSetting, setting);
-    }
-
-    String WebServer::_randomString(int length) {
-      String result = "";
-      int generated = 0;
-      while (generated < length) {
-        byte randomValue = random(0, 26);
-        char letter = randomValue + 'a';
-        if (randomValue > 26) {
-          letter = (randomValue - 26);
-        }
-        result += letter;
-        generated++;
-      }
-      return result;
     }
 
     String WebServer::_getCheckedAttr(bool checked) {

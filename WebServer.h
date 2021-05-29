@@ -43,7 +43,6 @@ namespace Victoria {
         void _handleAccessory();
         void _handleAccessoryState();
         std::pair<bool, AccessorySetting> _getAccessorySetting(String id);
-        static String _randomString(int length);
         static String _getCheckedAttr(bool checked);
         static String _getTypeHtml(AccessorySetting setting);
         static String _getIOHtml(AccessorySetting setting);
