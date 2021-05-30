@@ -63,7 +63,15 @@ namespace Victoria {
       _server->send(302, "text/plain", "");
     }
 
-    String WebServer::_formatPage(const String& htmlBody) {
+    void WebServer::_send200(const String& bodyHtml) {
+      _server->send(200, "text/html", _formatPage(bodyHtml));
+    }
+
+    void WebServer::_send404(const String& bodyHtml) {
+      _server->send(404, "text/html", _formatPage(bodyHtml));
+    }
+
+    String WebServer::_formatPage(const String& bodyHtml) {
       return "\
         <!DOCTYPE HTML>\
         <html>\
@@ -78,7 +86,7 @@ namespace Victoria {
           </head>\
           <body>\
             <h1>" + _productName + "</h1>\
-            " + htmlBody + "\
+            " + bodyHtml + "\
           </body>\
         </html>\
       ";
@@ -115,18 +123,22 @@ namespace Victoria {
         strWifiMode = "WIFI_AP_STA";
       }
       // ip
-      IPAddress localIP = WiFi.localIP();
       String strLocalIP = "";
-      if (localIP) {
-        strLocalIP = localIP.toString();
+      bool isStaEnabled = ((wifiMode & WIFI_STA) != 0);
+      if (isStaEnabled) {
+        IPAddress localIP = WiFi.localIP();
+        if (localIP) {
+          strLocalIP = localIP.toString();
+        }
       }
       // ap
-      bool isApEnabled = ((wifiMode & WIFI_AP) != 0);
-      String strApEnabled = isApEnabled ? "YES" : "NO";
       String strApIP = "";
-      IPAddress apIP = WiFi.softAPIP();
-      if (apIP) {
-        strApIP = apIP.toString();
+      bool isApEnabled = ((wifiMode & WIFI_AP) != 0);
+      if (isApEnabled) {
+        IPAddress apIP = WiFi.softAPIP();
+        if (apIP) {
+          strApIP = apIP.toString();
+        }
       }
       // mac
       String macAddr = WiFi.macAddress();
@@ -147,7 +159,7 @@ namespace Victoria {
         }
       }
       // content
-      String htmlBody = "\
+      _send200("\
         <p>\
           <a href=\"/wifi/list\">Wifi</a>\
           <a href=\"/reset\">Reset</a>\
@@ -163,24 +175,19 @@ namespace Victoria {
             <td>" + strWifiMode + "</td>\
           </tr>\
           <tr>\
-            <td>IP Address</td>\
-            <td><a href=\"http://" + strLocalIP + "\">" + strLocalIP + "</a></td>\
-          </tr>\
-          <tr>\
-            <td>AP Enabled</td>\
-            <td>" + strApEnabled + "</td>\
-          </tr>\
-          <tr>\
             <td>AP Address</td>\
             <td><a href=\"http://" + strApIP + "\">" + strApIP + "</a></td>\
+          </tr>\
+          <tr>\
+            <td>IP Address</td>\
+            <td><a href=\"http://" + strLocalIP + "\">" + strLocalIP + "</a></td>\
           </tr>\
           <tr>\
             <td>MAC Address</td>\
             <td>" + macAddr + "</td>\
           </tr>\
         </table>\
-      ";
-      _server->send(200, "text/html", _formatPage(htmlBody));
+      ");
       _dispatchRequestEnd();
     }
 
@@ -199,7 +206,7 @@ namespace Victoria {
           </li>\
         ";
       }
-      String htmlBody = "\
+      _send200("\
         <p><a href=\"/\">Home</a></p>\
         <h3>Connect WiFi</h3>\
         <form method=\"post\" action=\"/wifi/connect\">\
@@ -210,8 +217,7 @@ namespace Victoria {
           </p>\
           <p><input type=\"submit\" value=\"Connect\" /></p>\
         </form>\
-      ";
-      _server->send(200, "text/html", _formatPage(htmlBody));
+      ");
       _dispatchRequestEnd();
     }
 
@@ -221,14 +227,13 @@ namespace Victoria {
       String password = _server->arg("password");
 
       if (WiFi.status() == WL_CONNECTED && WiFi.SSID() == ssid) {
-        String ignoreMessage = "\
+        _send200("\
           <p><a href=\"/\">Home</a></p>\
           <fieldset>\
             <legend>Ignore</legend>\
             <p>Ignore network setup</p>\
           </fieldset>\
-        ";
-        _server->send(200, "text/html", _formatPage(ignoreMessage));
+        ");
         _dispatchRequestEnd();
         return;
       }
@@ -250,24 +255,22 @@ namespace Victoria {
 
       bool isConnected = WiFi.status() == WL_CONNECTED;
       if (isConnected) {
-        String successMessage = "\
+        _send200("\
           <p><a href=\"/\">Home</a></p>\
           <fieldset>\
             <legend>Success</legend>\
             <p>Connected to <b>" + ssid + "</b></p>\
             <p>IP address <b>" + WiFi.localIP().toString() + "</b></p>\
           </fieldset>\
-        ";
-        _server->send(200, "text/html", _formatPage(successMessage));
+        ");
       } else {
-        String failedMessage = "\
+        _send200("\
           <p><a href=\"/\">Home</a></p>\
           <fieldset>\
             <legend>Failed</legend>\
             <p>Connect <b>" + ssid + "</b> failed</p>\
           </fieldset>\
-        ";
-        _server->send(200, "text/html", _formatPage(failedMessage));
+        ");
       }
       _dispatchRequestEnd();
     }
@@ -326,7 +329,7 @@ namespace Victoria {
           _redirectTo(currentUrl);
         }
       } else {
-        String htmlBody = "\
+        _send200("\
           <p>\
             <a href=\"/\">Home</a>\
             <a href=\"/accessory/state?id=" + accessoryId + "\">State</a>\
@@ -344,8 +347,7 @@ namespace Victoria {
               <input type=\"submit\" name=\"Submit\" value=\"Delete\" />\
             </p>\
           </form>\
-        ";
-        _server->send(200, "text/html", _formatPage(htmlBody));
+        ");
       }
       _dispatchRequestEnd();
     }
@@ -384,7 +386,7 @@ namespace Victoria {
         String stateHtml =
           setting.type == BooleanAccessoryType ? _getBooleanHtml(state) :
           setting.type == IntegerAccessoryType ? _getIntegerHtml(state) : "";
-        String htmlBody = "\
+        _send200("\
           <p><a href=\"/\">Home</a></p>\
           <h3>State (" + setting.name + ")</h3>\
           <form method=\"post\" action=\"" + currentUrl + "\">\
@@ -393,8 +395,7 @@ namespace Victoria {
               <input type=\"submit\" name=\"Submit\" value=\"Save\" />\
             </p>\
           </form>\
-        ";
-        _server->send(200, "text/html", _formatPage(htmlBody));
+        ");
       }
       _dispatchRequestEnd();
     }
@@ -410,15 +411,14 @@ namespace Victoria {
         }
       }
       if (!foundSetting) {
-        String notFound = "\
+        _send200("\
           <p><a href=\"/\">Home</a></p>\
           <fieldset>\
             <legend>Oops...</legend>\
             <p>Accessory Not Found</p>\
             <p>Accessory ID: " + id + "</p>\
           </fieldset>\
-        ";
-        _server->send(200, "text/html", _formatPage(notFound));
+        ");
       }
       return std::make_pair(foundSetting, setting);
     }
@@ -516,7 +516,7 @@ namespace Victoria {
         }
         _redirectTo("/");
       } else {
-        String htmlBody = "\
+        _send200("\
           <p><a href=\"/\">Home</a></p>\
           <h3>Reset</h3>\
           <form method=\"post\" action=\"/reset\">\
@@ -534,8 +534,7 @@ namespace Victoria {
             </p>\
             <p><input type=\"submit\" value=\"Submit\" /></p>\
           </form>\
-        ";
-        _server->send(200, "text/html", _formatPage(htmlBody));
+        ");
       }
       _dispatchRequestEnd();
     }
@@ -549,7 +548,7 @@ namespace Victoria {
     void WebServer::_handleNotFound() {
       _dispatchRequestStart();
       String method = (_server->method() == HTTP_GET) ? "GET" : "POST";
-      String bodyHtml = "\
+      _send404("\
         <p><a href=\"/\">Home</a></p>\
         <fieldset>\
           <legend>Oops...</legend>\
@@ -557,8 +556,7 @@ namespace Victoria {
           <p>URI: " + _server->uri() + "</p>\
           <p>Method: " + method + "</p>\
         </fieldset>\
-      ";
-      _server->send(404, "text/html", _formatPage(bodyHtml));
+      ");
       _dispatchRequestEnd();
     }
 

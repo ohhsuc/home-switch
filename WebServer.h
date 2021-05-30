@@ -32,8 +32,10 @@ namespace Victoria {
         String _productName;
         String _hostName;
         ESP8266WebServer* _server;
-        String _formatPage(const String& htmlBody);
         void _redirectTo(const String& url);
+        void _send200(const String& bodyHtml);
+        void _send404(const String& bodyHtml);
+        String _formatPage(const String& bodyHtml);
         void _dispatchRequestStart();
         void _dispatchRequestEnd();
         void _handleRoot();
