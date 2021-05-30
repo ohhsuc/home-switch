@@ -87,21 +87,21 @@ std::map<String, AccessorySetting> loadSettings() {
   auto model = configStore->load();
   return model.settings;
 }
-void saveSetting(String id, AccessorySetting& setting) {
+void saveSetting(const String& id, const AccessorySetting& setting) {
   auto model = configStore->load();
   model.settings[id] = setting;
   configStore->save(model);
 }
-void deleteSetting(String id, AccessorySetting& setting) {
+void deleteSetting(const String& id, const AccessorySetting& setting) {
   auto model = configStore->load();
   model.settings.erase(id);
   configStore->save(model);
 }
 
-void getState(String id, AccessorySetting& setting, AccessoryState& state) {
+void getState(const String& id, const AccessorySetting& setting, AccessoryState& state) {
   state.boolValue = cha_switch.value.bool_value;
 }
-void setState(String id, AccessorySetting& setting, AccessoryState& state) {
+void setState(const String& id, const AccessorySetting& setting, AccessoryState& state) {
   setAccessory(state.boolValue);
 }
 

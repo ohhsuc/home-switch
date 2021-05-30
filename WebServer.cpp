@@ -3,7 +3,7 @@
 namespace Victoria {
   namespace Components {
 
-    WebServer::WebServer(int port, String productName, String hostName) {
+    WebServer::WebServer(int port, const String& productName, const String& hostName) {
       _server = new ESP8266WebServer(port);
       _productName = productName;
       _hostName = hostName;
@@ -58,12 +58,12 @@ namespace Victoria {
       _server->handleClient();
     }
 
-    void WebServer::_redirectTo(String url) {
+    void WebServer::_redirectTo(const String& url) {
       _server->sendHeader(F("Location"), url, true);
       _server->send(302, "text/plain", "");
     }
 
-    String WebServer::_formatPage(String htmlBody) {
+    String WebServer::_formatPage(const String& htmlBody) {
       return "\
         <!DOCTYPE HTML>\
         <html>\
@@ -279,10 +279,10 @@ namespace Victoria {
       if (onSaveSetting) {
         // save
         AccessorySetting newSetting = {
-          name: "New" + accessoryIndex,
-          type: BooleanAccessoryType,
-          outputIO: 0,
-          inputIO: 1,
+          .name = "New" + accessoryIndex,
+          .type = BooleanAccessoryType,
+          .outputIO = 0,
+          .inputIO = 1,
         };
         onSaveSetting(accessoryId, newSetting);
         // redirect
@@ -361,8 +361,8 @@ namespace Victoria {
         return;
       }
       AccessoryState state = {
-        boolValue: false,
-        intValue: 0,
+        .boolValue = false,
+        .intValue = 0,
       };
       if (_server->method() == HTTP_POST) {
         if (_server->hasArg("BooleanValue")) {
@@ -399,7 +399,7 @@ namespace Victoria {
       _dispatchRequestEnd();
     }
 
-    std::pair<bool, AccessorySetting> WebServer::_getAccessorySetting(String id) {
+    std::pair<bool, AccessorySetting> WebServer::_getAccessorySetting(const String& id) {
       bool foundSetting = false;
       AccessorySetting setting;
       if (onLoadSettings) {
@@ -427,7 +427,7 @@ namespace Victoria {
       return checked ? " checked=\"checked\"" : "";
     }
 
-    String WebServer::_getTypeHtml(AccessorySetting setting) {
+    String WebServer::_getTypeHtml(const AccessorySetting& setting) {
       String booleanAttribute = _getCheckedAttr(setting.type == BooleanAccessoryType);
       String integerAttribute = _getCheckedAttr(setting.type == IntegerAccessoryType);
       String html = "\
@@ -446,7 +446,7 @@ namespace Victoria {
       return html;
     }
 
-    String WebServer::_getIOHtml(AccessorySetting setting) {
+    String WebServer::_getIOHtml(const AccessorySetting& setting) {
       String html = "\
         <fieldset>\
           <legend>IO Pins</legend>\
@@ -463,7 +463,7 @@ namespace Victoria {
       return html;
     }
 
-    String WebServer::_getBooleanHtml(AccessoryState state) {
+    String WebServer::_getBooleanHtml(const AccessoryState& state) {
       String trueAttribute = _getCheckedAttr(state.boolValue);
       String falseAttribute = _getCheckedAttr(!state.boolValue);
       String html = "\
@@ -482,7 +482,7 @@ namespace Victoria {
       return html;
     }
 
-    String WebServer::_getIntegerHtml(AccessoryState state) {
+    String WebServer::_getIntegerHtml(const AccessoryState& state) {
       String html = "\
         <fieldset>\
           <legend>Integer Value</legend>\

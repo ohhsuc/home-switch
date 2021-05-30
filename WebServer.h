@@ -10,17 +10,17 @@ namespace Victoria {
   namespace Components {
     class WebServer {
       public:
-        WebServer(int port, String productName, String hostName);
+        WebServer(int port, const String& productName, const String& hostName);
         ~WebServer();
         void setup();
         void loop();
         // accessory events
         typedef std::map<String, AccessorySetting> (*LoadAccessorySettingsEvent)(void);
-        typedef void (*UpdateAccessorySettingEvent)(String, AccessorySetting&);
+        typedef void (*UpdateAccessorySettingEvent)(const String&, const AccessorySetting&);
         LoadAccessorySettingsEvent onLoadSettings;
         UpdateAccessorySettingEvent onSaveSetting;
         UpdateAccessorySettingEvent onDeleteSetting;
-        typedef void (*AccessoryStateEvent)(String, AccessorySetting&, AccessoryState&);
+        typedef void (*AccessoryStateEvent)(const String&, const AccessorySetting&, AccessoryState&);
         AccessoryStateEvent onGetState;
         AccessoryStateEvent onSetState;
         // server events
@@ -32,8 +32,8 @@ namespace Victoria {
         String _productName;
         String _hostName;
         ESP8266WebServer* _server;
-        String _formatPage(String htmlBody);
-        void _redirectTo(String url);
+        String _formatPage(const String& htmlBody);
+        void _redirectTo(const String& url);
         void _dispatchRequestStart();
         void _dispatchRequestEnd();
         void _handleRoot();
@@ -42,12 +42,12 @@ namespace Victoria {
         void _handleNewAccessory();
         void _handleAccessory();
         void _handleAccessoryState();
-        std::pair<bool, AccessorySetting> _getAccessorySetting(String id);
+        std::pair<bool, AccessorySetting> _getAccessorySetting(const String& id);
         static String _getCheckedAttr(bool checked);
-        static String _getTypeHtml(AccessorySetting setting);
-        static String _getIOHtml(AccessorySetting setting);
-        static String _getBooleanHtml(AccessoryState state);
-        static String _getIntegerHtml(AccessoryState state);
+        static String _getTypeHtml(const AccessorySetting& setting);
+        static String _getIOHtml(const AccessorySetting& setting);
+        static String _getBooleanHtml(const AccessoryState& state);
+        static String _getIntegerHtml(const AccessoryState& state);
         void _handleReset();
         void _handleCrossOrigin();
         void _handleNotFound();

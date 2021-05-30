@@ -1,4 +1,4 @@
-#include <list>
+#include <vector>
 #include "Arduino.h"
 #include "Timer.h"
 
@@ -25,7 +25,7 @@ namespace Victoria {
     }
 
     void Timer::loop() {
-      std::list<unsigned int> hitIds;
+      std::vector<unsigned int> hitIds;
       unsigned long now = millis();
       for (const auto& item : _configs) {
         Config config = item.second;
@@ -46,10 +46,10 @@ namespace Victoria {
 
     unsigned int Timer::_addConfig(bool type, unsigned short milliseconds, Callback callback) {
       Config config = {
-        type: type,
-        ms: milliseconds,
-        cb: callback,
-        time: millis(),
+        .type = type,
+        .ms = milliseconds,
+        .cb = callback,
+        .time = millis(),
       };
       unsigned int id = _idSeed++;
       _configs[id] = config;

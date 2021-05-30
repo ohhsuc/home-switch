@@ -29,7 +29,7 @@ namespace Victoria {
     std::map<String, AccessorySetting> settings;
     // ... other items
 
-    void deserializeFrom(StaticJsonDocument<256>& doc) {
+    void deserializeFrom(const StaticJsonDocument<256>& doc) {
       auto settingsDoc = doc["s"];
       if (settingsDoc) {
         int index = -1;
@@ -40,10 +40,10 @@ namespace Victoria {
           }
           int type = item[2];
           AccessorySetting setting = {
-            name: item[1],
-            type: AccessoryType(type), // convert int to enum
-            outputIO: item[3],
-            inputIO: item[4],
+            .name = item[1],
+            .type = AccessoryType(type), // convert int to enum
+            .outputIO = item[3],
+            .inputIO = item[4],
           };
           String id = item[0];
           settings[id] = setting;

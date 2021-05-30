@@ -15,10 +15,7 @@ namespace Victoria {
 
     SettingModel ConfigStore::load() {
       // [default result]
-      std::map<String, AccessorySetting> settings;
-      SettingModel model = {
-        settings: settings,
-      };
+      SettingModel model;
 
       // [open file]
       File file = LittleFS.open(CONFIG_FILE_PATH, "r");

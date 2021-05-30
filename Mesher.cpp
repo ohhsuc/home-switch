@@ -11,21 +11,21 @@ namespace Victoria {
     void IMeshLoader::onMessage(TMessageHandler handler) {
       _messageHandler = handler;
     }
-    void IMeshLoader::send(MeshMessage& message) {
+    void IMeshLoader::send(const MeshMessage& message) {
       Serial.println("IMeshLoader send()");
     }
 
     // RadioFrequencyMeshLoader
     RadioFrequencyMeshLoader::RadioFrequencyMeshLoader(uint8_t inputPin) : IMeshLoader(inputPin) {
     }
-    void RadioFrequencyMeshLoader::send(MeshMessage& message) {
+    void RadioFrequencyMeshLoader::send(const MeshMessage& message) {
       Serial.println("RadioFrequencyMeshLoader send()");
     }
 
     // BluetoothMeshLoader
     BluetoothMeshLoader::BluetoothMeshLoader(uint8_t inputPin) : IMeshLoader(inputPin) {
     }
-    void BluetoothMeshLoader::send(MeshMessage& message) {
+    void BluetoothMeshLoader::send(const MeshMessage& message) {
       Serial.println("BluetoothMeshLoader send()");
     }
 
@@ -66,12 +66,12 @@ namespace Victoria {
     void Mesher::send(MeshMessageType type) {
       send(type, "");
     }
-    void Mesher::send(MeshMessageType type, String content) {
+    void Mesher::send(MeshMessageType type, const String& content) {
       MeshMessage message = {
-        sourceId: _id,
-        replyId: "",
-        type: type,
-        content: content,
+        .sourceId = _id,
+        .replyId = "",
+        .type = type,
+        .content = content,
       };
       _loader->send(message);
     }
