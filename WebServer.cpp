@@ -241,7 +241,7 @@ namespace Victoria {
       Serial.println("PASSWORD: " + password);
       WiFi.begin(ssid, password);
       // Wait for connection
-      int checkTimes = 5;
+      int checkTimes = 30;
       while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
@@ -283,7 +283,7 @@ namespace Victoria {
         AccessorySetting newSetting = {
           .name = "New" + accessoryIndex,
           .type = BooleanAccessoryType,
-          .outputIO = 3, // RXD (Receiver)
+          .outputIO = 3, // GPIO-3 RXD (Receiver)
           .inputIO = 0,  // GPIO-0
         };
         onSaveSetting(accessoryId, newSetting);

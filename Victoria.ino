@@ -159,12 +159,12 @@ void setup(void) {
   arduino_homekit_setup(&config);
   timer.setInterval(10 * 1000, homekitNotify); // heatbeat
 
-  Serial.println("Setup complete!");
-  ledOff();
-
   auto mesher = Mesher();
   auto loader = RadioFrequencyMeshLoader(10);
   mesher.setLoader(&loader);
+
+  Serial.println("Setup complete!");
+  ledOff();
 }
 
 void loop(void) {

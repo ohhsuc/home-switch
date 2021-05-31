@@ -1,5 +1,7 @@
 #include "OnOffEvents.h"
 
+#define DEFAULT_DEBOUNCE_DELAY 50
+
 namespace Victoria {
   namespace Events {
 
@@ -15,7 +17,7 @@ namespace Victoria {
         _lastTimeRead = millis();
         return;
       }
-      if (millis() - _lastTimeRead > _debounceDelay) {
+      if (millis() - _lastTimeRead > DEFAULT_DEBOUNCE_DELAY) {
         if (isOn != _lastState) {
           _lastState = isOn;
           if (onToggle) {

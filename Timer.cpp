@@ -52,9 +52,9 @@ namespace Victoria {
         .cb = callback,
         .time = millis(),
       };
-      unsigned int id = _idSeed++;
-      _configs[id] = config;
-      return id;
+      _idSeed = _idSeed + 1;
+      _configs[_idSeed] = config;
+      return _idSeed;
     }
 
     bool Timer::_removeConfig(unsigned int id) {
