@@ -1,7 +1,8 @@
 #ifndef ButtonEvents_h
 #define ButtonEvents_h
 
-#include "Arduino.h"
+#include <functional>
+#include <Arduino.h>
 
 // Migrate from
 // https://www.sigmdel.ca/michel/program/esp8266/arduino/switch_debouncing_en.html
@@ -14,10 +15,10 @@
 namespace Victoria {
   namespace Events {
     class ButtonEvents {
+      typedef std::function<void(int)> TClickHandler;
       public:
         ButtonEvents(uint8_t inputPin);
-        typedef void (*ClickEvent)(int);
-        ClickEvent onClick;
+        TClickHandler onClick;
         void loop();
       private:
         uint8_t _inputPin;

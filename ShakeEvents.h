@@ -1,15 +1,16 @@
 #ifndef ShakeEvents_h
 #define ShakeEvents_h
 
-#include "Arduino.h"
+#include <functional>
+#include <Arduino.h>
 
 namespace Victoria {
   namespace Events {
     class ShakeEvents {
+      typedef std::function<void()> TShakeHandler;
       public:
         ShakeEvents(uint8_t inputPin);
-        typedef void (*ShakeEvent)();
-        ShakeEvent onShake;
+        TShakeHandler onShake;
         void loop();
       private:
         uint8_t _inputPin;

@@ -33,10 +33,9 @@ namespace Victoria {
         // IPAddress apSubnet(255, 255, 255, 0);
         // WiFi.softAPConfig(apIp, apIp, apSubnet);
         WiFi.softAP(_hostName);
-
         IPAddress currentApIp = WiFi.softAPIP();
         if (currentApIp) {
-          Serial.println("AP IP address: " + currentApIp.toString());
+          Serial.println("AP Address: " + currentApIp.toString());
         }
       }
 
@@ -284,8 +283,8 @@ namespace Victoria {
         AccessorySetting newSetting = {
           .name = "New" + accessoryIndex,
           .type = BooleanAccessoryType,
-          .outputIO = 0,
-          .inputIO = 1,
+          .outputIO = 3, // RXD (Receiver)
+          .inputIO = 0,  // GPIO-0
         };
         onSaveSetting(accessoryId, newSetting);
         // redirect

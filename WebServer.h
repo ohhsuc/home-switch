@@ -2,6 +2,8 @@
 #define WebServer_h
 
 #include <map>
+#include <functional>
+#include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include "Commons.h"
@@ -9,25 +11,25 @@
 namespace Victoria {
   namespace Components {
     class WebServer {
+      typedef std::function<std::map<String, AccessorySetting>()> TLoadAccessorySettingsHandler;
+      typedef std::function<void(const String&, const AccessorySetting&)> TAccessorySettingHandler;
+      typedef std::function<void(const String&, const AccessorySetting&, AccessoryState&)> TAccessoryStateHandler;
+      typedef std::function<void()> TServerEventHandler;
       public:
         WebServer(int port, const String& productName, const String& hostName);
         ~WebServer();
         void setup();
         void loop();
         // accessory events
-        typedef std::map<String, AccessorySetting> (*LoadAccessorySettingsEvent)(void);
-        typedef void (*UpdateAccessorySettingEvent)(const String&, const AccessorySetting&);
-        LoadAccessorySettingsEvent onLoadSettings;
-        UpdateAccessorySettingEvent onSaveSetting;
-        UpdateAccessorySettingEvent onDeleteSetting;
-        typedef void (*AccessoryStateEvent)(const String&, const AccessorySetting&, AccessoryState&);
-        AccessoryStateEvent onGetState;
-        AccessoryStateEvent onSetState;
+        TLoadAccessorySettingsHandler onLoadSettings;
+        TAccessorySettingHandler onSaveSetting;
+        TAccessorySettingHandler onDeleteSetting;
+        TAccessoryStateHandler onGetState;
+        TAccessoryStateHandler onSetState;
         // server events
-        typedef void (*ServerEvent)();
-        ServerEvent onRequestStart;
-        ServerEvent onRequestEnd;
-        ServerEvent onResetAccessory;
+        TServerEventHandler onRequestStart;
+        TServerEventHandler onRequestEnd;
+        TServerEventHandler onResetAccessory;
       private:
         String _productName;
         String _hostName;

@@ -2,15 +2,17 @@
 #define Timer_h
 
 #include <map>
+#include <functional>
+#include <Arduino.h>
 
 namespace Victoria {
   namespace Events {
     class Timer {
+      typedef std::function<void()> TCallback;
       public:
         Timer();
-        typedef void (*Callback)();
-        unsigned int setTimeout(unsigned short delayMillis, Callback callback);
-        unsigned int setInterval(unsigned short intervalMillis, Callback callback);
+        unsigned int setTimeout(unsigned short delayMillis, TCallback callback);
+        unsigned int setInterval(unsigned short intervalMillis, TCallback callback);
         bool clearTimeout(unsigned int id);
         bool clearInterval(unsigned int id);
         void loop();
@@ -18,14 +20,13 @@ namespace Victoria {
         struct Config {
           bool type; // true for setTimeout, otherwise setInterval
           unsigned short ms; // delay or interval in milliseconds
-          Callback cb; // callback function
+          TCallback cb; // callback function
           unsigned long time; // timestamp when timer registered
         };
         unsigned int _idSeed = 0;
         std::map<unsigned int, Config> _configs;
-        unsigned int _addConfig(bool type, unsigned short milliseconds, Callback callback);
+        unsigned int _addConfig(bool type, unsigned short milliseconds, TCallback callback);
         bool _removeConfig(unsigned int id);
-        void _fireCallback(Callback callback);
     };
   }
 }

@@ -1,13 +1,16 @@
 #ifndef TimesTrigger_h
 #define TimesTrigger_h
 
+#include <functional>
+#include <Arduino.h>
+
 namespace Victoria {
   namespace Events {
     class TimesTrigger {
+      typedef std::function<void()> TTimesOutHandler;
       public:
         TimesTrigger(int times, int resetMillis);
-        typedef void (*TimesOutEvent)();
-        TimesOutEvent onTimesOut;
+        TTimesOutHandler onTimesOut;
         void count();
       private:
         int _times;

@@ -1,5 +1,4 @@
 #include <vector>
-#include "Arduino.h"
 #include "Timer.h"
 
 namespace Victoria {
@@ -8,11 +7,11 @@ namespace Victoria {
     Timer::Timer() {
     }
 
-    unsigned int Timer::setTimeout(unsigned short delayMillis, Callback callback) {
+    unsigned int Timer::setTimeout(unsigned short delayMillis, TCallback callback) {
       return _addConfig(true, delayMillis, callback);
     }
 
-    unsigned int Timer::setInterval(unsigned short intervalMillis, Callback callback) {
+    unsigned int Timer::setInterval(unsigned short intervalMillis, TCallback callback) {
       return _addConfig(false, intervalMillis, callback);
     }
 
@@ -40,11 +39,13 @@ namespace Victoria {
         } else {
           config.time = now;
         }
-        _fireCallback(config.cb);
+        if (config.cb) {
+          config.cb();
+        }
       }
     }
 
-    unsigned int Timer::_addConfig(bool type, unsigned short milliseconds, Callback callback) {
+    unsigned int Timer::_addConfig(bool type, unsigned short milliseconds, TCallback callback) {
       Config config = {
         .type = type,
         .ms = milliseconds,
@@ -62,12 +63,6 @@ namespace Victoria {
         return true;
       }
       return false;
-    }
-
-    void Timer::_fireCallback(Callback callback) {
-      if (callback) {
-        (*callback)();
-      }
     }
 
   }

@@ -1,4 +1,3 @@
-#include <ArduinoJson.h>
 #include <LittleFS.h>
 #include "ConfigStore.h"
 
@@ -47,7 +46,7 @@ namespace Victoria {
       }
 
       // [convert]
-      model.deserializeFrom(doc);
+      _deserializeFrom(model, doc);
       return model;
     }
 
@@ -55,7 +54,7 @@ namespace Victoria {
       // [convert]
       // DynamicJsonDocument doc(1024); // Store data in the heap - Dynamic Memory Allocation
       StaticJsonDocument<256> doc; // Store data in the stack - Fixed Memory Allocation
-      model.serializeTo(doc);
+      _serializeTo(model, doc);
 
       // [open file]
       File file = LittleFS.open(CONFIG_FILE_PATH, "w");
@@ -66,8 +65,44 @@ namespace Victoria {
 
       // [write]
       serializeJson(doc, file);
-
       return true;
+    }
+
+    void ConfigStore::_serializeTo(const SettingModel& model, StaticJsonDocument<256>& doc) {
+      int i = 0;
+      for (const auto& pair : model.settings) {
+        String id = pair.first;
+        AccessorySetting setting = pair.second;
+        int type = setting.type; // convert enum to int
+        doc["s"][i][0] = id;
+        doc["s"][i][1] = setting.name;
+        doc["s"][i][2] = type;
+        doc["s"][i][3] = setting.outputIO;
+        doc["s"][i][4] = setting.inputIO;
+        i++;
+      }
+    }
+
+    void ConfigStore::_deserializeFrom(SettingModel& model, const StaticJsonDocument<256>& doc) {
+      auto settingsDoc = doc["s"];
+      if (settingsDoc) {
+        int index = -1;
+        while (true) {
+          auto item = settingsDoc[++index];
+          if (!item || !item[0]) {
+            break;
+          }
+          int type = item[2];
+          AccessorySetting setting = {
+            .name = item[1],
+            .type = AccessoryType(type), // convert int to enum
+            .outputIO = item[3],
+            .inputIO = item[4],
+          };
+          String id = item[0];
+          model.settings[id] = setting;
+        }
+      }
     }
 
   }

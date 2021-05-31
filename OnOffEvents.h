@@ -1,17 +1,18 @@
 #ifndef OnOffEvents_h
 #define OnOffEvents_h
 
-#include "Arduino.h"
+#include <functional>
+#include <Arduino.h>
 
 #define DEFAULT_DEBOUNCE_DELAY 50
 
 namespace Victoria {
   namespace Events {
     class OnOffEvents {
+      typedef std::function<void(bool)> TToggleHandler;
       public:
         OnOffEvents(uint8_t inputPin);
-        typedef void (*ToggleEvent)(bool);
-        ToggleEvent onToggle;
+        TToggleHandler onToggle;
         void loop();
       private:
         uint8_t _inputPin;

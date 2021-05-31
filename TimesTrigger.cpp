@@ -1,4 +1,3 @@
-#include "Arduino.h"
 #include "TimesTrigger.h"
 
 namespace Victoria {
@@ -19,9 +18,11 @@ namespace Victoria {
       }
       _count++;
       _lastTime = now;
-      if (_count >= _times && onTimesOut) {
+      if (_count >= _times) {
         _count = 0;
-        onTimesOut();
+        if (onTimesOut) {
+          onTimesOut();
+        }
       }
     }
 
