@@ -68,9 +68,9 @@ namespace Victoria {
     }
     void Mesher::send(MeshMessageType type, const String& content) {
       MeshMessage message = {
+        .type = type,
         .sourceId = _id,
         .replyId = "",
-        .type = type,
         .content = content,
       };
       _loader->send(message);

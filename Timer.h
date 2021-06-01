@@ -11,21 +11,21 @@ namespace Victoria {
       typedef std::function<void()> TCallback;
       public:
         Timer();
-        unsigned int setTimeout(unsigned short delayMillis, TCallback callback);
-        unsigned int setInterval(unsigned short intervalMillis, TCallback callback);
+        unsigned int setTimeout(unsigned short timespan, TCallback callback);
+        unsigned int setInterval(unsigned short timespan, TCallback callback);
         bool clearTimeout(unsigned int id);
         bool clearInterval(unsigned int id);
         void loop();
       private:
         struct Config {
-          bool type; // true for setTimeout, otherwise setInterval
-          unsigned short ms; // delay or interval in milliseconds
-          TCallback cb; // callback function
-          unsigned long time; // timestamp when timer registered
+          bool repeat; // true for setInterval, otherwise setTimeout
+          unsigned short timespan; // delay or interval in milliseconds
+          TCallback callback; // callback function
+          unsigned long timestamp; // timestamp when timer registered
         };
         unsigned int _idSeed = 0;
         std::map<unsigned int, Config> _configs;
-        unsigned int _addConfig(bool type, unsigned short milliseconds, TCallback callback);
+        unsigned int _addConfig(bool repeat, unsigned short timespan, TCallback callback);
         bool _removeConfig(unsigned int id);
     };
   }

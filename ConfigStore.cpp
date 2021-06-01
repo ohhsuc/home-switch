@@ -97,7 +97,11 @@ namespace Victoria {
         int index = -1;
         while (true) {
           auto item = settingsDoc[++index];
-          if (!item || !item[0]) {
+          if (!item) {
+            break;
+          }
+          String id = item[0];
+          if (!id) {
             break;
           }
           int type = item[2];
@@ -109,7 +113,6 @@ namespace Victoria {
             .outputLevel = item[5],
             .inputLevel = item[6],
           };
-          String id = item[0];
           model.settings[id] = setting;
         }
       }

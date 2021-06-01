@@ -9,15 +9,15 @@ namespace Victoria {
   namespace Components {
 
     enum MeshMessageType {
-      MESH_HEARTBEAT,
-      MESH_WIFI_REQUEST,
-      MESH_WIFI_CONNECTED,
+      MESH_HEARTBEAT = 0,
+      MESH_WIFI_REQUEST = 1,
+      MESH_WIFI_CONNECTED = 2,
     };
 
     struct MeshMessage {
+      MeshMessageType type;
       String sourceId;
       String replyId;
-      MeshMessageType type;
       String content;
     };
 

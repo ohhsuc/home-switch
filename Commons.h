@@ -14,9 +14,9 @@ namespace Victoria {
   const VEnvironment VEnv = VTest;
 
   enum AccessoryType {
-    EmptyAccessoryType,
-    BooleanAccessoryType,
-    IntegerAccessoryType,
+    EmptyAccessoryType = 0,
+    BooleanAccessoryType = 1,
+    IntegerAccessoryType = 2,
   };
 
   struct AccessorySetting {

@@ -1,13 +1,14 @@
 #include <map>
 #include <Arduino.h>
 #include <arduino_homekit_server.h>
+#include "ConfigStore.h"
 #include "WebServer.h"
 #include "Timer.h"
 #include "TimesTrigger.h"
 #include "ButtonEvents.h"
 #include "OnOffEvents.h"
-#include "ConfigStore.h"
 #include "Mesher.h"
+#include "BooleanAccessory.h"
 
 using namespace Victoria;
 using namespace Victoria::Events;
@@ -22,33 +23,20 @@ auto webServer = WebServer(80, productName, hostName);
 ConfigStore* configStore;
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
+BooleanAccessory* booleanAccessory;
 
 // access your HomeKit characteristics defined
 extern "C" homekit_server_config_t config;
 extern "C" homekit_characteristic_t cha_switch;
 
-uint8_t LedPin;
-uint8_t RelayPin;
-
 void ledOn() {
-  digitalWrite(LedPin, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
   Serial.println("led -> ON");
   delay(100); // at least light for some time
 }
 void ledOff() {
-  digitalWrite(LedPin, HIGH);
+  digitalWrite(LED_BUILTIN, HIGH);
   Serial.println("led -> OFF");
-}
-
-void setRelay(bool isOn) {
-  if (isOn) {
-    digitalWrite(RelayPin, LOW);
-    Serial.println("relay -> LOW");
-  } else {
-    digitalWrite(RelayPin, HIGH);
-    Serial.println("relay -> HIGH");
-  }
-  timesTrigger.count();
 }
 
 void homekitNotify() {
@@ -59,7 +47,10 @@ void setAccessory(bool value) {
   ledOn();
   cha_switch.value.bool_value = value;
   homekitNotify();
-  setRelay(value);
+  if (booleanAccessory) {
+    booleanAccessory->setValue(value);
+  }
+  timesTrigger.count();
   ledOff();
 }
 
@@ -116,9 +107,7 @@ void inputToggle(bool isOn) {
 
 void setup(void) {
   Serial.begin(115200);
-
-  LedPin = LED_BUILTIN;
-  pinMode(LedPin, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
   ledOn();
 
   configStore = new ConfigStore();
@@ -128,10 +117,15 @@ void setup(void) {
     // outputs
     if (setting.outputIO > 0) {
       auto outputPin = setting.outputIO;
-      RelayPin = outputPin;
       pinMode(outputPin, OUTPUT);
       if (setting.outputLevel > 0) {
         digitalWrite(outputPin, setting.outputLevel);
+      }
+      booleanAccessory = NULL;
+      if (setting.type == BooleanAccessoryType) {
+        booleanAccessory = new BooleanAccessory(setting.outputIO);
+      } else if(setting.type == IntegerAccessoryType) {
+        //TODO:
       }
     }
     // inputs

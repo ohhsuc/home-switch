@@ -7,12 +7,12 @@ namespace Victoria {
     Timer::Timer() {
     }
 
-    unsigned int Timer::setTimeout(unsigned short delayMillis, TCallback callback) {
-      return _addConfig(true, delayMillis, callback);
+    unsigned int Timer::setTimeout(unsigned short timespan, TCallback callback) {
+      return _addConfig(false, timespan, callback);
     }
 
-    unsigned int Timer::setInterval(unsigned short intervalMillis, TCallback callback) {
-      return _addConfig(false, intervalMillis, callback);
+    unsigned int Timer::setInterval(unsigned short timespan, TCallback callback) {
+      return _addConfig(true, timespan, callback);
     }
 
     bool Timer::clearTimeout(unsigned int id) {
@@ -28,29 +28,29 @@ namespace Victoria {
       unsigned long now = millis();
       for (const auto& item : _configs) {
         Config config = item.second;
-        if (now - config.time > config.ms) {
+        if (now - config.timestamp > config.timespan) {
           hitIds.push_back(item.first);
         }
       }
       for (const unsigned int id : hitIds) {
         Config& config = _configs[id];
-        if (config.type) {
-          _removeConfig(id);
+        if (config.repeat) {
+          config.timestamp = now;
         } else {
-          config.time = now;
+          _removeConfig(id);
         }
-        if (config.cb) {
-          config.cb();
+        if (config.callback) {
+          config.callback();
         }
       }
     }
 
-    unsigned int Timer::_addConfig(bool type, unsigned short milliseconds, TCallback callback) {
+    unsigned int Timer::_addConfig(bool repeat, unsigned short timespan, TCallback callback) {
       Config config = {
-        .type = type,
-        .ms = milliseconds,
-        .cb = callback,
-        .time = millis(),
+        .repeat = repeat,
+        .timespan = timespan,
+        .callback = callback,
+        .timestamp = millis(),
       };
       _idSeed = _idSeed + 1;
       _configs[_idSeed] = config;
