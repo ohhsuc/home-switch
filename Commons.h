@@ -6,6 +6,13 @@
 
 namespace Victoria {
 
+  enum VEnvironment {
+    VTest,
+    VProd,
+  };
+
+  const VEnvironment VEnv = VTest;
+
   enum AccessoryType {
     EmptyAccessoryType,
     BooleanAccessoryType,
@@ -15,8 +22,10 @@ namespace Victoria {
   struct AccessorySetting {
     String name;
     AccessoryType type;
-    uint8_t outputIO;
-    uint8_t inputIO;
+    short int outputIO;
+    short int inputIO;
+    short int outputLevel;
+    short int inputLevel;
   };
 
   struct AccessoryState {
@@ -46,6 +55,12 @@ namespace Victoria {
         return result;
       }
   };
+
+  // const int led = LED_BUILTIN;
+  const uint8_t V_GPIO0 = 0; // GPIO-0
+  const uint8_t V_GPIO2 = 2; // GPIO-2 (Led Builtin)
+  const uint8_t V_TXD = 1; // TXD (Transmitter)
+  const uint8_t V_RXD = 3; // RXD (Receiver)
 }
 
 #endif //Commons_h

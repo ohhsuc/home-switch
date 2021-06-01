@@ -1,8 +1,6 @@
 #include <LittleFS.h>
 #include "ConfigStore.h"
 
-#define CONFIG_FILE_PATH "/Victoria.json"
-
 namespace Victoria {
   namespace Components {
 
@@ -23,7 +21,7 @@ namespace Victoria {
         return model;
       }
       size_t size = file.size();
-      if (size > 1024) {
+      if (size > DEFAULT_FILE_SIZE) {
         Serial.println("Config file size is too large");
         return model;
       }
@@ -37,8 +35,8 @@ namespace Victoria {
       file.readBytes(buf.get(), size);
 
       // [deserialize]
-      // DynamicJsonDocument doc(1024); // Store data in the heap - Dynamic Memory Allocation
-      StaticJsonDocument<256> doc; // Store data in the stack - Fixed Memory Allocation
+      // DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
+      StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
       auto error = deserializeJson(doc, buf.get());
       if (error) {
         Serial.println("Failed to parse config file");
@@ -52,8 +50,8 @@ namespace Victoria {
 
     bool ConfigStore::save(SettingModel model) {
       // [convert]
-      // DynamicJsonDocument doc(1024); // Store data in the heap - Dynamic Memory Allocation
-      StaticJsonDocument<256> doc; // Store data in the stack - Fixed Memory Allocation
+      // DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
+      StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
       _serializeTo(model, doc);
 
       // [open file]
@@ -65,10 +63,18 @@ namespace Victoria {
 
       // [write]
       serializeJson(doc, file);
+
+      // [log]
+      if (VEnv == VTest) {
+        char buffer[DEFAULT_FILE_SIZE];
+        serializeJsonPretty(doc, buffer);
+        Serial.println(buffer);
+      }
+
       return true;
     }
 
-    void ConfigStore::_serializeTo(const SettingModel& model, StaticJsonDocument<256>& doc) {
+    void ConfigStore::_serializeTo(const SettingModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
       int i = 0;
       for (const auto& pair : model.settings) {
         String id = pair.first;
@@ -79,11 +85,13 @@ namespace Victoria {
         doc["s"][i][2] = type;
         doc["s"][i][3] = setting.outputIO;
         doc["s"][i][4] = setting.inputIO;
+        doc["s"][i][5] = setting.outputLevel;
+        doc["s"][i][6] = setting.inputLevel;
         i++;
       }
     }
 
-    void ConfigStore::_deserializeFrom(SettingModel& model, const StaticJsonDocument<256>& doc) {
+    void ConfigStore::_deserializeFrom(SettingModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
       auto settingsDoc = doc["s"];
       if (settingsDoc) {
         int index = -1;
@@ -98,6 +106,8 @@ namespace Victoria {
             .type = AccessoryType(type), // convert int to enum
             .outputIO = item[3],
             .inputIO = item[4],
+            .outputLevel = item[5],
+            .inputLevel = item[6],
           };
           String id = item[0];
           model.settings[id] = setting;

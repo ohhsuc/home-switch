@@ -283,8 +283,10 @@ namespace Victoria {
         AccessorySetting newSetting = {
           .name = "New" + accessoryIndex,
           .type = BooleanAccessoryType,
-          .outputIO = 3, // GPIO-3 RXD (Receiver)
-          .inputIO = 0,  // GPIO-0
+          .outputIO = -1,
+          .inputIO = -1,
+          .outputLevel = -1,
+          .inputLevel = -1,
         };
         onSaveSetting(accessoryId, newSetting);
         // redirect
@@ -309,6 +311,8 @@ namespace Victoria {
         String accessoryType = _server->arg("AccessoryType");
         String outputIO = _server->arg("OutputIO");
         String inputIO = _server->arg("InputIO");
+        String outputLevel = _server->arg("OutputLevel");
+        String inputLevel = _server->arg("InputLevel");
         String submit = _server->arg("Submit");
         if (submit == "Delete") {
           if (onDeleteSetting) {
@@ -322,6 +326,8 @@ namespace Victoria {
             accessoryType == "integer" ? IntegerAccessoryType : EmptyAccessoryType;
           setting.outputIO = outputIO.toInt();
           setting.inputIO = inputIO.toInt();
+          setting.outputLevel = outputLevel.toInt();
+          setting.inputLevel = inputLevel.toInt();
           if (onSaveSetting) {
             onSaveSetting(accessoryId, setting);
           }
@@ -452,14 +458,27 @@ namespace Victoria {
           <p>\
             <label for=\"txtOutputIO\">Output</label>\
             <input type=\"number\" id=\"txtOutputIO\" name=\"OutputIO\" value=\"" + String(setting.outputIO) + "\" />\
+            " + _getLevelHtml("OutputLevel", setting.outputLevel) + "\
           </p>\
           <p>\
             <label for=\"txtInputIO\">Input</label>\
             <input type=\"number\" id=\"txtInputIO\" name=\"InputIO\" value=\"" + String(setting.inputIO) + "\" />\
+            " + _getLevelHtml("InputLevel", setting.inputLevel) + "\
           </p>\
         </fieldset>\
       ";
       return html;
+    }
+
+    String WebServer::_getLevelHtml(const String name, const short int level) {
+      return "\
+        <label for=\"txt" + name + "High\">High</label>\
+        <input type=\"radio\" id=\"txt" + name + "High\" name=\"" + name + "\" value=\"1\"" + _getCheckedAttr(level == 1) + " />\
+        <label for=\"txt" + name + "Low\">Low</label>\
+        <input type=\"radio\" id=\"txt" + name + "Low\" name=\"" + name + "\" value=\"0\"" + _getCheckedAttr(level == 0) + " />\
+        <label for=\"txt" + name + "No\">No</label>\
+        <input type=\"radio\" id=\"txt" + name + "No\" name=\"" + name + "\" value=\"-1\"" + _getCheckedAttr(level == -1) + " />\
+      ";
     }
 
     String WebServer::_getBooleanHtml(const AccessoryState& state) {

@@ -27,15 +27,8 @@ OnOffEvents* onOffEvents;
 extern "C" homekit_server_config_t config;
 extern "C" homekit_characteristic_t cha_switch;
 
-// const int led = LED_BUILTIN;
-const uint8_t GPIO0 = 0; // GPIO-0
-const uint8_t GPIO2 = 2; // GPIO-2 (Led Builtin)
-const uint8_t TXD = 1; // TXD (Transmitter)
-const uint8_t RXD = 3; // RXD (Receiver)
-
 uint8_t LedPin;
 uint8_t RelayPin;
-uint8_t InputPin;
 
 void ledOn() {
   digitalWrite(LedPin, LOW);
@@ -123,18 +116,37 @@ void inputToggle(bool isOn) {
 
 void setup(void) {
   Serial.begin(115200);
-  configStore = new ConfigStore();
-  auto settings = loadSettings();
-  auto setting = settings.begin()->second;
 
-  LedPin = GPIO2;
+  LedPin = LED_BUILTIN;
   pinMode(LedPin, OUTPUT);
   ledOn();
 
-  InputPin = setting.inputIO;
-  RelayPin = setting.outputIO;
-  pinMode(RelayPin, OUTPUT);
-  digitalWrite(RelayPin, HIGH);
+  configStore = new ConfigStore();
+  auto settings = loadSettings();
+  if (settings.size() > 0) {
+    auto setting = settings.begin()->second;
+    // outputs
+    if (setting.outputIO > 0) {
+      auto outputPin = setting.outputIO;
+      RelayPin = outputPin;
+      pinMode(outputPin, OUTPUT);
+      if (setting.outputLevel > 0) {
+        digitalWrite(outputPin, setting.outputLevel);
+      }
+    }
+    // inputs
+    if (setting.inputIO > 0) {
+      auto inputPin = setting.inputIO;
+      pinMode(inputPin, INPUT_PULLUP);
+      if (setting.inputLevel > 0) {
+        digitalWrite(inputPin, setting.inputLevel);
+      }
+      inputEvents = new ButtonEvents(inputPin);
+      inputEvents->onClick = buttonClick;
+      onOffEvents = new OnOffEvents(inputPin);
+      onOffEvents->onToggle = inputToggle;
+    }
+  }
 
   webServer.onLoadSettings = loadSettings;
   webServer.onSaveSetting = saveSetting;
@@ -146,17 +158,11 @@ void setup(void) {
   webServer.onResetAccessory = resetAccessory;
   webServer.setup();
 
-  timesTrigger.onTimesOut = timesOut;
-
-  inputEvents = new ButtonEvents(InputPin);
-  inputEvents->onClick = buttonClick;
-
-  onOffEvents = new OnOffEvents(InputPin);
-  onOffEvents->onToggle = inputToggle;
-
   cha_switch.getter = cha_switch_getter;
   cha_switch.setter = cha_switch_setter;
   arduino_homekit_setup(&config);
+
+  timesTrigger.onTimesOut = timesOut;
   timer.setInterval(10 * 1000, homekitNotify); // heatbeat
 
   auto mesher = Mesher();
@@ -170,7 +176,11 @@ void setup(void) {
 void loop(void) {
   timer.loop();
   webServer.loop();
-  inputEvents->loop();
-  onOffEvents->loop();
   arduino_homekit_loop();
+  if (inputEvents) {
+    inputEvents->loop();
+  }
+  if (onOffEvents) {
+    onOffEvents->loop();
+  }
 }

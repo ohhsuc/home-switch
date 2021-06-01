@@ -5,6 +5,9 @@
 #include <ArduinoJson.h>
 #include "Commons.h"
 
+#define CONFIG_FILE_PATH "/Victoria.json"
+#define DEFAULT_FILE_SIZE 512
+
 namespace Victoria {
   namespace Components {
     class ConfigStore {
@@ -13,8 +16,8 @@ namespace Victoria {
         SettingModel load();
         bool save(SettingModel model);
       private:
-        static void _serializeTo(const SettingModel& model, StaticJsonDocument<256>& doc);
-        static void _deserializeFrom(SettingModel& model, const StaticJsonDocument<256>& doc);
+        static void _serializeTo(const SettingModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc);
+        static void _deserializeFrom(SettingModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc);
     };
   }
 }

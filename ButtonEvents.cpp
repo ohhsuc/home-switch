@@ -5,8 +5,6 @@ namespace Victoria {
 
     ButtonEvents::ButtonEvents(uint8_t inputPin) {
       _inputPin = inputPin;
-      pinMode(_inputPin, INPUT_PULLUP);
-      digitalWrite(_inputPin, HIGH);
     }
 
     void ButtonEvents::loop() {

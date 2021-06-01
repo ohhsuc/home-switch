@@ -50,6 +50,7 @@ namespace Victoria {
         static String _getCheckedAttr(bool checked);
         static String _getTypeHtml(const AccessorySetting& setting);
         static String _getIOHtml(const AccessorySetting& setting);
+        static String _getLevelHtml(const String name, const short int level);
         static String _getBooleanHtml(const AccessoryState& state);
         static String _getIntegerHtml(const AccessoryState& state);
         void _handleReset();

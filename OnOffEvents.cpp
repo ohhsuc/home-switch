@@ -7,8 +7,6 @@ namespace Victoria {
 
     OnOffEvents::OnOffEvents(uint8_t inputPin) {
       _inputPin = inputPin;
-      pinMode(_inputPin, INPUT_PULLUP);
-      digitalWrite(_inputPin, HIGH);
     }
 
     void OnOffEvents::loop() {
