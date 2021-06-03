@@ -22,10 +22,10 @@ namespace Victoria {
   struct AccessorySetting {
     String name;
     AccessoryType type;
-    short int outputIO;
-    short int inputIO;
-    short int outputLevel;
-    short int inputLevel;
+    int outputIO;
+    int inputIO;
+    int outputLevel;
+    int inputLevel;
   };
 
   struct AccessoryState {

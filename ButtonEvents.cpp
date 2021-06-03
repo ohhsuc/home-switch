@@ -8,7 +8,7 @@ namespace Victoria {
     }
 
     void ButtonEvents::loop() {
-      int state = _loadState();
+      auto state = _loadState();
       if (state != _lastState) {
         _lastState = state;
         if (onClick) {
@@ -18,8 +18,9 @@ namespace Victoria {
     }
 
     int ButtonEvents::_loadState() {
+      int clicks = 0;
       if (_buttonState == AWAIT_PRESS) {
-        _clicks = 0;
+        clicks = 0;
         if (digitalRead(_inputPin) == LOW) {
           _buttonState = DEBOUNCE_PRESS;
           _eventTime = millis();
@@ -36,7 +37,7 @@ namespace Victoria {
       else if (_buttonState == AWAIT_RELEASE) {
         if (digitalRead(_inputPin) == HIGH) {
           if ((millis() - _eventTime) > _holdTime) {
-            _clicks = -1;
+            clicks = -1;
           }
           _buttonState = DEBOUNCE_RELEASE;
           _eventTime = millis();
@@ -45,11 +46,11 @@ namespace Victoria {
 
       else if (_buttonState == DEBOUNCE_RELEASE) {
         if ((millis() - _eventTime) > _debounceReleaseTime) {
-          if (_clicks < 0) {
+          if (clicks < 0) {
             _buttonState = AWAIT_PRESS;
             return -1;
           }
-          _clicks += 1;
+          clicks += 1;
           _buttonState = AWAIT_MULTI_PRESS;
           _eventTime = millis();
         }
@@ -62,7 +63,7 @@ namespace Victoria {
         }
         else if ((millis() - _eventTime) > _multiClickTime) {
           _buttonState = AWAIT_PRESS;
-          return _clicks;
+          return clicks;
         }
       }
 

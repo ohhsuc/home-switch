@@ -115,28 +115,39 @@ void setup(void) {
   if (settings.size() > 0) {
     auto setting = settings.begin()->second;
     // outputs
-    if (setting.outputIO > 0) {
-      auto outputPin = setting.outputIO;
+    auto outputPin = setting.outputIO;
+    if (outputPin > 0) {
       pinMode(outputPin, OUTPUT);
       if (setting.outputLevel > 0) {
         digitalWrite(outputPin, setting.outputLevel);
       }
-      booleanAccessory = NULL;
+      if (booleanAccessory) {
+        delete booleanAccessory;
+        booleanAccessory = NULL;
+      }
       if (setting.type == BooleanAccessoryType) {
-        booleanAccessory = new BooleanAccessory(setting.outputIO);
+        booleanAccessory = new BooleanAccessory(outputPin);
       } else if(setting.type == IntegerAccessoryType) {
         //TODO:
       }
     }
     // inputs
-    if (setting.inputIO > 0) {
-      auto inputPin = setting.inputIO;
+    auto inputPin = setting.inputIO;
+    if (inputPin > 0) {
       pinMode(inputPin, INPUT_PULLUP);
       if (setting.inputLevel > 0) {
         digitalWrite(inputPin, setting.inputLevel);
       }
+      if (inputEvents) {
+        delete inputEvents;
+        inputEvents = NULL;
+      }
       inputEvents = new ButtonEvents(inputPin);
       inputEvents->onClick = buttonClick;
+      if (onOffEvents) {
+        delete onOffEvents;
+        onOffEvents = NULL;
+      }
       onOffEvents = new OnOffEvents(inputPin);
       onOffEvents->onToggle = inputToggle;
     }
@@ -157,7 +168,7 @@ void setup(void) {
   arduino_homekit_setup(&config);
 
   timesTrigger.onTimesOut = timesOut;
-  timer.setInterval(10 * 1000, homekitNotify); // heatbeat
+  timer.setInterval(60 * 1000, homekitNotify); // heartbeat
 
   auto mesher = Mesher();
   auto loader = RadioFrequencyMeshLoader(10);

@@ -7,11 +7,11 @@ namespace Victoria {
     Timer::Timer() {
     }
 
-    unsigned int Timer::setTimeout(unsigned short timespan, TCallback callback) {
+    unsigned int Timer::setTimeout(int timespan, TCallback callback) {
       return _addConfig(false, timespan, callback);
     }
 
-    unsigned int Timer::setInterval(unsigned short timespan, TCallback callback) {
+    unsigned int Timer::setInterval(int timespan, TCallback callback) {
       return _addConfig(true, timespan, callback);
     }
 
@@ -45,7 +45,7 @@ namespace Victoria {
       }
     }
 
-    unsigned int Timer::_addConfig(bool repeat, unsigned short timespan, TCallback callback) {
+    unsigned int Timer::_addConfig(bool repeat, int timespan, TCallback callback) {
       Config config = {
         .repeat = repeat,
         .timespan = timespan,

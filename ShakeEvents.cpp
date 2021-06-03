@@ -8,13 +8,13 @@ namespace Victoria {
     ShakeEvents::ShakeEvents(uint8_t inputPin) {
       _inputPin = inputPin;
       pinMode(_inputPin, INPUT);
-      _state = digitalRead(_inputPin);
+      _inputState = digitalRead(_inputPin);
     }
 
     void ShakeEvents::loop() {
       int state = digitalRead(_inputPin);
-      if (_state != state) {
-        _state = state;
+      if (_inputState != state) {
+        _inputState = state;
         _shaked = true;
       }
       if (_shaked) {

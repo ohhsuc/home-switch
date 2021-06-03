@@ -14,7 +14,7 @@ namespace Victoria {
         void loop();
       private:
         uint8_t _inputPin;
-        int _state = 0;
+        int _inputState = 0;
         bool _shaked = false;
         unsigned long _lastFire;
     };

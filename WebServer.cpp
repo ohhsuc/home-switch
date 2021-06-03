@@ -11,6 +11,8 @@ namespace Victoria {
 
     WebServer::~WebServer() {
       _server->stop();
+      delete _server;
+      _server = NULL;
     }
 
     void WebServer::setup() {
