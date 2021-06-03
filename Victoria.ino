@@ -26,8 +26,8 @@ OnOffEvents* onOffEvents;
 BooleanAccessory* booleanAccessory;
 
 // access your HomeKit characteristics defined
-extern "C" homekit_server_config_t config;
-extern "C" homekit_characteristic_t cha_switch;
+extern "C" homekit_server_config_t homekitConfig;
+extern "C" homekit_characteristic_t homekitBoolCha;
 
 void ledOn() {
   digitalWrite(LED_BUILTIN, LOW);
@@ -40,12 +40,12 @@ void ledOff() {
 }
 
 void homekitNotify() {
-  homekit_characteristic_notify(&cha_switch, cha_switch.value);
+  homekit_characteristic_notify(&homekitBoolCha, homekitBoolCha.value);
 }
 
 void setAccessory(bool value) {
   ledOn();
-  cha_switch.value.bool_value = value;
+  homekitBoolCha.value.bool_value = value;
   homekitNotify();
   if (booleanAccessory) {
     booleanAccessory->setValue(value);
@@ -55,8 +55,8 @@ void setAccessory(bool value) {
 }
 
 homekit_value_t cha_switch_getter() {
-  return cha_switch.value;
-  // return (HOMEKIT_BOOL(cha_switch.value.bool_value));
+  return homekitBoolCha.value;
+  // return (HOMEKIT_BOOL(homekitBoolCha.value.bool_value));
 }
 
 void cha_switch_setter(const homekit_value_t value) {
@@ -83,7 +83,7 @@ void deleteSetting(const String& id, const AccessorySetting& setting) {
 }
 
 void getState(const String& id, const AccessorySetting& setting, AccessoryState& state) {
-  state.boolValue = cha_switch.value.bool_value;
+  state.boolValue = homekitBoolCha.value.bool_value;
 }
 void setState(const String& id, const AccessorySetting& setting, AccessoryState& state) {
   setAccessory(state.boolValue);
@@ -95,7 +95,7 @@ void timesOut() {
 
 void buttonClick(int times) {
   if (times == 1) {
-    bool value = !cha_switch.value.bool_value;
+    bool value = !homekitBoolCha.value.bool_value;
     setAccessory(value);
   }
 }
@@ -127,6 +127,7 @@ void setup(void) {
       }
       if (setting.type == BooleanAccessoryType) {
         booleanAccessory = new BooleanAccessory(outputPin);
+        booleanAccessory->setup();
       } else if(setting.type == IntegerAccessoryType) {
         //TODO:
       }
@@ -163,9 +164,9 @@ void setup(void) {
   webServer.onResetAccessory = resetAccessory;
   webServer.setup();
 
-  cha_switch.getter = cha_switch_getter;
-  cha_switch.setter = cha_switch_setter;
-  arduino_homekit_setup(&config);
+  homekitBoolCha.getter = cha_switch_getter;
+  homekitBoolCha.setter = cha_switch_setter;
+  arduino_homekit_setup(&homekitConfig);
 
   timesTrigger.onTimesOut = timesOut;
   timer.setInterval(60 * 1000, homekitNotify); // heartbeat
@@ -182,6 +183,9 @@ void loop(void) {
   timer.loop();
   webServer.loop();
   arduino_homekit_loop();
+  if (booleanAccessory) {
+    booleanAccessory->loop();
+  }
   if (inputEvents) {
     inputEvents->loop();
   }

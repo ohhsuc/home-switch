@@ -8,6 +8,9 @@ namespace Victoria {
     class BooleanAccessory {
       public:
         BooleanAccessory(uint8_t outputPin);
+        ~BooleanAccessory();
+        void setup();
+        void loop();
         void setValue(bool value);
         bool getValue();
       private:
