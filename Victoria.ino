@@ -1,6 +1,5 @@
 #include <map>
 #include <Arduino.h>
-#include <arduino_homekit_server.h>
 #include "ConfigStore.h"
 #include "WebServer.h"
 #include "Timer.h"
@@ -25,10 +24,6 @@ ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
 BooleanAccessory* booleanAccessory;
 
-// access your HomeKit characteristics defined
-extern "C" homekit_server_config_t homekitConfig;
-extern "C" homekit_characteristic_t homekitBoolCha;
-
 void ledOn() {
   digitalWrite(LED_BUILTIN, LOW);
   Serial.println("led -> ON");
@@ -37,34 +32,6 @@ void ledOn() {
 void ledOff() {
   digitalWrite(LED_BUILTIN, HIGH);
   Serial.println("led -> OFF");
-}
-
-void homekitNotify() {
-  homekit_characteristic_notify(&homekitBoolCha, homekitBoolCha.value);
-}
-
-void setAccessory(bool value) {
-  ledOn();
-  homekitBoolCha.value.bool_value = value;
-  homekitNotify();
-  if (booleanAccessory) {
-    booleanAccessory->setValue(value);
-  }
-  timesTrigger.count();
-  ledOff();
-}
-
-homekit_value_t cha_switch_getter() {
-  return homekitBoolCha.value;
-  // return (HOMEKIT_BOOL(homekitBoolCha.value.bool_value));
-}
-
-void cha_switch_setter(const homekit_value_t value) {
-  setAccessory(value.bool_value);
-}
-
-void resetAccessory() {
-  homekit_server_reset();
 }
 
 std::map<String, AccessorySetting> loadSettings() {
@@ -83,10 +50,14 @@ void deleteSetting(const String& id, const AccessorySetting& setting) {
 }
 
 void getState(const String& id, const AccessorySetting& setting, AccessoryState& state) {
-  state.boolValue = homekitBoolCha.value.bool_value;
+  if (booleanAccessory) {
+    state.boolValue = booleanAccessory->getValue();
+  }
 }
 void setState(const String& id, const AccessorySetting& setting, AccessoryState& state) {
-  setAccessory(state.boolValue);
+  if (booleanAccessory) {
+    booleanAccessory->setValue(state.boolValue);
+  }
 }
 
 void timesOut() {
@@ -94,15 +65,34 @@ void timesOut() {
 }
 
 void buttonClick(int times) {
-  if (times == 1) {
-    bool value = !homekitBoolCha.value.bool_value;
-    setAccessory(value);
+  if (times == 1 && booleanAccessory) {
+    bool value = booleanAccessory->getValue();
+    booleanAccessory->setValue(!value);
+  }
+}
+
+void heartbeat() {
+  if (booleanAccessory) {
+    booleanAccessory->heartbeat();
   }
 }
 
 void inputToggle(bool isOn) {
   Serial.print("toggle ");
   Serial.println(isOn ? "ON" : "OFF");
+}
+
+void onAccessoryChange(bool value) {
+  ledOn();
+  timesTrigger.count();
+  Serial.println("boolean value " + String(value));
+  ledOff();
+}
+
+void resetAccessory() {
+  if (booleanAccessory) {
+    booleanAccessory->reset();
+  }
 }
 
 void setup(void) {
@@ -127,6 +117,7 @@ void setup(void) {
       }
       if (setting.type == BooleanAccessoryType) {
         booleanAccessory = new BooleanAccessory(outputPin);
+        booleanAccessory->onChange = onAccessoryChange;
         booleanAccessory->setup();
       } else if(setting.type == IntegerAccessoryType) {
         //TODO:
@@ -164,12 +155,8 @@ void setup(void) {
   webServer.onResetAccessory = resetAccessory;
   webServer.setup();
 
-  homekitBoolCha.getter = cha_switch_getter;
-  homekitBoolCha.setter = cha_switch_setter;
-  arduino_homekit_setup(&homekitConfig);
-
   timesTrigger.onTimesOut = timesOut;
-  timer.setInterval(60 * 1000, homekitNotify); // heartbeat
+  timer.setInterval(60 * 1000, heartbeat);
 
   auto mesher = Mesher();
   auto loader = RadioFrequencyMeshLoader(10);
@@ -182,7 +169,6 @@ void setup(void) {
 void loop(void) {
   timer.loop();
   webServer.loop();
-  arduino_homekit_loop();
   if (booleanAccessory) {
     booleanAccessory->loop();
   }
