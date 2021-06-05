@@ -15,12 +15,13 @@
 namespace Victoria {
   namespace Events {
     class ButtonEvents {
-      typedef std::function<void(int)> TClickHandler;
+      typedef std::function<void(const String&, int)> TClickHandler;
       public:
-        ButtonEvents(uint8_t inputPin);
+        ButtonEvents(String accessoryId, uint8_t inputPin);
         TClickHandler onClick;
         void loop();
       private:
+        String _accessoryId;
         uint8_t _inputPin;
         unsigned int _debouncePressTime   = DEFAULT_DEBOUNCE_PRESS_TIME;
         unsigned int _debounceReleaseTime = DEFAULT_DEBOUNCE_RELEASE_TIME;

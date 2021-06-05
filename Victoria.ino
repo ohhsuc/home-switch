@@ -67,7 +67,7 @@ void timesOut() {
   Serial.println("times out!");
 }
 
-void buttonClick(int times) {
+void buttonClick(const String& accessoryId, int times) {
   if (times == 1 && booleanAccessory) {
     bool value = booleanAccessory->getValue();
     booleanAccessory->setValue(!value);
@@ -80,7 +80,7 @@ void heartbeat() {
   }
 }
 
-void inputToggle(bool isOn) {
+void inputToggle(const String& accessoryId, bool isOn) {
   Serial.print("toggle ");
   Serial.println(isOn ? "ON" : "OFF");
 }
@@ -138,13 +138,13 @@ void setup(void) {
         delete inputEvents;
         inputEvents = NULL;
       }
-      inputEvents = new ButtonEvents(inputPin);
+      inputEvents = new ButtonEvents(id, inputPin);
       inputEvents->onClick = buttonClick;
       if (onOffEvents) {
         delete onOffEvents;
         onOffEvents = NULL;
       }
-      onOffEvents = new OnOffEvents(inputPin);
+      onOffEvents = new OnOffEvents(id, inputPin);
       onOffEvents->onToggle = inputToggle;
     }
   }

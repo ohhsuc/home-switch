@@ -5,7 +5,8 @@
 namespace Victoria {
   namespace Events {
 
-    OnOffEvents::OnOffEvents(uint8_t inputPin) {
+    OnOffEvents::OnOffEvents(String accessoryId, uint8_t inputPin) {
+      _accessoryId = accessoryId;
       _inputPin = inputPin;
     }
 
@@ -19,7 +20,7 @@ namespace Victoria {
         if (isOn != _lastState) {
           _lastState = isOn;
           if (onToggle) {
-            onToggle(isOn);
+            onToggle(_accessoryId, isOn);
           }
         }
       }
