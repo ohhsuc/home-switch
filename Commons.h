@@ -3,6 +3,7 @@
 
 #include <map>
 #include <Arduino.h>
+#include "Console.h"
 
 namespace Victoria {
 
@@ -10,8 +11,6 @@ namespace Victoria {
     VTest,
     VProd,
   };
-
-  const VEnvironment VEnv = VTest;
 
   enum AccessoryType {
     EmptyAccessoryType = 0,
@@ -61,6 +60,10 @@ namespace Victoria {
   const uint8_t V_GPIO2 = 2; // GPIO-2 (Led Builtin)
   const uint8_t V_TXD = 1; // TXD (Transmitter)
   const uint8_t V_RXD = 3; // RXD (Receiver)
+
+  // globals
+  Console console();
+  const VEnvironment VEnv = VTest;
 }
 
 #endif //Commons_h
