@@ -388,7 +388,7 @@ namespace Victoria {
         _redirectTo(currentUrl);
       } else {
         if (onGetState) {
-          onGetState(accessoryId, setting, state);
+          state = onGetState(accessoryId, setting);
         }
         String stateHtml =
           setting.type == BooleanAccessoryType ? _getBooleanHtml(state) :

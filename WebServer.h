@@ -13,7 +13,8 @@ namespace Victoria {
     class WebServer {
       typedef std::function<std::map<String, AccessorySetting>()> TLoadAccessorySettingsHandler;
       typedef std::function<void(const String&, const AccessorySetting&)> TAccessorySettingHandler;
-      typedef std::function<void(const String&, const AccessorySetting&, AccessoryState&)> TAccessoryStateHandler;
+      typedef std::function<AccessoryState(const String&, const AccessorySetting&)> TGetAccessoryStateHandler;
+      typedef std::function<void(const String&, const AccessorySetting&, AccessoryState&)> TSetAccessoryStateHandler;
       typedef std::function<void()> TServerEventHandler;
       public:
         WebServer(int port, const String& productName, const String& hostName);
@@ -24,8 +25,8 @@ namespace Victoria {
         TLoadAccessorySettingsHandler onLoadSettings;
         TAccessorySettingHandler onSaveSetting;
         TAccessorySettingHandler onDeleteSetting;
-        TAccessoryStateHandler onGetState;
-        TAccessoryStateHandler onSetState;
+        TGetAccessoryStateHandler onGetState;
+        TSetAccessoryStateHandler onSetState;
         // server events
         TServerEventHandler onRequestStart;
         TServerEventHandler onRequestEnd;

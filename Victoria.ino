@@ -39,23 +39,25 @@ std::map<String, AccessorySetting> loadSettings() {
   auto model = configStore->load();
   return model.settings;
 }
-void saveSetting(const String& id, const AccessorySetting& setting) {
+void saveSetting(const String& accessoryId, const AccessorySetting& setting) {
   auto model = configStore->load();
-  model.settings[id] = setting;
+  model.settings[accessoryId] = setting;
   configStore->save(model);
 }
-void deleteSetting(const String& id, const AccessorySetting& setting) {
+void deleteSetting(const String& accessoryId, const AccessorySetting& setting) {
   auto model = configStore->load();
-  model.settings.erase(id);
+  model.settings.erase(accessoryId);
   configStore->save(model);
 }
 
-void getState(const String& id, const AccessorySetting& setting, AccessoryState& state) {
+AccessoryState getState(const String& accessoryId, const AccessorySetting& setting) {
   if (booleanAccessory) {
-    state.boolValue = booleanAccessory->getValue();
+    return {
+      .boolValue = booleanAccessory->getValue(),
+    };
   }
 }
-void setState(const String& id, const AccessorySetting& setting, AccessoryState& state) {
+void setState(const String& accessoryId, const AccessorySetting& setting, AccessoryState& state) {
   if (booleanAccessory) {
     booleanAccessory->setValue(state.boolValue);
   }
