@@ -103,7 +103,9 @@ void setup(void) {
   configStore = new ConfigStore();
   auto settings = loadSettings();
   if (settings.size() > 0) {
-    auto setting = settings.begin()->second;
+    auto pair = settings.begin();
+    auto id = pair->first;
+    auto setting = pair->second;
     // outputs
     auto outputPin = setting.outputIO;
     if (outputPin > 0) {
@@ -116,9 +118,8 @@ void setup(void) {
         booleanAccessory = NULL;
       }
       if (setting.type == BooleanAccessoryType) {
-        booleanAccessory = new BooleanAccessory(outputPin);
+        booleanAccessory = new BooleanAccessory(id, outputPin);
         booleanAccessory->onChange = onAccessoryChange;
-        booleanAccessory->setup();
       } else if(setting.type == IntegerAccessoryType) {
         //TODO:
       }
