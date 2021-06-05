@@ -7,11 +7,11 @@
 namespace Victoria {
   namespace Components {
     class BooleanAccessory: public BaseAccessory {
-      typedef std::function<void(bool)> TChangeHandler;
+      typedef std::function<void(const AccessoryState&)> TChangeHandler;
       public:
         BooleanAccessory(String id, uint8_t outputPin);
-        void setValue(bool value);
-        bool getValue();
+        virtual AccessoryState getState();
+        virtual void setState(const AccessoryState& state);
         TChangeHandler onChange;
       private:
         static void _setter_ex(homekit_characteristic_t *ch, const homekit_value_t value);

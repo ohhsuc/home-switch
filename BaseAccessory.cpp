@@ -27,6 +27,14 @@ namespace Victoria {
       }
     }
 
+    AccessoryState BaseAccessory::getState() {
+      Serial.println("BaseAccessory::getState");
+    }
+
+    void BaseAccessory::setState(const AccessoryState& state) {
+      Serial.println("BaseAccessory::setState");
+    }
+
     void BaseAccessory::loop() {
       arduino_homekit_loop();
     }
@@ -49,6 +57,15 @@ namespace Victoria {
       if (_mainCharacteristic) {
         homekit_characteristic_notify(_mainCharacteristic, _mainCharacteristic->value);
       }
+    }
+
+    BaseAccessory* BaseAccessory::findAccessoryById(const String& accessoryId) {
+      for (auto const& pair : _accessories) {
+        if (pair.second->accessoryId == accessoryId) {
+          return pair.second;
+        }
+      }
+      return NULL;
     }
 
     BaseAccessory* BaseAccessory::_findAccessory(homekit_characteristic_t* mainCharacteristic) {

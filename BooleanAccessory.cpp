@@ -11,29 +11,33 @@ namespace Victoria {
       _init();
     }
 
-    void BooleanAccessory::setValue(bool value) {
+    AccessoryState BooleanAccessory::getState() {
+      return {
+        .boolValue = _mainCharacteristic->value.bool_value,
+      };
+    }
+
+    void BooleanAccessory::setState(const AccessoryState& state) {
       if (_mainCharacteristic) {
-        _mainCharacteristic->value.bool_value = value;
+        _mainCharacteristic->value.bool_value = state.boolValue;
         _notify();
       }
-      if (value) {
+      if (state.boolValue) {
         digitalWrite(_outputPin, LOW);
       } else {
         digitalWrite(_outputPin, HIGH);
       }
       if (onChange) {
-        onChange(value);
+        onChange(state);
       }
-    }
-
-    bool BooleanAccessory::getValue() {
-      return _mainCharacteristic->value.bool_value;
     }
 
     void BooleanAccessory::_setter_ex(homekit_characteristic_t *ch, const homekit_value_t value) {
       BooleanAccessory* accessory = static_cast<BooleanAccessory*>(_findAccessory(ch));
       if (accessory) {
-        accessory->setValue(value.bool_value);
+        accessory->setState({
+          .boolValue = value.bool_value,
+        });
       }
     }
 

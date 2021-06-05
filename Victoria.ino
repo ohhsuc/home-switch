@@ -8,6 +8,7 @@
 #include "ButtonEvents.h"
 #include "OnOffEvents.h"
 #include "Mesher.h"
+#include "BaseAccessory.h"
 #include "BooleanAccessory.h"
 
 using namespace Victoria;
@@ -51,15 +52,15 @@ void deleteSetting(const String& accessoryId, const AccessorySetting& setting) {
 }
 
 AccessoryState getState(const String& accessoryId, const AccessorySetting& setting) {
-  if (booleanAccessory) {
-    return {
-      .boolValue = booleanAccessory->getValue(),
-    };
+  BaseAccessory* accessory = BaseAccessory::findAccessoryById(accessoryId);
+  if (accessory) {
+    return accessory->getState();
   }
 }
 void setState(const String& accessoryId, const AccessorySetting& setting, AccessoryState& state) {
-  if (booleanAccessory) {
-    booleanAccessory->setValue(state.boolValue);
+  BaseAccessory* accessory = BaseAccessory::findAccessoryById(accessoryId);
+  if (accessory) {
+    accessory->setState(state);
   }
 }
 
@@ -69,8 +70,9 @@ void timesOut() {
 
 void buttonClick(const String& accessoryId, int times) {
   if (times == 1 && booleanAccessory) {
-    bool value = booleanAccessory->getValue();
-    booleanAccessory->setValue(!value);
+    AccessoryState state = booleanAccessory->getState();
+    state.boolValue = !state.boolValue;
+    booleanAccessory->setState(state);
   }
 }
 
@@ -85,10 +87,11 @@ void inputToggle(const String& accessoryId, bool isOn) {
   Serial.println(isOn ? "ON" : "OFF");
 }
 
-void onAccessoryChange(bool value) {
+void onAccessoryChange(const AccessoryState& state) {
   ledOn();
   timesTrigger.count();
-  Serial.println("boolean value " + String(value));
+  Serial.println("boolean value " + String(state.boolValue));
+  Serial.println("integer value " + String(state.intValue));
   ledOff();
 }
 

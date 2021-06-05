@@ -6,6 +6,7 @@
 #include <arduino_homekit_server.h>
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
+#include "Commons.h"
 
 namespace Victoria {
   namespace Components {
@@ -13,10 +14,13 @@ namespace Victoria {
       public:
         BaseAccessory(String id, uint8_t outputPin, homekit_server_config_t* serverConfig, homekit_characteristic_t* mainCharacteristic);
         ~BaseAccessory();
+        virtual AccessoryState getState();
+        virtual void setState(const AccessoryState& state);
         void loop();
         void reset();
         void heartbeat();
         String accessoryId;
+        static BaseAccessory* findAccessoryById(const String& accessoryId);
       protected:
         uint8_t _outputPin;
         homekit_server_config_t* _serverConfig;
