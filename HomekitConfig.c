@@ -14,6 +14,8 @@ void onAccessoryIdentify(homekit_value_t value) {
   printf("accessory identify\n");
 }
 
+homekit_characteristic_t versionCharacteristic = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, INFORMATION_REVISION);
+
 homekit_service_t informationService = HOMEKIT_SERVICE_(
   ACCESSORY_INFORMATION,
   .primary = false,
@@ -22,8 +24,8 @@ homekit_service_t informationService = HOMEKIT_SERVICE_(
     HOMEKIT_CHARACTERISTIC(MANUFACTURER, INFORMATION_MANUFACTURER),
     HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, INFORMATION_SERIAL_NUMBER),
     HOMEKIT_CHARACTERISTIC(MODEL, INFORMATION_MODEL),
-    HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION, INFORMATION_REVISION),
     HOMEKIT_CHARACTERISTIC(IDENTIFY, onAccessoryIdentify),
+    &versionCharacteristic,
     NULL,
   },
 );

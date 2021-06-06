@@ -3,6 +3,7 @@
 namespace Victoria {
   namespace Components {
 
+    extern "C" homekit_characteristic_t versionCharacteristic;
     std::map<homekit_characteristic_t*, BaseAccessory*> _accessories;
 
     BaseAccessory::BaseAccessory(String id, uint8_t outputPin, homekit_server_config_t* serverConfig, homekit_characteristic_t* mainCharacteristic) {
@@ -69,6 +70,10 @@ namespace Victoria {
 
     void BaseAccessory::resetAll() {
       homekit_server_reset();
+    }
+
+    String BaseAccessory::getVersion() {
+      return versionCharacteristic.value.string_value;
     }
 
     BaseAccessory* BaseAccessory::_findAccessory(homekit_characteristic_t* mainCharacteristic) {

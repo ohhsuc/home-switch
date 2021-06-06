@@ -17,10 +17,11 @@ using namespace Victoria::Components;
 
 const String productName = "Victoria";
 const String hostName = "Victoria-91002";
+const String firmwareVersion = BaseAccessory::getVersion();
 
 Timer timer;
 TimesTrigger timesTrigger(10, 5 * 1000);
-WebServer webServer(80, productName, hostName);
+WebServer webServer(80, productName, hostName, firmwareVersion);
 ConfigStore* configStore;
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
@@ -160,7 +161,8 @@ void setup(void) {
   auto loader = RadioFrequencyMeshLoader(10);
   mesher.setLoader(&loader);
 
-  Serial.println("Setup complete!");
+  Serial.println("Firmware Version: " + firmwareVersion);
+  Serial.println("Setup Complete!");
   ledOff();
 }
 

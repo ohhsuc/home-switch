@@ -3,10 +3,11 @@
 namespace Victoria {
   namespace Components {
 
-    WebServer::WebServer(int port, const String& productName, const String& hostName) {
+    WebServer::WebServer(int port, const String& productName, const String& hostName, const String& firmwareVersion) {
       _server = new ESP8266WebServer(port);
       _productName = productName;
       _hostName = hostName;
+      _firmwareVersion = firmwareVersion;
     }
 
     WebServer::~WebServer() {
@@ -186,6 +187,10 @@ namespace Victoria {
           <tr>\
             <td>MAC Address</td>\
             <td>" + macAddr + "</td>\
+          </tr>\
+          <tr>\
+            <td>Firmware Version</td>\
+            <td>" + _firmwareVersion + "</td>\
           </tr>\
         </table>\
       ");
