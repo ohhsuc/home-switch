@@ -62,7 +62,7 @@ namespace Victoria {
   const uint8_t V_RXD = 3; // RXD (Receiver)
 
   // globals
-  Console console();
+  // Console console();
   const VEnvironment VEnv = VTest;
 }
 

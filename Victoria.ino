@@ -18,13 +18,12 @@ using namespace Victoria::Components;
 const String productName = "Victoria";
 const String hostName = "Victoria-91002";
 
-auto timer = Timer();
-auto timesTrigger = TimesTrigger(10, 5 * 1000);
-auto webServer = WebServer(80, productName, hostName);
+Timer timer;
+TimesTrigger timesTrigger(10, 5 * 1000);
+WebServer webServer(80, productName, hostName);
 ConfigStore* configStore;
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
-BooleanAccessory* booleanAccessory;
 
 void ledOn() {
   digitalWrite(LED_BUILTIN, LOW);
@@ -49,16 +48,21 @@ void deleteSetting(const String& accessoryId, const AccessorySetting& setting) {
   auto model = configStore->load();
   model.settings.erase(accessoryId);
   configStore->save(model);
+  // auto accessory = BaseAccessory::findAccessoryById(accessoryId);
+  // if (accessory) {
+  //   delete accessory;
+  //   accessory = NULL;
+  // }
 }
 
 AccessoryState getState(const String& accessoryId, const AccessorySetting& setting) {
-  BaseAccessory* accessory = BaseAccessory::findAccessoryById(accessoryId);
+  auto accessory = BaseAccessory::findAccessoryById(accessoryId);
   if (accessory) {
     return accessory->getState();
   }
 }
 void setState(const String& accessoryId, const AccessorySetting& setting, AccessoryState& state) {
-  BaseAccessory* accessory = BaseAccessory::findAccessoryById(accessoryId);
+  auto accessory = BaseAccessory::findAccessoryById(accessoryId);
   if (accessory) {
     accessory->setState(state);
   }
@@ -70,7 +74,7 @@ void timesOut() {
 
 void onButtonClick(const String& accessoryId, int times) {
   if (times == 1) {
-    BaseAccessory* accessory = BaseAccessory::findAccessoryById(accessoryId);
+    auto accessory = BaseAccessory::findAccessoryById(accessoryId);
     if (accessory) {
       AccessoryState state = accessory->getState();
       state.boolValue = !state.boolValue;
@@ -110,12 +114,8 @@ void setup(void) {
       if (setting.outputLevel > 0) {
         digitalWrite(outputPin, setting.outputLevel);
       }
-      if (booleanAccessory) {
-        delete booleanAccessory;
-        booleanAccessory = NULL;
-      }
       if (setting.type == BooleanAccessoryType) {
-        booleanAccessory = new BooleanAccessory(id, outputPin);
+        auto booleanAccessory = new BooleanAccessory(id, outputPin);
         booleanAccessory->onStateChange = onStateChange;
       } else if(setting.type == IntegerAccessoryType) {
         //TODO:

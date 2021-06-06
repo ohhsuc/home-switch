@@ -33,7 +33,7 @@ namespace Victoria {
     }
 
     void BooleanAccessory::_setter_ex(homekit_characteristic_t *ch, const homekit_value_t value) {
-      BooleanAccessory* accessory = static_cast<BooleanAccessory*>(_findAccessory(ch));
+      auto accessory = static_cast<BooleanAccessory*>(_findAccessory(ch));
       if (accessory) {
         accessory->setState({
           .boolValue = value.bool_value,

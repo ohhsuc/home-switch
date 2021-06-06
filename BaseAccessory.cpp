@@ -25,6 +25,7 @@ namespace Victoria {
         delete _mainCharacteristic;
         _mainCharacteristic = NULL;
       }
+      Serial.println("Accessory disposed " + accessoryId);
     }
 
     AccessoryState BaseAccessory::getState() {
