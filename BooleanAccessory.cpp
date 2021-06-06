@@ -20,15 +20,15 @@ namespace Victoria {
     void BooleanAccessory::setState(const AccessoryState& state) {
       if (_mainCharacteristic) {
         _mainCharacteristic->value.bool_value = state.boolValue;
-        _notify();
+        notify();
       }
       if (state.boolValue) {
         digitalWrite(_outputPin, LOW);
       } else {
         digitalWrite(_outputPin, HIGH);
       }
-      if (onChange) {
-        onChange(state);
+      if (onStateChange) {
+        onStateChange(state);
       }
     }
 

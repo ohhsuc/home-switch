@@ -14,19 +14,19 @@ namespace Victoria {
       public:
         BaseAccessory(String id, uint8_t outputPin, homekit_server_config_t* serverConfig, homekit_characteristic_t* mainCharacteristic);
         ~BaseAccessory();
+        String accessoryId;
         virtual AccessoryState getState();
         virtual void setState(const AccessoryState& state);
-        void loop();
-        void reset();
-        void heartbeat();
-        String accessoryId;
+        void notify();
         static BaseAccessory* findAccessoryById(const String& accessoryId);
+        static void heartbeatAll();
+        static void loopAll();
+        static void resetAll();
       protected:
         uint8_t _outputPin;
         homekit_server_config_t* _serverConfig;
         homekit_characteristic_t* _mainCharacteristic;
         void _init();
-        void _notify();
         static BaseAccessory* _findAccessory(homekit_characteristic_t* mainCharacteristic);
     };
   }

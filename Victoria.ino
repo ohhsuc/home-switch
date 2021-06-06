@@ -68,37 +68,28 @@ void timesOut() {
   Serial.println("times out!");
 }
 
-void buttonClick(const String& accessoryId, int times) {
-  if (times == 1 && booleanAccessory) {
-    AccessoryState state = booleanAccessory->getState();
-    state.boolValue = !state.boolValue;
-    booleanAccessory->setState(state);
+void onButtonClick(const String& accessoryId, int times) {
+  if (times == 1) {
+    BaseAccessory* accessory = BaseAccessory::findAccessoryById(accessoryId);
+    if (accessory) {
+      AccessoryState state = accessory->getState();
+      state.boolValue = !state.boolValue;
+      accessory->setState(state);
+    }
   }
 }
 
-void heartbeat() {
-  if (booleanAccessory) {
-    booleanAccessory->heartbeat();
-  }
-}
-
-void inputToggle(const String& accessoryId, bool isOn) {
+void onToggle(const String& accessoryId, bool isOn) {
   Serial.print("toggle ");
   Serial.println(isOn ? "ON" : "OFF");
 }
 
-void onAccessoryChange(const AccessoryState& state) {
+void onStateChange(const AccessoryState& state) {
   ledOn();
   timesTrigger.count();
   Serial.println("boolean value " + String(state.boolValue));
   Serial.println("integer value " + String(state.intValue));
   ledOff();
-}
-
-void resetAccessory() {
-  if (booleanAccessory) {
-    booleanAccessory->reset();
-  }
 }
 
 void setup(void) {
@@ -125,7 +116,7 @@ void setup(void) {
       }
       if (setting.type == BooleanAccessoryType) {
         booleanAccessory = new BooleanAccessory(id, outputPin);
-        booleanAccessory->onChange = onAccessoryChange;
+        booleanAccessory->onStateChange = onStateChange;
       } else if(setting.type == IntegerAccessoryType) {
         //TODO:
       }
@@ -142,13 +133,13 @@ void setup(void) {
         inputEvents = NULL;
       }
       inputEvents = new ButtonEvents(id, inputPin);
-      inputEvents->onClick = buttonClick;
+      inputEvents->onClick = onButtonClick;
       if (onOffEvents) {
         delete onOffEvents;
         onOffEvents = NULL;
       }
       onOffEvents = new OnOffEvents(id, inputPin);
-      onOffEvents->onToggle = inputToggle;
+      onOffEvents->onToggle = onToggle;
     }
   }
 
@@ -159,11 +150,11 @@ void setup(void) {
   webServer.onSetState = setState;
   webServer.onRequestStart = ledOn;
   webServer.onRequestEnd = ledOff;
-  webServer.onResetAccessory = resetAccessory;
+  webServer.onResetAccessory = [](){ BaseAccessory::resetAll(); };
   webServer.setup();
 
   timesTrigger.onTimesOut = timesOut;
-  timer.setInterval(60 * 1000, heartbeat);
+  timer.setInterval(60 * 1000, [](){ BaseAccessory::heartbeatAll(); });
 
   auto mesher = Mesher();
   auto loader = RadioFrequencyMeshLoader(10);
@@ -176,9 +167,7 @@ void setup(void) {
 void loop(void) {
   timer.loop();
   webServer.loop();
-  if (booleanAccessory) {
-    booleanAccessory->loop();
-  }
+  BaseAccessory::loopAll();
   if (inputEvents) {
     inputEvents->loop();
   }
