@@ -110,9 +110,9 @@ void setup(void) {
     auto setting = pair->second;
     // outputs
     auto outputPin = setting.outputIO;
-    if (outputPin > 0) {
+    if (outputPin > -1) {
       pinMode(outputPin, OUTPUT);
-      if (setting.outputLevel > 0) {
+      if (setting.outputLevel > -1) {
         digitalWrite(outputPin, setting.outputLevel);
       }
       if (setting.type == BooleanAccessoryType) {
@@ -124,9 +124,9 @@ void setup(void) {
     }
     // inputs
     auto inputPin = setting.inputIO;
-    if (inputPin > 0) {
+    if (inputPin > -1) {
       pinMode(inputPin, INPUT_PULLUP);
-      if (setting.inputLevel > 0) {
+      if (setting.inputLevel > -1) {
         digitalWrite(inputPin, setting.inputLevel);
       }
       if (inputEvents) {
