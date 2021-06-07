@@ -43,6 +43,7 @@ namespace Victoria {
       }
 
       _server->on("/", HTTP_GET, std::bind(&WebServer::_handleRoot, this));
+      _server->on("/system", HTTP_GET, std::bind(&WebServer::_handleSystem, this));
       _server->on("/wifi/list", HTTP_GET, std::bind(&WebServer::_handleWifiList, this));
       _server->on("/wifi/connect", HTTP_POST, std::bind(&WebServer::_handleWifiConnect, this));
       _server->on("/accessory/new", HTTP_GET, std::bind(&WebServer::_handleNewAccessory, this));
@@ -125,7 +126,7 @@ namespace Victoria {
         strWifiMode = "WIFI_AP_STA";
       }
       // ip
-      String strLocalIP = "-";
+      String strLocalIP = "";
       bool isStaEnabled = ((wifiMode & WIFI_STA) != 0);
       if (isStaEnabled) {
         IPAddress localIP = WiFi.localIP();
@@ -134,7 +135,7 @@ namespace Victoria {
         }
       }
       // ap
-      String strApIP = "-";
+      String strApIP = "";
       bool isApEnabled = ((wifiMode & WIFI_AP) != 0);
       if (isApEnabled) {
         IPAddress apIP = WiFi.softAPIP();
@@ -164,8 +165,8 @@ namespace Victoria {
         .headers = {},
         .rows = {
           { "Wifi Mode", strWifiMode },
-          { "AP Address", "<a href=\"http://" + strApIP + "\">" + strApIP + "</a>" },
-          { "IP Address", "<a href=\"http://" + strLocalIP + "\">" + strLocalIP + "</a>" },
+          { "AP Address", strApIP != "" ? "<a href=\"http://" + strApIP + "\">" + strApIP + "</a>" : "-" },
+          { "IP Address", strLocalIP != "" ? "<a href=\"http://" + strLocalIP + "\">" + strLocalIP + "</a>" : "-" },
           { "MAC Address", macAddr },
           { "Firmware Version", _firmwareVersion },
         },
@@ -174,6 +175,7 @@ namespace Victoria {
       _send200("\
         <p>\
           <a href=\"/wifi/list\">Wifi</a>\
+          <a href=\"/system\">System</a>\
           <a href=\"/reset\">Reset</a>\
         </p>\
         <h3>Accessories</h3>\
@@ -181,7 +183,35 @@ namespace Victoria {
           " + accessoryLinks + "\
         </p>\
         <h3>Home</h3>\
-        " + _renderTable(table) + "\
+        <p>\
+          " + _renderTable(table) + "\
+        </p>\
+      ");
+      _dispatchRequestEnd();
+    }
+
+    void WebServer::_handleSystem() {
+      _dispatchRequestStart();
+      SPIFFS.begin();
+      FSInfo fsInfo;
+      SPIFFS.info(fsInfo);
+      TableModel table = {
+        .headers = {},
+        .rows = {
+          { "Total Bytes", String(fsInfo.totalBytes) },
+          { "Used Bytes", String(fsInfo.usedBytes) },
+          { "Max Path Length", String(fsInfo.maxPathLength) },
+          { "Max Open Files", String(fsInfo.maxOpenFiles) },
+          { "Block Size", String(fsInfo.blockSize) },
+          { "Page Size", String(fsInfo.pageSize) },
+        },
+      };
+      _send200("\
+        <p><a href=\"/\">Home</a></p>\
+        <h3>System</h3>\
+        <p>\
+          " + _renderTable(table) + "\
+        </p>\
       ");
       _dispatchRequestEnd();
     }
