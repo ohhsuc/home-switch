@@ -2,6 +2,7 @@
 #define Commons_h
 
 #include <map>
+#include <vector>
 #include <Arduino.h>
 #include "Console.h"
 
@@ -10,6 +11,11 @@ namespace Victoria {
   enum VEnvironment {
     VTest,
     VProd,
+  };
+
+  struct TableModel {
+    std::vector<String> headers;
+    std::vector<std::vector<String>> rows;
   };
 
   enum AccessoryType {

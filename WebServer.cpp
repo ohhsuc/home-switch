@@ -125,7 +125,7 @@ namespace Victoria {
         strWifiMode = "WIFI_AP_STA";
       }
       // ip
-      String strLocalIP = "";
+      String strLocalIP = "-";
       bool isStaEnabled = ((wifiMode & WIFI_STA) != 0);
       if (isStaEnabled) {
         IPAddress localIP = WiFi.localIP();
@@ -134,7 +134,7 @@ namespace Victoria {
         }
       }
       // ap
-      String strApIP = "";
+      String strApIP = "-";
       bool isApEnabled = ((wifiMode & WIFI_AP) != 0);
       if (isApEnabled) {
         IPAddress apIP = WiFi.softAPIP();
@@ -160,6 +160,16 @@ namespace Victoria {
           ";
         }
       }
+      TableModel table = {
+        .headers = {},
+        .rows = {
+          { "Wifi Mode", strWifiMode },
+          { "AP Address", "<a href=\"http://" + strApIP + "\">" + strApIP + "</a>" },
+          { "IP Address", "<a href=\"http://" + strLocalIP + "\">" + strLocalIP + "</a>" },
+          { "MAC Address", macAddr },
+          { "Firmware Version", _firmwareVersion },
+        },
+      };
       // content
       _send200("\
         <p>\
@@ -171,28 +181,7 @@ namespace Victoria {
           " + accessoryLinks + "\
         </p>\
         <h3>Home</h3>\
-        <table>\
-          <tr>\
-            <td>Wifi Mode</td>\
-            <td>" + strWifiMode + "</td>\
-          </tr>\
-          <tr>\
-            <td>AP Address</td>\
-            <td><a href=\"http://" + strApIP + "\">" + strApIP + "</a></td>\
-          </tr>\
-          <tr>\
-            <td>IP Address</td>\
-            <td><a href=\"http://" + strLocalIP + "\">" + strLocalIP + "</a></td>\
-          </tr>\
-          <tr>\
-            <td>MAC Address</td>\
-            <td>" + macAddr + "</td>\
-          </tr>\
-          <tr>\
-            <td>Firmware Version</td>\
-            <td>" + _firmwareVersion + "</td>\
-          </tr>\
-        </table>\
+        " + _renderTable(table) + "\
       ");
       _dispatchRequestEnd();
     }
@@ -437,6 +426,29 @@ namespace Victoria {
 
     String WebServer::_getCheckedAttr(bool checked) {
       return checked ? " checked=\"checked\"" : "";
+    }
+
+    String WebServer::_renderTable(const TableModel& model) {
+      String tableHeader = "<tr>";
+      for (const auto& header : model.headers) {
+        tableHeader += "<th>" + header + "</th>";
+      }
+      tableHeader += "</tr>";
+      String tableRows = "";
+      for (const auto& row : model.rows) {
+        tableRows += "<tr>";
+        for (const auto cell : row) {
+          tableRows += "<td>" + cell + "</td>";
+        }
+        tableRows += "</tr>";
+      }
+      String html = "\
+        <table>\
+          " + tableHeader + "\
+          " + tableRows + "\
+        </table>\
+      ";
+      return html;
     }
 
     String WebServer::_getTypeHtml(const AccessorySetting& setting) {
