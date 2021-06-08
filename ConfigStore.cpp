@@ -6,7 +6,7 @@ namespace Victoria {
 
     ConfigStore::ConfigStore() {
       if (!LittleFS.begin()) {
-        Serial.println("Failed to mount file system");
+        console.error("Failed to mount file system");
       }
     }
 
@@ -17,12 +17,12 @@ namespace Victoria {
       // [open file]
       File file = LittleFS.open(CONFIG_FILE_PATH, "r");
       if (!file) {
-        Serial.println("Failed to open config file");
+        console.error("Failed to open config file");
         return model;
       }
       size_t size = file.size();
       if (size > DEFAULT_FILE_SIZE) {
-        Serial.println("Config file size is too large");
+        console.error("Config file size is too large");
         return model;
       }
 
@@ -39,7 +39,7 @@ namespace Victoria {
       StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
       auto error = deserializeJson(doc, buf.get());
       if (error) {
-        Serial.println("Failed to parse config file");
+        console.error("Failed to parse config file");
         return model;
       }
 
@@ -57,7 +57,7 @@ namespace Victoria {
       // [open file]
       File file = LittleFS.open(CONFIG_FILE_PATH, "w");
       if (!file) {
-        Serial.println("Failed to open config file for writing");
+        console.error("Failed to open config file for writing");
         return false;
       }
 
@@ -68,7 +68,7 @@ namespace Victoria {
       if (VEnv == VTest) {
         char buffer[DEFAULT_FILE_SIZE];
         serializeJsonPretty(doc, buffer);
-        Serial.println(buffer);
+        console.debug(buffer);
       }
 
       return true;

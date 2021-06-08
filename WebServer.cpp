@@ -24,7 +24,7 @@ namespace Victoria {
         WiFi.mode(WIFI_AP_STA);
         wifiMode = WIFI_AP_STA;
       }
-      Serial.println("Wifi mode: WIFI_AP_STA");
+      console.log("Wifi mode: WIFI_AP_STA");
 
       WiFi.hostname(_hostName);
       WiFi.setAutoConnect(true);
@@ -38,7 +38,7 @@ namespace Victoria {
         WiFi.softAP(_hostName);
         IPAddress currentApIp = WiFi.softAPIP();
         if (currentApIp) {
-          Serial.println("AP Address: " + currentApIp.toString());
+          console.log("AP Address: " + currentApIp.toString());
         }
       }
 
@@ -263,14 +263,14 @@ namespace Victoria {
         return;
       }
 
-      Serial.println("SSID: " + ssid);
-      Serial.println("PASSWORD: " + password);
+      console.log("SSID: " + ssid);
+      console.log("PASSWORD: " + password);
       WiFi.begin(ssid, password);
       // Wait for connection
       int checkTimes = 30;
       while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        Serial.print(".");
+        console.write(".");
         if (checkTimes == 0) {
           break;
         } else {
@@ -570,7 +570,7 @@ namespace Victoria {
           // wifi_config_reset();
           WiFi.disconnect(true);
           WiFi.mode(WIFI_AP_STA);
-          Serial.println("Wifi mode: WIFI_AP_STA");
+          console.log("Wifi mode: WIFI_AP_STA");
         }
         String resetAccessory = _server->arg("ResetAccessory");
         if (resetAccessory == "yes" && onResetAccessory) {

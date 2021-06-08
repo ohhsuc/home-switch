@@ -38,4 +38,7 @@ namespace Victoria {
     return content;
   }
 
+  // global
+  Console console;
+
 }

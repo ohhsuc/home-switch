@@ -28,12 +28,12 @@ OnOffEvents* onOffEvents;
 
 void ledOn() {
   digitalWrite(LED_BUILTIN, LOW);
-  Serial.println("led -> ON");
+  console.log("led -> ON");
   delay(100); // at least light for some time
 }
 void ledOff() {
   digitalWrite(LED_BUILTIN, HIGH);
-  Serial.println("led -> OFF");
+  console.log("led -> OFF");
 }
 
 std::map<String, AccessorySetting> loadSettings() {
@@ -70,7 +70,7 @@ void setState(const String& accessoryId, const AccessorySetting& setting, Access
 }
 
 void timesOut() {
-  Serial.println("times out!");
+  console.log("times out!");
 }
 
 void onButtonClick(const String& accessoryId, int times) {
@@ -85,20 +85,19 @@ void onButtonClick(const String& accessoryId, int times) {
 }
 
 void onToggle(const String& accessoryId, bool isOn) {
-  Serial.print("toggle ");
-  Serial.println(isOn ? "ON" : "OFF");
+  console.log("toggle " + String(isOn ? "ON" : "OFF"));
 }
 
 void onStateChange(const AccessoryState& state) {
   ledOn();
   timesTrigger.count();
-  Serial.println("boolean value " + String(state.boolValue));
-  Serial.println("integer value " + String(state.intValue));
+  console.log("boolean value " + String(state.boolValue));
+  console.log("integer value " + String(state.intValue));
   ledOff();
 }
 
 void setup(void) {
-  Serial.begin(115200);
+  console.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   ledOn();
 
@@ -161,8 +160,8 @@ void setup(void) {
   auto loader = RadioFrequencyMeshLoader(10);
   mesher.setLoader(&loader);
 
-  Serial.println("Firmware Version: " + firmwareVersion);
-  Serial.println("Setup Complete!");
+  console.log("Firmware Version: " + firmwareVersion);
+  console.log("Setup Complete!");
   ledOff();
 }
 

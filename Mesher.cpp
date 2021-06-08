@@ -12,21 +12,21 @@ namespace Victoria {
       _messageHandler = handler;
     }
     void IMeshLoader::send(const MeshMessage& message) {
-      Serial.println("IMeshLoader send()");
+      console.log("IMeshLoader send()");
     }
 
     // RadioFrequencyMeshLoader
     RadioFrequencyMeshLoader::RadioFrequencyMeshLoader(uint8_t inputPin) : IMeshLoader(inputPin) {
     }
     void RadioFrequencyMeshLoader::send(const MeshMessage& message) {
-      Serial.println("RadioFrequencyMeshLoader send()");
+      console.log("RadioFrequencyMeshLoader send()");
     }
 
     // BluetoothMeshLoader
     BluetoothMeshLoader::BluetoothMeshLoader(uint8_t inputPin) : IMeshLoader(inputPin) {
     }
     void BluetoothMeshLoader::send(const MeshMessage& message) {
-      Serial.println("BluetoothMeshLoader send()");
+      console.log("BluetoothMeshLoader send()");
     }
 
     // Mesher

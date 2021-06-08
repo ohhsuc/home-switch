@@ -16,6 +16,9 @@ namespace Victoria {
     private:
       static String _format(String type, String message);
   };
+
+  // global
+  extern Console console;
 }
 
 #endif //Console_h

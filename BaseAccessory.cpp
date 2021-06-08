@@ -26,15 +26,15 @@ namespace Victoria {
         delete _mainCharacteristic;
         _mainCharacteristic = NULL;
       }
-      Serial.println("Accessory disposed " + accessoryId);
+      console.log("Accessory disposed " + accessoryId);
     }
 
     AccessoryState BaseAccessory::getState() {
-      Serial.println("BaseAccessory::getState");
+      console.log("BaseAccessory::getState");
     }
 
     void BaseAccessory::setState(const AccessoryState& state) {
-      Serial.println("BaseAccessory::setState");
+      console.log("BaseAccessory::setState");
     }
 
     void BaseAccessory::notify() {
