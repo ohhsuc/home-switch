@@ -27,9 +27,7 @@ namespace Victoria {
       } else {
         digitalWrite(_outputPin, HIGH);
       }
-      if (onStateChange) {
-        onStateChange(state);
-      }
+      BaseAccessory::setState(state);
     }
 
     void BooleanAccessory::_setter_ex(homekit_characteristic_t *ch, const homekit_value_t value) {

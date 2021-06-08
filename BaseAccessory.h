@@ -11,10 +11,12 @@
 namespace Victoria {
   namespace Components {
     class BaseAccessory {
+      typedef std::function<void(const AccessoryState&)> TStateChangeHandler;
       public:
         BaseAccessory(String id, uint8_t outputPin, homekit_server_config_t* serverConfig, homekit_characteristic_t* mainCharacteristic);
         ~BaseAccessory();
         String accessoryId;
+        TStateChangeHandler onStateChange;
         virtual AccessoryState getState();
         virtual void setState(const AccessoryState& state);
         void notify();

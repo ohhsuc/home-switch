@@ -34,7 +34,9 @@ namespace Victoria {
     }
 
     void BaseAccessory::setState(const AccessoryState& state) {
-      console.log("BaseAccessory::setState");
+      if (onStateChange) {
+        onStateChange(state);
+      }
     }
 
     void BaseAccessory::notify() {
