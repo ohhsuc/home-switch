@@ -18,9 +18,15 @@ namespace Victoria {
     }
 
     void BooleanAccessory::setState(const AccessoryState& state) {
+      _innerSetState(state, true);
+    }
+
+    void BooleanAccessory::_innerSetState(const AccessoryState& state, bool doNotify) {
       if (_mainCharacteristic) {
         _mainCharacteristic->value.bool_value = state.boolValue;
-        notify();
+        if (doNotify) {
+          notify();
+        }
       }
       if (state.boolValue) {
         digitalWrite(_outputPin, LOW);
@@ -33,9 +39,9 @@ namespace Victoria {
     void BooleanAccessory::_setter_ex(homekit_characteristic_t *ch, const homekit_value_t value) {
       auto accessory = static_cast<BooleanAccessory*>(_findAccessory(ch));
       if (accessory) {
-        accessory->setState({
+        accessory->_innerSetState({
           .boolValue = value.bool_value,
-        });
+        }, false);
       }
     }
 

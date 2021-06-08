@@ -12,6 +12,7 @@ namespace Victoria {
         virtual AccessoryState getState();
         virtual void setState(const AccessoryState& state);
       private:
+        void _innerSetState(const AccessoryState& state, bool doNotify);
         static void _setter_ex(homekit_characteristic_t *ch, const homekit_value_t value);
     };
   }

@@ -28,12 +28,10 @@ OnOffEvents* onOffEvents;
 
 void ledOn() {
   digitalWrite(LED_BUILTIN, LOW);
-  console.log("led -> ON");
   delay(100); // at least light for some time
 }
 void ledOff() {
   digitalWrite(LED_BUILTIN, HIGH);
-  console.log("led -> OFF");
 }
 
 std::map<String, AccessorySetting> loadSettings() {
