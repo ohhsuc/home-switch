@@ -9,8 +9,8 @@ namespace Victoria {
     class BooleanAccessory: public BaseAccessory {
       public:
         BooleanAccessory(String id, uint8_t outputPin);
-        virtual AccessoryState getState();
-        virtual void setState(const AccessoryState& state);
+        AccessoryState getState() override;
+        void setState(const AccessoryState& state) override;
       private:
         void _innerSetState(const AccessoryState& state, bool doNotify);
         static void _setter_ex(homekit_characteristic_t *ch, const homekit_value_t value);
