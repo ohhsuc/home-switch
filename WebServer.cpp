@@ -162,7 +162,7 @@ namespace Victoria {
         }
       }
       TableModel table = {
-        .headers = {},
+        .header = {},
         .rows = {
           { "Wifi Mode", strWifiMode },
           { "AP Address", strApIP != "" ? "<a href=\"http://" + strApIP + "\">" + strApIP + "</a>" : "-" },
@@ -196,7 +196,7 @@ namespace Victoria {
       FSInfo fsInfo;
       SPIFFS.info(fsInfo);
       TableModel table = {
-        .headers = {},
+        .header = {},
         .rows = {
           { "Total Bytes", String(fsInfo.totalBytes) },
           { "Used Bytes", String(fsInfo.usedBytes) },
@@ -460,16 +460,19 @@ namespace Victoria {
     }
 
     String WebServer::_renderTable(const TableModel& model) {
-      String tableHeader = "<tr>";
-      for (const auto& header : model.headers) {
-        tableHeader += "<th>" + header + "</th>";
+      String tableHeader = "";
+      if (model.header.size() > 0) {
+        tableHeader += "<tr>";
+        for (const auto& headerCell : model.header) {
+          tableHeader += "<th>" + headerCell + "</th>";
+        }
+        tableHeader += "</tr>";
       }
-      tableHeader += "</tr>";
       String tableRows = "";
       for (const auto& row : model.rows) {
         tableRows += "<tr>";
-        for (const auto cell : row) {
-          tableRows += "<td>" + cell + "</td>";
+        for (const auto rowCell : row) {
+          tableRows += "<td>" + rowCell + "</td>";
         }
         tableRows += "</tr>";
       }

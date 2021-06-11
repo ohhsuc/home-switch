@@ -14,7 +14,7 @@ namespace Victoria {
   };
 
   struct TableModel {
-    std::vector<String> headers;
+    std::vector<String> header;
     std::vector<std::vector<String>> rows;
   };
 
