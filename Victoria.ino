@@ -115,7 +115,7 @@ void setup(void) {
       if (setting.type == BooleanAccessoryType) {
         auto booleanAccessory = new BooleanAccessory(id, outputPin);
         booleanAccessory->onStateChange = onStateChange;
-      } else if(setting.type == IntegerAccessoryType) {
+      } else if (setting.type == IntegerAccessoryType) {
         //TODO:
       }
     }
@@ -132,10 +132,6 @@ void setup(void) {
       }
       inputEvents = new ButtonEvents(id, inputPin);
       inputEvents->onClick = onButtonClick;
-      if (onOffEvents) {
-        delete onOffEvents;
-        onOffEvents = NULL;
-      }
       onOffEvents = new OnOffEvents(id, inputPin);
       onOffEvents->onToggle = onToggle;
     }

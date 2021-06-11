@@ -277,6 +277,7 @@ namespace Victoria {
           checkTimes--;
         }
       }
+      console.newline();
 
       bool isConnected = WiFi.status() == WL_CONNECTED;
       if (isConnected) {

@@ -8,23 +8,27 @@ namespace Victoria {
     Serial.begin(baud);
   }
 
-  void Console::log(String log) {
+  void Console::log(const String& log) {
     write(_format("log", log), true);
   }
 
-  void Console::error(String error) {
+  void Console::error(const String& error) {
     write(_format("error", error), true);
   }
 
-  void Console::debug(String debug) {
+  void Console::debug(const String& debug) {
     write(_format("debug", debug), true);
   }
 
-  void Console::write(String message) {
+  void Console::write(const String& message) {
     write(message, false);
   }
 
-  void Console::write(String message, bool newline) {
+  void Console::newline() {
+    write("", true);
+  }
+
+  void Console::write(const String& message, bool newline) {
     if (newline) {
       Serial.println(message);
     } else {
@@ -32,7 +36,7 @@ namespace Victoria {
     }
   }
 
-  String Console::_format(String type, String message) {
+  String Console::_format(const String& type, const String& message) {
     auto now = millis();
     auto content = "[" + String(now) + "][" + type + "] " + message;
     return content;
