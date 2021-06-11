@@ -1,3 +1,4 @@
+#include <LittleFS.h>
 #include "WebServer.h"
 
 namespace Victoria {
@@ -196,27 +197,60 @@ namespace Victoria {
 
     void WebServer::_handleSystem() {
       _dispatchRequestStart();
-      SPIFFS.begin();
-      FSInfo fsInfo;
-      SPIFFS.info(fsInfo);
-      TableModel table = {
-        .header = {},
-        .rows = {
-          { "Total Bytes", String(fsInfo.totalBytes) },
-          { "Used Bytes", String(fsInfo.usedBytes) },
-          { "Max Path Length", String(fsInfo.maxPathLength) },
-          { "Max Open Files", String(fsInfo.maxOpenFiles) },
-          { "Block Size", String(fsInfo.blockSize) },
-          { "Page Size", String(fsInfo.pageSize) },
-        },
-      };
-      _send200("\
-        <p><a href=\"/\">Home</a></p>\
-        <h3>System</h3>\
-        <p>\
-          " + _renderTable(table) + "\
-        </p>\
-      ");
+      if (LittleFS.begin()) {
+        FSInfo fsInfo;
+        if (LittleFS.info(fsInfo)) {
+          TableModel infoTable = {
+            .header = {},
+            .rows = {
+              { "Total Bytes", String(fsInfo.totalBytes) },
+              { "Used Bytes", String(fsInfo.usedBytes) },
+              { "Max Path Length", String(fsInfo.maxPathLength) },
+              { "Max Open Files", String(fsInfo.maxOpenFiles) },
+              { "Block Size", String(fsInfo.blockSize) },
+              { "Page Size", String(fsInfo.pageSize) },
+            },
+          };
+          TableModel filesTable = {
+            .header = { "Name", "Bytes" },
+          };
+          std::function<void(File)> loopFile;
+          loopFile = [&](File file)->void {
+            console.debug(String(file.fullName()));
+            File next = file.openNextFile();
+            file.close();
+            if (!next) {
+              return;
+            }
+            if (next.isFile()) {
+              String name = String(next.fullName());
+              String uri = "/system/file?name=" + name;
+              filesTable.rows.push_back({
+                "<a href=\"" + uri + "\">" + name + "</a>",
+                String(next.size()),
+              });
+            }
+            loopFile(next);
+          };
+          loopFile(LittleFS.open("/", "r"));
+          _send200("\
+            <p><a href=\"/\">Home</a></p>\
+            <h3>System</h3>\
+            <p>\
+              " + _renderTable(infoTable) + "\
+            </p>\
+            <h3>Files</h3>\
+            <p>\
+              " + _renderTable(filesTable) + "\
+            </p>\
+          ");
+        } else {
+          console.error("Read fs info failed");
+        }
+      } else {
+        console.error("Failed to mount file system");
+      }
+      LittleFS.end();
       _dispatchRequestEnd();
     }
 
