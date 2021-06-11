@@ -85,15 +85,18 @@ namespace Victoria {
             <title>" + _productName + "</title>\
             <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
             <style>\
-              html, body { background: transparent; font-family: Arial, Sans-Serif; margin: 0; padding: 0; border: 0; }\
+              html, body { background: transparent; font-family: Arial, Sans-Serif; margin: 0; padding: 0; border: 0; color: #4f4e4e; }\
+              h1, h2, h3 { font-weight: 400; }\
+              a { color: #00979d; text-decoration: none; }\
+              fieldset { border: 1px solid #00979c; }\
               ul { padding: 0; list-style-type: none; }\
-              td { border-bottom: 1px solid #aaa; }\
-              .container { padding: 0 10px; }\
-              .title { background: #008184; color: #fff; text-align: center; margin: 0; padding: 5px; }\
+              td { border-bottom: 1px solid #d5e9e9; }\
+              .container { padding: 0 10px; font-size: 14px; }\
+              .title { background: #008184; color: #ffffff; text-align: center; margin: 0; padding: 5px 0; }\
             </style>\
           </head>\
           <body>\
-            <h1 class=\"title\">" + _productName + "</h1>\
+            <h2 class=\"title\">" + _productName + "</h2>\
             <div class=\"container\">\
               " + bodyHtml + "\
             </div>\
@@ -164,7 +167,7 @@ namespace Victoria {
         for (const auto& pair : settings) {
           String url = ("/accessory?id=" + pair.first);
           accessoryLinks += "\
-            <a href=\"" + url + "\">" + pair.second.name + "</a>\
+            | <a href=\"" + url + "\">" + pair.second.name + "</a>\
           ";
         }
       }
@@ -181,17 +184,17 @@ namespace Victoria {
       // content
       _send200("\
         <p>\
-          <a href=\"/wifi/list\">Wifi</a>\
-          <a href=\"/system\">System</a>\
+          <a href=\"/wifi/list\">Wifi</a> |\
+          <a href=\"/system\">System</a> |\
           <a href=\"/reset\">Reset</a>\
-        </p>\
-        <h3>Accessories</h3>\
-        <p>\
-          " + accessoryLinks + "\
         </p>\
         <h3>Home</h3>\
         <p>\
           " + _renderTable(table) + "\
+        </p>\
+        <h3>Accessories</h3>\
+        <p>\
+          " + accessoryLinks + "\
         </p>\
       ");
       _dispatchRequestEnd();
@@ -428,7 +431,7 @@ namespace Victoria {
       } else {
         _send200("\
           <p>\
-            <a href=\"/\">Home</a>\
+            <a href=\"/\">Home</a> |\
             <a href=\"/accessory/state?id=" + accessoryId + "\">State</a>\
           </p>\
           <h3>Setting (" + setting.name + ")</h3>\
