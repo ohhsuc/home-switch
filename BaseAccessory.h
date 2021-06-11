@@ -19,7 +19,6 @@ namespace Victoria {
         TStateChangeHandler onStateChange;
         virtual AccessoryState getState();
         virtual void setState(const AccessoryState& state);
-        void notify();
         static BaseAccessory* findAccessoryById(const String& accessoryId);
         static void heartbeatAll();
         static void loopAll();
@@ -30,6 +29,7 @@ namespace Victoria {
         homekit_server_config_t* _serverConfig;
         homekit_characteristic_t* _mainCharacteristic;
         void _init();
+        void _notify();
         static BaseAccessory* _findAccessory(homekit_characteristic_t* mainCharacteristic);
     };
   }

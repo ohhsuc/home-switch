@@ -39,15 +39,15 @@ namespace Victoria {
       }
     }
 
-    void BaseAccessory::notify() {
-      if (_mainCharacteristic) {
-        homekit_characteristic_notify(_mainCharacteristic, _mainCharacteristic->value);
-      }
-    }
-
     void BaseAccessory::_init() {
       if (_serverConfig) {
         arduino_homekit_setup(_serverConfig);
+      }
+    }
+
+    void BaseAccessory::_notify() {
+      if (_mainCharacteristic) {
+        homekit_characteristic_notify(_mainCharacteristic, _mainCharacteristic->value);
       }
     }
 
@@ -62,7 +62,7 @@ namespace Victoria {
 
     void BaseAccessory::heartbeatAll() {
       for (auto const& pair : _accessories) {
-        pair.second->notify();
+        pair.second->_notify();
       }
     }
 

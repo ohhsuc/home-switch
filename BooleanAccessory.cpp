@@ -21,11 +21,11 @@ namespace Victoria {
       _innerSetState(state, true);
     }
 
-    void BooleanAccessory::_innerSetState(const AccessoryState& state, bool doNotify) {
+    void BooleanAccessory::_innerSetState(const AccessoryState& state, bool notify) {
       if (_mainCharacteristic) {
         _mainCharacteristic->value.bool_value = state.boolValue;
-        if (doNotify) {
-          notify();
+        if (notify) {
+          _notify();
         }
       }
       if (state.boolValue) {
