@@ -62,7 +62,7 @@ namespace Victoria {
     }
 
     void WebServer::_redirectTo(const String& url) {
-      _server->sendHeader(F("Location"), url, true);
+      _server->sendHeader("Location", url, true);
       _server->send(302, "text/plain", "");
     }
 
@@ -82,14 +82,18 @@ namespace Victoria {
             <title>" + _productName + "</title>\
             <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
             <style>\
-              body { background-color: #cccccc; font-family: Arial, Sans-Serif; }\
+              html, body { background: transparent; font-family: Arial, Sans-Serif; margin: 0; padding: 0; border: 0; }\
               ul { padding: 0; list-style-type: none; }\
-              td { border-bottom: 1px solid #aaaaaa; }\
+              td { border-bottom: 1px solid #aaa; }\
+              .container { padding: 0 10px; }\
+              .title { background: #008184; color: #fff; text-align: center; margin: 0; padding: 5px; }\
             </style>\
           </head>\
           <body>\
-            <h1>" + _productName + "</h1>\
-            " + bodyHtml + "\
+            <h1 class=\"title\">" + _productName + "</h1>\
+            <div class=\"container\">\
+              " + bodyHtml + "\
+            </div>\
           </body>\
         </html>\
       ";
@@ -97,10 +101,10 @@ namespace Victoria {
 
     void WebServer::_dispatchRequestStart() {
       // set cross origin
-      _server->sendHeader(F("Access-Control-Allow-Origin"), F("*"));
-      _server->sendHeader(F("Access-Control-Max-Age"), F("600")); // 10 minutes
-      _server->sendHeader(F("Access-Control-Allow-Methods"), F("PUT,POST,GET,OPTIONS"));
-      _server->sendHeader(F("Access-Control-Allow-Headers"), F("*"));
+      _server->sendHeader("Access-Control-Allow-Origin", "*");
+      _server->sendHeader("Access-Control-Max-Age", "600"); // 10 minutes
+      _server->sendHeader("Access-Control-Allow-Methods", "PUT,POST,GET,OPTIONS");
+      _server->sendHeader("Access-Control-Allow-Headers", "*");
       // fire event
       if (onRequestStart) {
         onRequestStart();
