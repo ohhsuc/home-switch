@@ -44,6 +44,7 @@ namespace Victoria {
         void _dispatchRequestEnd();
         void _handleRoot();
         void _handleSystem();
+        void _handleSystemFile();
         void _handleWifiList();
         void _handleWifiConnect();
         void _handleNewAccessory();

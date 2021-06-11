@@ -45,6 +45,8 @@ namespace Victoria {
 
       _server->on("/", HTTP_GET, std::bind(&WebServer::_handleRoot, this));
       _server->on("/system", HTTP_GET, std::bind(&WebServer::_handleSystem, this));
+      _server->on("/system/file", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
+      _server->on("/system/file", HTTP_ANY, std::bind(&WebServer::_handleSystemFile, this));
       _server->on("/wifi/list", HTTP_GET, std::bind(&WebServer::_handleWifiList, this));
       _server->on("/wifi/connect", HTTP_POST, std::bind(&WebServer::_handleWifiConnect, this));
       _server->on("/accessory/new", HTTP_GET, std::bind(&WebServer::_handleNewAccessory, this));
@@ -216,7 +218,6 @@ namespace Victoria {
           };
           std::function<void(File)> loopFile;
           loopFile = [&](File file)->void {
-            console.debug(String(file.fullName()));
             File next = file.openNextFile();
             file.close();
             if (!next) {
@@ -246,6 +247,32 @@ namespace Victoria {
           ");
         } else {
           console.error("Read fs info failed");
+        }
+      } else {
+        console.error("Failed to mount file system");
+      }
+      LittleFS.end();
+      _dispatchRequestEnd();
+    }
+
+    void WebServer::_handleSystemFile() {
+      _dispatchRequestStart();
+      if (LittleFS.begin()) {
+        String fileName = "/" + _server->arg("name");
+        File file = LittleFS.open(fileName, "r");
+        if (file) {
+          size_t size = file.size();
+          String content = file.readString();
+          file.close();
+          _send200("\
+            <p><a href=\"/system\">System</a></p>\
+            <h3>" + fileName + " " + String(size) + " bytes</h3>\
+            <p>\
+              <textarea name=\"Content\" cols=\"50\" rows=\"10\">" + content + "</textarea>\
+            </p>\
+          ");
+        } else {
+          console.error("Failed to open file " + fileName);
         }
       } else {
         console.error("Failed to mount file system");
