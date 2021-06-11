@@ -4,74 +4,82 @@
 namespace Victoria {
   namespace Components {
 
-    ConfigStore::ConfigStore() {
-      if (!LittleFS.begin()) {
-        console.error("Failed to mount file system");
-      }
-    }
+    ConfigStore::ConfigStore() { }
 
     SettingModel ConfigStore::load() {
-      // [default result]
+      // default result
       SettingModel model;
-
-      // [open file]
-      File file = LittleFS.open(CONFIG_FILE_PATH, "r");
-      if (!file) {
-        console.error("Failed to open config file");
-        return model;
+      // begin
+      if (LittleFS.begin()) {
+        // check exists
+        if (LittleFS.exists(CONFIG_FILE_PATH)) {
+          // open file
+          File file = LittleFS.open(CONFIG_FILE_PATH, "r");
+          if (file) {
+            // validate size
+            size_t size = file.size();
+            if (size <= DEFAULT_FILE_SIZE) {
+              // read file
+              // Allocate a buffer to store contents of the file.
+              char buffer[size];
+              // We don't use String here because ArduinoJson library requires the input
+              // buffer to be mutable. If you don't use ArduinoJson, you may as well
+              // use file.readString instead.
+              file.readBytes(buffer, size);
+              // close
+              file.close();
+              // deserialize
+              // DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
+              StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
+              auto error = deserializeJson(doc, buffer);
+              if (!error) {
+                // convert
+                _deserializeFrom(model, doc);
+              } else {
+                console.error("Failed to parse config file");
+              }
+            } else {
+              console.error("Config file size is too large");
+            }
+          } else {
+            console.error("Failed to open config file");
+          }
+        } else {
+          console.error("File notfound " + String(CONFIG_FILE_PATH));
+        }
+      } else {
+        console.error("Failed to mount file system");
       }
-      size_t size = file.size();
-      if (size > DEFAULT_FILE_SIZE) {
-        console.error("Config file size is too large");
-        return model;
-      }
-
-      // [read file]
-      // Allocate a buffer to store contents of the file.
-      std::unique_ptr<char[]> buf(new char[size]);
-      // We don't use String here because ArduinoJson library requires the input
-      // buffer to be mutable. If you don't use ArduinoJson, you may as well
-      // use file.readString instead.
-      file.readBytes(buf.get(), size);
-
-      // [deserialize]
-      // DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
-      StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
-      auto error = deserializeJson(doc, buf.get());
-      if (error) {
-        console.error("Failed to parse config file");
-        return model;
-      }
-
-      // [convert]
-      _deserializeFrom(model, doc);
+      // end
+      LittleFS.end();
       return model;
     }
 
     bool ConfigStore::save(SettingModel model) {
-      // [convert]
+      // convert
       // DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
       StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
       _serializeTo(model, doc);
-
-      // [open file]
-      File file = LittleFS.open(CONFIG_FILE_PATH, "w");
-      if (!file) {
-        console.error("Failed to open config file for writing");
-        return false;
+      bool success = false;
+      // begin
+      if (LittleFS.begin()) {
+        // open file
+        File file = LittleFS.open(CONFIG_FILE_PATH, "w");
+        if (file) {
+          // write
+          serializeJson(doc, file);
+          // close
+          file.close();
+          success = true;
+        } else {
+          console.error("Failed to open config file for writing");
+        }
+      } else {
+        console.error("Failed to mount file system");
       }
-
-      // [write]
-      serializeJson(doc, file);
-
-      // [log]
-      if (VEnv == VTest) {
-        char buffer[DEFAULT_FILE_SIZE];
-        serializeJsonPretty(doc, buffer);
-        console.debug(buffer);
-      }
-
-      return true;
+      // end
+      LittleFS.end();
+      return success;
     }
 
     void ConfigStore::_serializeTo(const SettingModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
