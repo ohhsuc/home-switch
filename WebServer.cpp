@@ -221,6 +221,7 @@ namespace Victoria {
           };
           std::function<void(File)> loopFile;
           loopFile = [&](File file)->void {
+            // https://arduino-esp8266.readthedocs.io/en/latest/filesystem.html#file-object
             File next = file.openNextFile();
             file.close();
             if (!next) {

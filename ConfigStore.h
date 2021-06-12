@@ -6,7 +6,7 @@
 #include "Commons.h"
 
 #define CONFIG_FILE_PATH "/Victoria.json"
-#define DEFAULT_FILE_SIZE 512
+#define DEFAULT_FILE_SIZE 1024
 
 namespace Victoria {
   namespace Components {

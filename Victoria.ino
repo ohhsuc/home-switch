@@ -20,9 +20,9 @@ const String hostName = "Victoria-91002";
 const String firmwareVersion = BaseAccessory::getVersion();
 
 Timer timer;
+ConfigStore configStore;
 TimesTrigger timesTrigger(10, 5 * 1000);
 WebServer webServer(80, productName, hostName, firmwareVersion);
-ConfigStore* configStore;
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
 
@@ -35,18 +35,18 @@ void ledOff() {
 }
 
 std::map<String, AccessorySetting> loadSettings() {
-  auto model = configStore->load();
+  auto model = configStore.load();
   return model.settings;
 }
 void saveSetting(const String& accessoryId, const AccessorySetting& setting) {
-  auto model = configStore->load();
+  auto model = configStore.load();
   model.settings[accessoryId] = setting;
-  configStore->save(model);
+  configStore.save(model);
 }
 void deleteSetting(const String& accessoryId, const AccessorySetting& setting) {
-  auto model = configStore->load();
+  auto model = configStore.load();
   model.settings.erase(accessoryId);
-  configStore->save(model);
+  configStore.save(model);
   // auto accessory = BaseAccessory::findAccessoryById(accessoryId);
   // if (accessory) {
   //   delete accessory;
@@ -99,7 +99,6 @@ void setup(void) {
   pinMode(LED_BUILTIN, OUTPUT);
   ledOn();
 
-  configStore = new ConfigStore();
   auto settings = loadSettings();
   if (settings.size() > 0) {
     auto pair = settings.begin();
@@ -125,10 +124,6 @@ void setup(void) {
       pinMode(inputPin, INPUT_PULLUP);
       if (setting.inputLevel > -1) {
         digitalWrite(inputPin, setting.inputLevel);
-      }
-      if (inputEvents) {
-        delete inputEvents;
-        inputEvents = NULL;
       }
       inputEvents = new ButtonEvents(id, inputPin);
       inputEvents->onClick = onButtonClick;

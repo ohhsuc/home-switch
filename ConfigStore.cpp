@@ -18,17 +18,18 @@ namespace Victoria {
           if (file) {
             // validate size
             size_t size = file.size();
+            // read file
+            // Allocate a buffer to store contents of the file.
+            char buffer[size];
+            // We don't use String here because ArduinoJson library requires the input
+            // buffer to be mutable. If you don't use ArduinoJson, you may as well
+            // use file.readString instead.
+            file.readBytes(buffer, size);
+            // close
+            file.close();
+            // deserialize
             if (size <= DEFAULT_FILE_SIZE) {
-              // read file
-              // Allocate a buffer to store contents of the file.
-              char buffer[size];
-              // We don't use String here because ArduinoJson library requires the input
-              // buffer to be mutable. If you don't use ArduinoJson, you may as well
-              // use file.readString instead.
-              file.readBytes(buffer, size);
-              // close
-              file.close();
-              // deserialize
+              // https://arduinojson.org/
               // DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
               StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
               auto error = deserializeJson(doc, buffer);
