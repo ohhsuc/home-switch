@@ -200,6 +200,7 @@ namespace Victoria {
       _dispatchRequestEnd();
     }
 
+    // https://arduino-esp8266.readthedocs.io/en/latest/filesystem.html
     void WebServer::_handleSystem() {
       _dispatchRequestStart();
       if (LittleFS.begin()) {
@@ -219,25 +220,39 @@ namespace Victoria {
           TableModel filesTable = {
             .header = { "Name", "Bytes" },
           };
-          std::function<void(File)> loopFile;
-          loopFile = [&](File file)->void {
-            // https://arduino-esp8266.readthedocs.io/en/latest/filesystem.html#file-object
-            File next = file.openNextFile();
-            file.close();
-            if (!next) {
-              return;
-            }
-            if (next.isFile()) {
-              String name = String(next.fullName());
+          // loop file method 1
+          // std::function<void(File)> loopFile;
+          // loopFile = [&](File file)->void {
+          //   File next = file.openNextFile();
+          //   file.close();
+          //   if (!next) {
+          //     return;
+          //   }
+          //   if (next.isFile()) {
+          //     String name = String(next.fullName());
+          //     String uri = "/system/file?name=" + name;
+          //     filesTable.rows.push_back({
+          //       "<a href=\"" + uri + "\">" + name + "</a>",
+          //       String(next.size()),
+          //     });
+          //   }
+          //   loopFile(next);
+          // };
+          // loopFile(LittleFS.open("/", "r"));
+
+          // loop file method 2
+          Dir dir = LittleFS.openDir("/");
+          while (dir.next()) {
+            if (dir.fileSize()) {
+              File file = dir.openFile("r");
+              String name = String(file.fullName());
               String uri = "/system/file?name=" + name;
               filesTable.rows.push_back({
                 "<a href=\"" + uri + "\">" + name + "</a>",
-                String(next.size()),
+                String(file.size()),
               });
             }
-            loopFile(next);
-          };
-          loopFile(LittleFS.open("/", "r"));
+          }
           _send200("\
             <p><a href=\"/\">Home</a></p>\
             <h3>System</h3>\
