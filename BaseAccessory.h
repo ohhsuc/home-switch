@@ -8,31 +8,29 @@
 #include <homekit/characteristics.h>
 #include "Commons.h"
 
-namespace Victoria {
-  namespace Components {
-    class BaseAccessory {
-      typedef std::function<void(const AccessoryState&)> TStateChangeHandler;
-      public:
-        BaseAccessory(String id, uint8_t outputPin, homekit_server_config_t* serverConfig, homekit_characteristic_t* mainCharacteristic);
-        ~BaseAccessory();
-        String accessoryId;
-        TStateChangeHandler onStateChange;
-        virtual AccessoryState getState();
-        virtual void setState(const AccessoryState& state);
-        static BaseAccessory* findAccessoryById(const String& accessoryId);
-        static void heartbeatAll();
-        static void loopAll();
-        static void resetAll();
-        static String getVersion();
-      protected:
-        uint8_t _outputPin;
-        homekit_server_config_t* _serverConfig;
-        homekit_characteristic_t* _mainCharacteristic;
-        void _init();
-        void _notify();
-        static BaseAccessory* _findAccessory(homekit_characteristic_t* mainCharacteristic);
-    };
-  }
+namespace Victoria::Components {
+  class BaseAccessory {
+    typedef std::function<void(const AccessoryState&)> TStateChangeHandler;
+    public:
+      BaseAccessory(String id, uint8_t outputPin, homekit_server_config_t* serverConfig, homekit_characteristic_t* mainCharacteristic);
+      ~BaseAccessory();
+      String accessoryId;
+      TStateChangeHandler onStateChange;
+      virtual AccessoryState getState();
+      virtual void setState(const AccessoryState& state);
+      static BaseAccessory* findAccessoryById(const String& accessoryId);
+      static void heartbeatAll();
+      static void loopAll();
+      static void resetAll();
+      static String getVersion();
+    protected:
+      uint8_t _outputPin;
+      homekit_server_config_t* _serverConfig;
+      homekit_characteristic_t* _mainCharacteristic;
+      void _init();
+      void _notify();
+      static BaseAccessory* _findAccessory(homekit_characteristic_t* mainCharacteristic);
+  };
 }
 
 #endif //BaseAccessory_h
