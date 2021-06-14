@@ -714,4 +714,4 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-}
+} // namespace Victoria::Components

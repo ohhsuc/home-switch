@@ -17,6 +17,6 @@ namespace Victoria::Events {
       bool _shaked = false;
       unsigned long _lastFire;
   };
-}
+} // namespace Victoria::Events
 
-#endif //ShakeEvents_h
+#endif // ShakeEvents_h

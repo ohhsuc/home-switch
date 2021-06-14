@@ -115,7 +115,7 @@ void setup(void) {
         auto booleanAccessory = new BooleanAccessory(id, outputPin);
         booleanAccessory->onStateChange = onStateChange;
       } else if (setting.type == IntegerAccessoryType) {
-        //TODO:
+        // TODO:
       }
     }
     // inputs
@@ -139,11 +139,11 @@ void setup(void) {
   webServer.onSetState = setState;
   webServer.onRequestStart = ledOn;
   webServer.onRequestEnd = ledOff;
-  webServer.onResetAccessory = [](){ BaseAccessory::resetAll(); };
+  webServer.onResetAccessory = []() { BaseAccessory::resetAll(); };
   webServer.setup();
 
   timesTrigger.onTimesOut = timesOut;
-  timer.setInterval(60 * 1000, [](){ BaseAccessory::heartbeatAll(); });
+  timer.setInterval(60 * 1000, []() { BaseAccessory::heartbeatAll(); });
 
   auto mesher = Mesher();
   auto loader = RadioFrequencyMeshLoader(10);

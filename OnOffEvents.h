@@ -17,6 +17,6 @@ namespace Victoria::Events {
       bool _lastState = false;
       unsigned long _lastTimeRead = 0;
   };
-}
+} // namespace Victoria::Events
 
-#endif //OnOffEvents_h
+#endif // OnOffEvents_h

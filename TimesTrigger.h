@@ -18,6 +18,6 @@ namespace Victoria::Events {
       int _count = 0;
       unsigned long _lastTime = 0;
   };
-}
+} // namespace Victoria::Events
 
-#endif //TimesTrigger_h
+#endif // TimesTrigger_h

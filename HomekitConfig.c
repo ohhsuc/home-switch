@@ -43,7 +43,7 @@ homekit_service_t boolService = HOMEKIT_SERVICE_(
   },
 );
 
-homekit_accessory_t *boolAccessories[] = {
+homekit_accessory_t* boolAccessories[] = {
   HOMEKIT_ACCESSORY(
     .id = 1,
     .category = homekit_accessory_category_switch,

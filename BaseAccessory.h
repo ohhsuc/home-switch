@@ -31,6 +31,6 @@ namespace Victoria::Components {
       void _notify();
       static BaseAccessory* _findAccessory(homekit_characteristic_t* mainCharacteristic);
   };
-}
+} // namespace Victoria::Components
 
-#endif //BaseAccessory_h
+#endif // BaseAccessory_h

@@ -64,4 +64,4 @@ namespace Victoria::Events {
     return false;
   }
 
-}
+} // namespace Victoria::Events

@@ -35,6 +35,6 @@ namespace Victoria::Events {
       int _loadState();
       int _lastState = 0;
   };
-}
+} // namespace Victoria::Events
 
-#endif //ButtonEvents_h
+#endif // ButtonEvents_h

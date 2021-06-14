@@ -18,6 +18,6 @@ namespace Victoria::Components {
       static void _serializeTo(const SettingModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc);
       static void _deserializeFrom(SettingModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc);
   };
-}
+} // namespace Victoria::Components
 
-#endif //ConfigStore_h
+#endif // ConfigStore_h

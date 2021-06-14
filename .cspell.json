@@ -1,9 +1,9 @@
 {
-    "version": "0.1",
-    "words": [
-      "gpio",
-      "println",
-      "wifi",
-      "ssid"
-    ]
+  "version": "0.1",
+  "words": [
+    "gpio",
+    "println",
+    "wifi",
+    "ssid"
+  ]
 }

@@ -31,13 +31,13 @@ namespace Victoria::Components {
       TMessageHandler _messageHandler;
   };
 
-  class RadioFrequencyMeshLoader: public IMeshLoader {
+  class RadioFrequencyMeshLoader : public IMeshLoader {
     public:
       RadioFrequencyMeshLoader(uint8_t inputPin);
       virtual void send(const MeshMessage& message);
   };
 
-  class BluetoothMeshLoader: public IMeshLoader {
+  class BluetoothMeshLoader : public IMeshLoader {
     public:
       BluetoothMeshLoader(uint8_t inputPin);
       virtual void send(const MeshMessage& message);
@@ -54,6 +54,6 @@ namespace Victoria::Components {
       IMeshLoader* _loader;
       void _handleMessage(MeshMessage& message);
   };
-}
+} // namespace Victoria::Components
 
-#endif //Mesher_h
+#endif // Mesher_h

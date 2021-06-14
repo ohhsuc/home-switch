@@ -45,4 +45,4 @@ namespace Victoria {
   // global
   Console console;
 
-}
+} // namespace Victoria

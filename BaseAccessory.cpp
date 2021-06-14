@@ -84,4 +84,4 @@ namespace Victoria::Components {
     return NULL;
   }
 
-}
+} // namespace Victoria::Components

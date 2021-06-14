@@ -35,7 +35,7 @@ namespace Victoria::Components {
     BaseAccessory::setState(state);
   }
 
-  void BooleanAccessory::_setter_ex(homekit_characteristic_t *ch, const homekit_value_t value) {
+  void BooleanAccessory::_setter_ex(homekit_characteristic_t* ch, const homekit_value_t value) {
     auto accessory = static_cast<BooleanAccessory*>(_findAccessory(ch));
     if (accessory) {
       accessory->_innerSetState({
@@ -44,4 +44,4 @@ namespace Victoria::Components {
     }
   }
 
-}
+} // namespace Victoria::Components

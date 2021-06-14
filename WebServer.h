@@ -61,6 +61,6 @@ namespace Victoria::Components {
       void _handleCrossOrigin();
       void _handleNotFound();
   };
-}
+} // namespace Victoria::Components
 
-#endif //WebServer_h
+#endif // WebServer_h

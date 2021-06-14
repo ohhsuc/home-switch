@@ -56,12 +56,11 @@ namespace Victoria::Events {
       }
     }
 
-    else {   // (_buttonState == AWAIT_MULTI_PRESS)
+    else { // (_buttonState == AWAIT_MULTI_PRESS)
       if (digitalRead(_inputPin) == LOW) {
         _buttonState = DEBOUNCE_PRESS;
         _eventTime = millis();
-      }
-      else if ((millis() - _eventTime) > _multiClickTime) {
+      } else if ((millis() - _eventTime) > _multiClickTime) {
         _buttonState = AWAIT_PRESS;
         return clicks;
       }
@@ -70,4 +69,4 @@ namespace Victoria::Events {
     return 0;
   }
 
-}
+} // namespace Victoria::Events

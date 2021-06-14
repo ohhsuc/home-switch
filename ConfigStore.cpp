@@ -3,7 +3,7 @@
 
 namespace Victoria::Components {
 
-  ConfigStore::ConfigStore() { }
+  ConfigStore::ConfigStore() {}
 
   SettingModel ConfigStore::load() {
     // default result
@@ -127,4 +127,4 @@ namespace Victoria::Components {
     }
   }
 
-}
+} // namespace Victoria::Components

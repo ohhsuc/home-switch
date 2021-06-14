@@ -28,4 +28,4 @@ namespace Victoria::Events {
     }
   }
 
-}
+} // namespace Victoria::Events

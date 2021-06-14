@@ -74,4 +74,4 @@ namespace Victoria::Components {
     _loader->send(message);
   }
 
-}
+} // namespace Victoria::Components
