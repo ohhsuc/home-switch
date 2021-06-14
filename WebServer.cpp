@@ -253,7 +253,7 @@ namespace Victoria::Components {
           }
         }
         _send200("\
-          <p><a href=\"/\">Home</a></p>\
+          <p><a href=\"/\">&lt; Home</a></p>\
           <h3>System</h3>\
           <p>\
             " + _renderTable(infoTable) + "\
@@ -283,7 +283,7 @@ namespace Victoria::Components {
         String content = file.readString();
         file.close();
         _send200("\
-          <p><a href=\"/system\">System</a></p>\
+          <p><a href=\"/system\">&lt; System</a></p>\
           <h3>" + fileName + " " + String(size) + " bytes</h3>\
           <p>\
             <textarea name=\"Content\" cols=\"50\" rows=\"10\">" + content + "</textarea>\
@@ -315,7 +315,7 @@ namespace Victoria::Components {
       ";
     }
     _send200("\
-      <p><a href=\"/\">Home</a></p>\
+      <p><a href=\"/\">&lt; Home</a></p>\
       <h3>Connect WiFi</h3>\
       <form method=\"post\" action=\"/wifi/connect\">\
         <ul>" + list + "</ul>\
@@ -336,7 +336,7 @@ namespace Victoria::Components {
 
     if (WiFi.status() == WL_CONNECTED && WiFi.SSID() == ssid) {
       _send200("\
-        <p><a href=\"/\">Home</a></p>\
+        <p><a href=\"/\">&lt; Home</a></p>\
         <fieldset>\
           <legend>Ignore</legend>\
           <p>Ignore network setup</p>\
@@ -365,7 +365,7 @@ namespace Victoria::Components {
     bool isConnected = WiFi.status() == WL_CONNECTED;
     if (isConnected) {
       _send200("\
-        <p><a href=\"/\">Home</a></p>\
+        <p><a href=\"/\">&lt; Home</a></p>\
         <fieldset>\
           <legend>Success</legend>\
           <p>Connected to <b>" + ssid + "</b></p>\
@@ -374,7 +374,7 @@ namespace Victoria::Components {
       ");
     } else {
       _send200("\
-        <p><a href=\"/\">Home</a></p>\
+        <p><a href=\"/\">&lt; Home</a></p>\
         <fieldset>\
           <legend>Failed</legend>\
           <p>Connect <b>" + ssid + "</b> failed</p>\
@@ -446,7 +446,7 @@ namespace Victoria::Components {
     } else {
       _send200("\
         <p>\
-          <a href=\"/\">Home</a> |\
+          <a href=\"/\">&lt; Home</a> |\
           <a href=\"/accessory/state?id=" + accessoryId + "\">State</a>\
         </p>\
         <h3>Setting (" + setting.name + ")</h3>\
@@ -470,6 +470,7 @@ namespace Victoria::Components {
   void WebServer::_handleAccessoryState() {
     _dispatchRequestStart();
     String accessoryId = _server->arg("id");
+    String backUrl = "/accessory?id=" + accessoryId;
     String currentUrl = "/accessory/state?id=" + accessoryId;
     std::pair<bool, AccessorySetting> found = _getAccessorySetting(accessoryId);
     AccessorySetting setting = found.second;
@@ -502,7 +503,9 @@ namespace Victoria::Components {
         setting.type == BooleanAccessoryType ? _getBooleanHtml(state) :
         setting.type == IntegerAccessoryType ? _getIntegerHtml(state) : "";
       _send200("\
-        <p><a href=\"/\">Home</a></p>\
+        <p>\
+          <a href=\"" + backUrl + "\">&lt; Setting (" + setting.name + ")</a>\
+        </p>\
         <h3>State (" + setting.name + ")</h3>\
         <form method=\"post\" action=\"" + currentUrl + "\">\
           " + stateHtml + "\
@@ -527,7 +530,7 @@ namespace Victoria::Components {
     }
     if (!foundSetting) {
       _send200("\
-        <p><a href=\"/\">Home</a></p>\
+        <p><a href=\"/\">&lt; Home</a></p>\
         <fieldset>\
           <legend>Oops...</legend>\
           <p>Accessory Not Found</p>\
@@ -671,7 +674,7 @@ namespace Victoria::Components {
       _redirectTo("/");
     } else {
       _send200("\
-        <p><a href=\"/\">Home</a></p>\
+        <p><a href=\"/\">&lt; Home</a></p>\
         <h3>Reset</h3>\
         <form method=\"post\" action=\"/reset\">\
           <p>\
@@ -703,7 +706,7 @@ namespace Victoria::Components {
     _dispatchRequestStart();
     String method = (_server->method() == HTTP_GET) ? "GET" : "POST";
     _send404("\
-      <p><a href=\"/\">Home</a></p>\
+      <p><a href=\"/\">&lt; Home</a></p>\
       <fieldset>\
         <legend>Oops...</legend>\
         <p>Resource Not Found</p>\
