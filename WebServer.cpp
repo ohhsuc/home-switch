@@ -667,17 +667,17 @@ namespace Victoria::Components {
         WiFi.mode(WIFI_AP_STA);
         console.log("Wifi mode: WIFI_AP_STA");
       }
-      String accessoryReset = _server->arg("AccessoryReset");
-      if (accessoryReset == "1" && onResetAccessory) {
+      if (_server->arg("AccessoryReset") == "1" && onResetAccessory) {
         onResetAccessory();
       }
-      String espRestart = _server->arg("EspRestart");
-      if (espRestart == "1") {
+      if (_server->arg("EspRestart") == "1") {
         // sdk_system_restart();
         ESP.restart();
       }
-      String espEraseConfig = _server->arg("EspEraseConfig");
-      if (espEraseConfig == "1") {
+      if (_server->arg("EspReset") == "1") {
+        ESP.reset();
+      }
+      if (_server->arg("EspEraseConfig") == "1") {
         ESP.eraseConfig();
       }
       _redirectTo("/");
@@ -690,6 +690,7 @@ namespace Victoria::Components {
             { "Reset Wifi", "WifiReset", "1", "checkbox", "" },
             { "Accessory Reset", "AccessoryReset", "1", "checkbox", "" },
             { "ESP Restart", "EspRestart", "1", "checkbox", "" },
+            { "ESP Reset", "EspReset", "1", "checkbox", "" },
             { "ESP Erase Config", "EspEraseConfig", "1", "checkbox", "" },
           }) + "\
           <p><input type=\"submit\" value=\"Submit\" /></p>\
