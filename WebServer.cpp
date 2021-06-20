@@ -655,21 +655,25 @@ namespace Victoria::Components {
   void WebServer::_handleReset() {
     _dispatchRequestStart();
     if (_server->method() == HTTP_POST) {
-      String resetWifi = _server->arg("ResetWifi");
-      if (resetWifi == "yes") {
+      String wifiReset = _server->arg("WifiReset");
+      if (wifiReset == "1") {
         // wifi_config_reset();
         WiFi.disconnect(true);
         WiFi.mode(WIFI_AP_STA);
         console.log("Wifi mode: WIFI_AP_STA");
       }
-      String resetAccessory = _server->arg("ResetAccessory");
-      if (resetAccessory == "yes" && onResetAccessory) {
+      String accessoryReset = _server->arg("AccessoryReset");
+      if (accessoryReset == "1" && onResetAccessory) {
         onResetAccessory();
       }
-      String restartESP = _server->arg("RestartESP");
-      if (restartESP == "yes") {
+      String espRestart = _server->arg("EspRestart");
+      if (espRestart == "1") {
         // sdk_system_restart();
         ESP.restart();
+      }
+      String espEraseConfig = _server->arg("EspEraseConfig");
+      if (espEraseConfig == "1") {
+        ESP.eraseConfig();
       }
       _redirectTo("/");
     } else {
@@ -678,16 +682,20 @@ namespace Victoria::Components {
         <h3>Reset</h3>\
         <form method=\"post\" action=\"/reset\">\
           <p>\
-            <input type=\"checkbox\" id=\"chkResetWifi\" name=\"ResetWifi\" value=\"yes\" />\
-            <label for=\"chkResetWifi\">Reset Wifi</label>\
+            <input type=\"checkbox\" id=\"chkWifiReset\" name=\"WifiReset\" value=\"1\" />\
+            <label for=\"chkWifiReset\">Reset Wifi</label>\
           </p>\
           <p>\
-            <input type=\"checkbox\" id=\"chkResetAccessory\" name=\"ResetAccessory\" value=\"yes\" />\
-            <label for=\"chkResetAccessory\">Reset Accessory</label>\
+            <input type=\"checkbox\" id=\"chkAccessoryReset\" name=\"AccessoryReset\" value=\"1\" />\
+            <label for=\"chkAccessoryReset\">Accessory Reset</label>\
           </p>\
           <p>\
-            <input type=\"checkbox\" id=\"chkRestartESP\" name=\"RestartESP\" value=\"yes\" />\
-            <label for=\"chkRestartESP\">Restart ESP</label>\
+            <input type=\"checkbox\" id=\"chkEspRestart\" name=\"EspRestart\" value=\"1\" />\
+            <label for=\"chkEspRestart\">ESP Restart</label>\
+          </p>\
+          <p>\
+            <input type=\"checkbox\" id=\"chkEspEraseConfig\" name=\"EspEraseConfig\" value=\"1\" />\
+            <label for=\"chkEspEraseConfig\">ESP Erase Config</label>\
           </p>\
           <p><input type=\"submit\" value=\"Submit\" /></p>\
         </form>\
