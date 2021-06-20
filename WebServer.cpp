@@ -276,8 +276,8 @@ namespace Victoria::Components {
   void WebServer::_handleSystemFile() {
     _dispatchRequestStart();
     if (LittleFS.begin()) {
-      String fileName = "/" + _server->arg("name");
-      File file = LittleFS.open(fileName, "r");
+      String fileName = _server->arg("name");
+      File file = LittleFS.open("/" + fileName, "r");
       if (file) {
         size_t size = file.size();
         String content = file.readString();
@@ -571,20 +571,29 @@ namespace Victoria::Components {
     return html;
   }
 
+  String WebServer::_renderSelectionList(std::vector<std::vector<String>> list) {
+    String html = "";
+    for (const auto& item : list) {
+      html += "\
+        <p>\
+          <input type=\"" + item[3] + "\" id=\"id" + item[1] + item[2] + "\" name=\"" + item[1] + "\" value=\"" + item[2] + "\"" + item[4] + " />\
+          <label for=\"id" + item[1] + item[2] + "\">" + item[0] + "</label>\
+        </p>\
+      ";
+    }
+    return html;
+  }
+
   String WebServer::_getTypeHtml(const AccessorySetting& setting) {
     String booleanAttribute = _getCheckedAttr(setting.type == BooleanAccessoryType);
     String integerAttribute = _getCheckedAttr(setting.type == IntegerAccessoryType);
     String html = "\
       <fieldset>\
         <legend>Accessory Type</legend>\
-        <p>\
-          <input type=\"radio\" id=\"rdoBooleanType\" name=\"AccessoryType\" value=\"boolean\"" + booleanAttribute + " />\
-          <label for=\"rdoBooleanType\">Boolean - Accessory with boolean value such as switcher(on/off), shake sensor(yes/no)</label>\
-        </p>\
-        <p>\
-          <input type=\"radio\" id=\"rdoIntegerType\" name=\"AccessoryType\" value=\"integer\"" + integerAttribute + " />\
-          <label for=\"rdoIntegerType\">Integer - Accessory with integer value such as temperature, humidness</label>\
-        </p>\
+        " + _renderSelectionList({
+          { "Boolean - Accessory with boolean value such as switcher(on/off), shake sensor(yes/no)", "AccessoryType", "boolean", "radio", booleanAttribute },
+          { "Integer - Accessory with integer value such as temperature, humidness", "AccessoryType", "integer", "radio", integerAttribute },
+        }) + "\
       </fieldset>\
     ";
     return html;
@@ -626,14 +635,10 @@ namespace Victoria::Components {
     String html = "\
       <fieldset>\
         <legend>Boolean Value</legend>\
-        <p>\
-          <input type=\"radio\" id=\"rdoBooleanTrue\" name=\"BooleanValue\" value=\"true\"" + trueAttribute + " />\
-          <label for=\"rdoBooleanTrue\">On/Yes/True</label>\
-        </p>\
-        <p>\
-          <input type=\"radio\" id=\"rdoBooleanFalse\" name=\"BooleanValue\" value=\"false\"" + falseAttribute + " />\
-          <label for=\"rdoBooleanFalse\">Off/No/False</label>\
-        </p>\
+        " + _renderSelectionList({
+          { "On/Yes/True", "BooleanValue", "true", "radio", trueAttribute },
+          { "Off/No/False", "BooleanValue", "false", "radio", falseAttribute },
+        }) + "\
       </fieldset>\
     ";
     return html;
@@ -681,22 +686,12 @@ namespace Victoria::Components {
         <p><a href=\"/\">&lt; Home</a></p>\
         <h3>Reset</h3>\
         <form method=\"post\" action=\"/reset\">\
-          <p>\
-            <input type=\"checkbox\" id=\"chkWifiReset\" name=\"WifiReset\" value=\"1\" />\
-            <label for=\"chkWifiReset\">Reset Wifi</label>\
-          </p>\
-          <p>\
-            <input type=\"checkbox\" id=\"chkAccessoryReset\" name=\"AccessoryReset\" value=\"1\" />\
-            <label for=\"chkAccessoryReset\">Accessory Reset</label>\
-          </p>\
-          <p>\
-            <input type=\"checkbox\" id=\"chkEspRestart\" name=\"EspRestart\" value=\"1\" />\
-            <label for=\"chkEspRestart\">ESP Restart</label>\
-          </p>\
-          <p>\
-            <input type=\"checkbox\" id=\"chkEspEraseConfig\" name=\"EspEraseConfig\" value=\"1\" />\
-            <label for=\"chkEspEraseConfig\">ESP Erase Config</label>\
-          </p>\
+          " + _renderSelectionList({
+            { "Reset Wifi", "WifiReset", "1", "checkbox", "" },
+            { "Accessory Reset", "AccessoryReset", "1", "checkbox", "" },
+            { "ESP Restart", "EspRestart", "1", "checkbox", "" },
+            { "ESP Erase Config", "EspEraseConfig", "1", "checkbox", "" },
+          }) + "\
           <p><input type=\"submit\" value=\"Submit\" /></p>\
         </form>\
       ");
