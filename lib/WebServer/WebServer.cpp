@@ -24,11 +24,6 @@ namespace Victoria::Components {
       WiFi.mode(WIFI_AP_STA);
       wifiMode = WIFI_AP_STA;
     }
-    console.log("Wifi mode: WIFI_AP_STA");
-
-    WiFi.hostname(_hostName);
-    WiFi.setAutoConnect(true);
-    WiFi.setAutoReconnect(true);
 
     bool isApEnabled = ((wifiMode & WIFI_AP) != 0);
     if (isApEnabled) {
@@ -41,6 +36,12 @@ namespace Victoria::Components {
         console.log("AP Address: " + currentApIp.toString());
       }
     }
+
+    WiFi.hostname(_hostName);
+    WiFi.setAutoConnect(true);
+    WiFi.setAutoReconnect(true);
+    WiFi.persistent(true);
+    WiFi.begin();
 
     _server->on("/", HTTP_GET, std::bind(&WebServer::_handleRoot, this));
     _server->on("/system", HTTP_GET, std::bind(&WebServer::_handleSystem, this));

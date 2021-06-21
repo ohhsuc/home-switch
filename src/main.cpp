@@ -143,7 +143,7 @@ void setup(void) {
   webServer.setup();
 
   timesTrigger.onTimesOut = timesOut;
-  timer.setInterval(60 * 1000, []() { BaseAccessory::heartbeatAll(); });
+  timer.setInterval(15 * 60 * 1000, []() { BaseAccessory::heartbeatAll(); });
 
   auto mesher = Mesher();
   auto loader = RadioFrequencyMeshLoader(10);
