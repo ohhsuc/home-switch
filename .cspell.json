@@ -4,6 +4,7 @@
     "gpio",
     "println",
     "wifi",
-    "ssid"
+    "ssid",
+    "mDNS"
   ]
 }
