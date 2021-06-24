@@ -99,6 +99,23 @@ void setup(void) {
   pinMode(LED_BUILTIN, OUTPUT);
   ledOn();
 
+  webServer.onLoadSettings = loadSettings;
+  webServer.onSaveSetting = saveSetting;
+  webServer.onDeleteSetting = deleteSetting;
+  webServer.onGetState = getState;
+  webServer.onSetState = setState;
+  webServer.onRequestStart = ledOn;
+  webServer.onRequestEnd = ledOff;
+  webServer.onResetAccessory = []() { BaseAccessory::resetAll(); };
+  webServer.setup();
+
+  timesTrigger.onTimesOut = timesOut;
+  timer.setInterval(15 * 60 * 1000, []() { BaseAccessory::heartbeatAll(); });
+
+  auto mesher = Mesher();
+  auto loader = RadioFrequencyMeshLoader(10);
+  mesher.setLoader(&loader);
+
   auto settings = loadSettings();
   if (settings.size() > 0) {
     auto pair = settings.begin();
@@ -131,23 +148,6 @@ void setup(void) {
       onOffEvents->onToggle = onToggle;
     }
   }
-
-  webServer.onLoadSettings = loadSettings;
-  webServer.onSaveSetting = saveSetting;
-  webServer.onDeleteSetting = deleteSetting;
-  webServer.onGetState = getState;
-  webServer.onSetState = setState;
-  webServer.onRequestStart = ledOn;
-  webServer.onRequestEnd = ledOff;
-  webServer.onResetAccessory = []() { BaseAccessory::resetAll(); };
-  webServer.setup();
-
-  timesTrigger.onTimesOut = timesOut;
-  timer.setInterval(15 * 60 * 1000, []() { BaseAccessory::heartbeatAll(); });
-
-  auto mesher = Mesher();
-  auto loader = RadioFrequencyMeshLoader(10);
-  mesher.setLoader(&loader);
 
   console.log("Firmware Version: " + firmwareVersion);
   console.log("Setup Complete!");
