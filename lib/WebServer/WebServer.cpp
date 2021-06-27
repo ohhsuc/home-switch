@@ -359,10 +359,11 @@ namespace Victoria::Components {
     }
 
     console.log("Wifi > SSID > " + ssid);
-    console.log("Wifi > PASSWORD > " + password);
+    console.log("Wifi > Password > " + password);
+    WiFi.persistent(true);
     WiFi.begin(ssid, password);
     // Wait for connecting
-    int checkTimes = 30;
+    int checkTimes = 60;
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
       console.write(".");
@@ -374,7 +375,7 @@ namespace Victoria::Components {
     }
     console.newline();
     bool isConnected = WiFi.status() == WL_CONNECTED;
-    console.log('Wifi > Connected > ' + String(isConnected));
+    console.log("Wifi > Connected > " + String(isConnected));
     if (isConnected) {
       _send200("\
         <p><a href=\"/\">&lt; Home</a></p>\

@@ -1,5 +1,6 @@
 #include <map>
 #include <Arduino.h>
+#include <ESP8266mDNS.h>
 #include "Commons.h"
 #include "ConfigStore.h"
 #include "WebServer.h"
@@ -106,6 +107,7 @@ void setup(void) {
   webServer.setup();
 
   timesTrigger.onTimesOut = timesOut;
+  timer.setInterval(5 * 1000, []() { MDNS.announce(); });
   timer.setInterval(15 * 60 * 1000, []() { BaseAccessory::heartbeatAll(); });
 
   auto mesher = Mesher();
