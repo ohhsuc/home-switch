@@ -55,6 +55,7 @@ namespace Victoria::Components {
       static String _getLevelHtml(const String name, const short int level);
       static String _getBooleanHtml(const AccessoryState& state);
       static String _getIntegerHtml(const AccessoryState& state);
+      static void _onWifiEvent(WiFiEvent_t event);
       void _handleReset();
       void _handleCrossOrigin();
       void _handleNotFound();

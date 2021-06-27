@@ -51,6 +51,7 @@ namespace Victoria::Components {
     WiFi.setAutoReconnect(true);
     WiFi.persistent(true);
     WiFi.begin();
+    WiFi.onEvent(WebServer::_onWifiEvent, WiFiEvent::WIFI_EVENT_ANY);
 
     _server->on("/", HTTP_GET, std::bind(&WebServer::_handleRoot, this));
     _server->on("/system", HTTP_GET, std::bind(&WebServer::_handleSystem, this));
@@ -668,6 +669,28 @@ namespace Victoria::Components {
       </fieldset>\
     ";
     return html;
+  }
+
+  void WebServer::_onWifiEvent(WiFiEvent_t event) {
+    switch (event) {
+      case WiFiEvent::WIFI_EVENT_STAMODE_CONNECTED:
+        console.log("Wifi > Event > STA connected");
+        break;
+      case WiFiEvent::WIFI_EVENT_STAMODE_DISCONNECTED:
+        console.log("Wifi > Event > STA disconnected");
+        break;
+      case WiFiEvent::WIFI_EVENT_STAMODE_GOT_IP:
+        console.log("Wifi > Event > STA got ip");
+        break;
+      case WiFiEvent::WIFI_EVENT_SOFTAPMODE_STACONNECTED:
+        console.log("Wifi > Event > AP connected");
+        break;
+      case WiFiEvent::WIFI_EVENT_SOFTAPMODE_STADISCONNECTED:
+        console.log("Wifi > Event > AP disconnected");
+        break;
+      default:
+        break;
+    }
   }
 
   void WebServer::_handleReset() {
