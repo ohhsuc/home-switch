@@ -22,7 +22,6 @@ namespace Victoria::Components {
       static void heartbeatAll();
       static void loopAll();
       static void resetAll();
-      static String getVersion();
     protected:
       uint8_t _outputPin;
       homekit_server_config_t* _serverConfig;

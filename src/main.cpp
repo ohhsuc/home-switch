@@ -15,14 +15,10 @@ using namespace Victoria;
 using namespace Victoria::Events;
 using namespace Victoria::Components;
 
-const String productName = "Victoria";
-const String hostName = "Victoria-91002";
-const String firmwareVersion = BaseAccessory::getVersion();
-
 Timer timer;
 ConfigStore configStore;
 TimesTrigger timesTrigger(10, 5 * 1000);
-WebServer webServer(80, productName, hostName, firmwareVersion);
+WebServer webServer(80);
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
 
@@ -149,7 +145,6 @@ void setup(void) {
     }
   }
 
-  console.log("Firmware Version: " + firmwareVersion);
   console.log("Setup Complete!");
   ledOff();
 }

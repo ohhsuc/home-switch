@@ -1,13 +1,22 @@
 #include <LittleFS.h>
 #include "WebServer.h"
 
+#ifndef FIRMWARE_NAME
+#define FIRMWARE_NAME "Victoria"
+#endif
+
+#ifndef FIRMWARE_VERSION
+#define FIRMWARE_VERSION "1.0.0"
+#endif
+
+#ifndef WIFI_HOST_NAME
+#define WIFI_HOST_NAME "Victoria-91002"
+#endif
+
 namespace Victoria::Components {
 
-  WebServer::WebServer(int port, const String& productName, const String& hostName, const String& firmwareVersion) {
+  WebServer::WebServer(int port) {
     _server = new ESP8266WebServer(port);
-    _productName = productName;
-    _hostName = hostName;
-    _firmwareVersion = firmwareVersion;
   }
 
   WebServer::~WebServer() {
@@ -30,14 +39,14 @@ namespace Victoria::Components {
       // IPAddress apIp(192, 168, 1, 33);
       // IPAddress apSubnet(255, 255, 255, 0);
       // WiFi.softAPConfig(apIp, apIp, apSubnet);
-      WiFi.softAP(_hostName);
+      WiFi.softAP(WIFI_HOST_NAME); // name which is displayed on AP list
       IPAddress currentApIp = WiFi.softAPIP();
       if (currentApIp) {
-        console.log("AP Address: " + currentApIp.toString());
+        console.log("Wifi > AP Address: " + currentApIp.toString());
       }
     }
 
-    WiFi.hostname(_hostName);
+    WiFi.hostname(WIFI_HOST_NAME); // name which is displayed on router
     WiFi.setAutoConnect(true);
     WiFi.setAutoReconnect(true);
     WiFi.persistent(true);
@@ -48,7 +57,7 @@ namespace Victoria::Components {
     _server->on("/system/file", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
     _server->on("/system/file", HTTP_ANY, std::bind(&WebServer::_handleSystemFile, this));
     _server->on("/wifi/list", HTTP_GET, std::bind(&WebServer::_handleWifiList, this));
-    _server->on("/wifi/connect", HTTP_POST, std::bind(&WebServer::_handleWifiConnect, this));
+    _server->on("/wifi/join", HTTP_POST, std::bind(&WebServer::_handleWifiJoin, this));
     _server->on("/accessory/new", HTTP_GET, std::bind(&WebServer::_handleNewAccessory, this));
     _server->on("/accessory", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
     _server->on("/accessory", HTTP_ANY, std::bind(&WebServer::_handleAccessory, this));
@@ -78,11 +87,12 @@ namespace Victoria::Components {
   }
 
   String WebServer::_formatPage(const String& bodyHtml) {
+    String productName = FIRMWARE_NAME;
     return "\
       <!DOCTYPE HTML>\
       <html>\
         <head>\
-          <title>" + _productName + "</title>\
+          <title>" + productName + "</title>\
           <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
           <style>\
             html, body { background: transparent; font-family: Arial, Sans-Serif; margin: 0; padding: 0; border: 0; color: #4f4e4e; }\
@@ -97,7 +107,7 @@ namespace Victoria::Components {
           </style>\
         </head>\
         <body>\
-          <h2 class=\"title\">" + _productName + "</h2>\
+          <h2 class=\"title\">" + productName + "</h2>\
           <div class=\"container\">\
             " + bodyHtml + "\
           </div>\
@@ -179,7 +189,7 @@ namespace Victoria::Components {
         { "AP Address", strApIP != "" ? "<a href=\"http://" + strApIP + "\">" + strApIP + "</a>" : "-" },
         { "IP Address", strLocalIP != "" ? "<a href=\"http://" + strLocalIP + "\">" + strLocalIP + "</a>" : "-" },
         { "MAC Address", macAddr },
-        { "Firmware Version", _firmwareVersion },
+        { "Firmware Version", FIRMWARE_VERSION },
       },
     };
     // content
@@ -266,10 +276,10 @@ namespace Victoria::Components {
           </p>\
         ");
       } else {
-        console.error("Read fs info failed");
+        console.error("LittleFS > Read fs info failed");
       }
     } else {
-      console.error("Failed to mount file system");
+      console.error("LittleFS > Failed to mount file system");
     }
     LittleFS.end();
     _dispatchRequestEnd();
@@ -292,10 +302,10 @@ namespace Victoria::Components {
           </p>\
         ");
       } else {
-        console.error("Failed to open file " + fileName);
+        console.error("LittleFS > Failed to open file " + fileName);
       }
     } else {
-      console.error("Failed to mount file system");
+      console.error("LittleFS > Failed to mount file system");
     }
     LittleFS.end();
     _dispatchRequestEnd();
@@ -318,20 +328,20 @@ namespace Victoria::Components {
     }
     _send200("\
       <p><a href=\"/\">&lt; Home</a></p>\
-      <h3>Connect WiFi</h3>\
-      <form method=\"post\" action=\"/wifi/connect\">\
+      <h3>Join WiFi</h3>\
+      <form method=\"post\" action=\"/wifi/join\">\
         <ul>" + list + "</ul>\
         <p>\
           <label for=\"txtPassword\">Password:</label>\
           <input type=\"text\" id=\"txtPassword\" name=\"password\" length=\"64\" />\
         </p>\
-        <p><input type=\"submit\" class=\"button\" value=\"Connect\" /></p>\
+        <p><input type=\"submit\" class=\"button\" value=\"Join\" /></p>\
       </form>\
     ");
     _dispatchRequestEnd();
   }
 
-  void WebServer::_handleWifiConnect() {
+  void WebServer::_handleWifiJoin() {
     _dispatchRequestStart();
     String ssid = _server->arg("ssid");
     String password = _server->arg("password");
@@ -348,10 +358,10 @@ namespace Victoria::Components {
       return;
     }
 
-    console.log("SSID: " + ssid);
-    console.log("PASSWORD: " + password);
+    console.log("Wifi > SSID > " + ssid);
+    console.log("Wifi > PASSWORD > " + password);
     WiFi.begin(ssid, password);
-    // Wait for connection
+    // Wait for connecting
     int checkTimes = 30;
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
@@ -363,14 +373,14 @@ namespace Victoria::Components {
       }
     }
     console.newline();
-
     bool isConnected = WiFi.status() == WL_CONNECTED;
+    console.log('Wifi > Connected > ' + String(isConnected));
     if (isConnected) {
       _send200("\
         <p><a href=\"/\">&lt; Home</a></p>\
         <fieldset>\
           <legend>Success</legend>\
-          <p>Connected to <b>" + ssid + "</b></p>\
+          <p>Joined to <b>" + ssid + "</b></p>\
           <p>IP address <b>" + WiFi.localIP().toString() + "</b></p>\
         </fieldset>\
       ");
@@ -379,7 +389,7 @@ namespace Victoria::Components {
         <p><a href=\"/\">&lt; Home</a></p>\
         <fieldset>\
           <legend>Failed</legend>\
-          <p>Connect <b>" + ssid + "</b> failed</p>\
+          <p>Joining to <b>" + ssid + "</b> failed</p>\
         </fieldset>\
       ");
     }
@@ -667,7 +677,7 @@ namespace Victoria::Components {
         // wifi_config_reset();
         WiFi.disconnect(true);
         WiFi.mode(WIFI_AP_STA);
-        console.log("Wifi mode: WIFI_AP_STA");
+        console.log("Wifi > Mode: WIFI_AP_STA");
       }
       if (_server->arg("AccessoryReset") == "1" && onResetAccessory) {
         onResetAccessory();

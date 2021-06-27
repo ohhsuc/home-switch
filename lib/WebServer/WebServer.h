@@ -16,7 +16,7 @@ namespace Victoria::Components {
     typedef std::function<void(const String&, const AccessorySetting&, AccessoryState&)> TSetAccessoryStateHandler;
     typedef std::function<void()> TServerEventHandler;
     public:
-      WebServer(int port, const String& productName, const String& hostName, const String& firmwareVersion);
+      WebServer(int port);
       ~WebServer();
       void setup();
       void loop();
@@ -31,9 +31,6 @@ namespace Victoria::Components {
       TServerEventHandler onRequestEnd;
       TServerEventHandler onResetAccessory;
     private:
-      String _productName;
-      String _hostName;
-      String _firmwareVersion;
       ESP8266WebServer* _server;
       void _redirectTo(const String& url);
       void _send200(const String& bodyHtml);
@@ -45,7 +42,7 @@ namespace Victoria::Components {
       void _handleSystem();
       void _handleSystemFile();
       void _handleWifiList();
-      void _handleWifiConnect();
+      void _handleWifiJoin();
       void _handleNewAccessory();
       void _handleAccessory();
       void _handleAccessoryState();
