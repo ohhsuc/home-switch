@@ -29,6 +29,8 @@ namespace Victoria::Components {
       TServerEventHandler onRequestStart;
       TServerEventHandler onRequestEnd;
       TServerEventHandler onResetAccessory;
+      // static
+      static String getHostName();
     private:
       ConfigStore* _configStore;
       ESP8266WebServer* _server;

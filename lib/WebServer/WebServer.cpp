@@ -9,10 +9,6 @@
 #define FIRMWARE_VERSION "1.0.0"
 #endif
 
-#ifndef WIFI_HOST_NAME
-#define WIFI_HOST_NAME "Victoria-91002"
-#endif
-
 namespace Victoria::Components {
 
   WebServer::WebServer(ConfigStore* configStore, int port) {
@@ -35,13 +31,7 @@ namespace Victoria::Components {
       wifiMode = WIFI_AP_STA;
     }
 
-    String id = WiFi.macAddress();
-    id.replace(":", "");
-    id.toUpperCase();
-    id = id.substring(id.length() - 4);
-    String hostName = WIFI_HOST_NAME;
-    hostName = hostName + "-" + id;
-
+    String hostName = getHostName();
     bool isApEnabled = ((wifiMode & WIFI_AP) != 0);
     if (isApEnabled) {
       // IPAddress apIp(192, 168, 1, 33);
@@ -80,6 +70,20 @@ namespace Victoria::Components {
 
   void WebServer::loop() {
     _server->handleClient();
+  }
+
+  String WebServer::getHostName() {
+    String id = WiFi.macAddress();
+    id.replace(":", "");
+    id.toUpperCase();
+    id = id.substring(id.length() - 4);
+
+    String firmwareVersion = FIRMWARE_VERSION;
+    firmwareVersion.replace(".", "");
+
+    String productName = FIRMWARE_NAME;
+    String hostName = productName + "-" + firmwareVersion + "-" + id;
+    return hostName;
   }
 
   std::pair<bool, ServiceSetting> WebServer::_getService(const String& serviceId) {
