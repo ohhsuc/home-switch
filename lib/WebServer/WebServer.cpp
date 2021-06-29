@@ -35,19 +35,26 @@ namespace Victoria::Components {
       wifiMode = WIFI_AP_STA;
     }
 
+    String id = WiFi.macAddress();
+    id.replace(":", "");
+    id.toUpperCase();
+    id = id.substring(id.length() - 4);
+    String hostName = WIFI_HOST_NAME;
+    hostName = hostName + "-" + id;
+
     bool isApEnabled = ((wifiMode & WIFI_AP) != 0);
     if (isApEnabled) {
       // IPAddress apIp(192, 168, 1, 33);
       // IPAddress apSubnet(255, 255, 255, 0);
       // WiFi.softAPConfig(apIp, apIp, apSubnet);
-      WiFi.softAP(WIFI_HOST_NAME); // name which is displayed on AP list
+      WiFi.softAP(hostName); // name which is displayed on AP list
       IPAddress currentApIp = WiFi.softAPIP();
       if (currentApIp) {
-        console.log("Wifi > AP Address: " + currentApIp.toString());
+        console.log("Wifi > AP Address > " + currentApIp.toString());
       }
     }
 
-    WiFi.hostname(WIFI_HOST_NAME); // name which is displayed on router
+    WiFi.hostname(hostName); // name which is displayed on router
     WiFi.setAutoConnect(true);
     WiFi.setAutoReconnect(true);
     WiFi.persistent(true);
@@ -205,6 +212,8 @@ namespace Victoria::Components {
         strApIP = apIP.toString();
       }
     }
+    // ssid
+    String ssidJoined = WiFi.SSID();
     // mac
     String macAddr = WiFi.macAddress();
     // services
@@ -224,9 +233,10 @@ namespace Victoria::Components {
       .header = {},
       .rows = {
         { "Wifi Mode", strWifiMode },
-        { "AP Address", strApIP != "" ? "<a href=\"http://" + strApIP + "\">" + strApIP + "</a>" : "-" },
+        { "Joined", ssidJoined != "" ? ssidJoined : "-" },
         { "IP Address", strLocalIP != "" ? "<a href=\"http://" + strLocalIP + "\">" + strLocalIP + "</a>" : "-" },
         { "MAC Address", macAddr },
+        { "AP Address", strApIP != "" ? "<a href=\"http://" + strApIP + "\">" + strApIP + "</a>" : "-" },
         { "Firmware Version", FIRMWARE_VERSION },
       },
     };
@@ -384,12 +394,12 @@ namespace Victoria::Components {
     String ssid = _server->arg("ssid");
     String password = _server->arg("password");
 
-    if (WiFi.status() == WL_CONNECTED && WiFi.SSID() == ssid) {
+    if (!ssid || ssid == "") {
       _send200("\
         <p><a href=\"/\">&lt; Home</a></p>\
         <fieldset>\
-          <legend>Ignore</legend>\
-          <p>Ignore network setup</p>\
+          <legend>Failed</legend>\
+          <p>Please select wifi to join</p>\
         </fieldset>\
       ");
       _dispatchRequestEnd();
@@ -709,7 +719,7 @@ namespace Victoria::Components {
         // wifi_config_reset();
         WiFi.disconnect(true);
         WiFi.mode(WIFI_AP_STA);
-        console.log("Wifi > Mode: WIFI_AP_STA");
+        console.log("Wifi > Mode > WIFI_AP_STA");
       }
       if (_server->arg("AccessoryReset") == "1" && onResetAccessory) {
         onResetAccessory();
