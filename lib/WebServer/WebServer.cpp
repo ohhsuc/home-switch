@@ -91,13 +91,8 @@ namespace Victoria::Components {
       foundSetting = true;
     }
     if (!foundSetting) {
-      _send200("\
-        <p><a href=\"/\">&lt; Home</a></p>\
-        <fieldset>\
-          <legend>Oops...</legend>\
-          <p>Service Not Found</p>\
-          <p>Service ID: " + serviceId + "</p>\
-        </fieldset>\
+      _sendHints("Service Not Found", "\
+        <p>Service ID: " + serviceId + "</p>\
       ");
     }
     return std::make_pair(foundSetting, setting);
@@ -132,6 +127,16 @@ namespace Victoria::Components {
 
   void WebServer::_send404(const String& bodyHtml) {
     _server->send(404, "text/html", _formatPage(bodyHtml));
+  }
+
+  void WebServer::_sendHints(const String& title, const String& message) {
+    _send200("\
+      <p><a href=\"/\">&lt; Home</a></p>\
+      <fieldset>\
+        <legend>" + title + "</legend>\
+        " + message + "\
+      </fieldset>\
+    ");
   }
 
   String WebServer::_formatPage(const String& bodyHtml) {
@@ -395,12 +400,8 @@ namespace Victoria::Components {
     String password = _server->arg("password");
 
     if (!ssid || ssid == "") {
-      _send200("\
-        <p><a href=\"/\">&lt; Home</a></p>\
-        <fieldset>\
-          <legend>Failed</legend>\
-          <p>Please select wifi to join</p>\
-        </fieldset>\
+      _sendHints("Failed", "\
+        <p>Please select wifi to join</p>\
       ");
       _dispatchRequestEnd();
       return;
@@ -425,21 +426,13 @@ namespace Victoria::Components {
     bool isConnected = WiFi.status() == WL_CONNECTED;
     console.log("Wifi > Connected > " + String(isConnected));
     if (isConnected) {
-      _send200("\
-        <p><a href=\"/\">&lt; Home</a></p>\
-        <fieldset>\
-          <legend>Success</legend>\
-          <p>Joined to <b>" + ssid + "</b></p>\
-          <p>IP address <b>" + WiFi.localIP().toString() + "</b></p>\
-        </fieldset>\
+      _sendHints("Success", "\
+        <p>Joined to <b>" + ssid + "</b></p>\
+        <p>IP address <b>" + WiFi.localIP().toString() + "</b></p>\
       ");
     } else {
-      _send200("\
-        <p><a href=\"/\">&lt; Home</a></p>\
-        <fieldset>\
-          <legend>Failed</legend>\
-          <p>Joining to <b>" + ssid + "</b> failed</p>\
-        </fieldset>\
+      _sendHints("Failed", "\
+        <p>Joining to <b>" + ssid + "</b> failed</p>\
       ");
     }
     _dispatchRequestEnd();
@@ -763,14 +756,9 @@ namespace Victoria::Components {
   void WebServer::_handleNotFound() {
     _dispatchRequestStart();
     String method = (_server->method() == HTTP_GET) ? "GET" : "POST";
-    _send404("\
-      <p><a href=\"/\">&lt; Home</a></p>\
-      <fieldset>\
-        <legend>Oops...</legend>\
-        <p>Resource Not Found</p>\
-        <p>URI: " + _server->uri() + "</p>\
-        <p>Method: " + method + "</p>\
-      </fieldset>\
+    _sendHints("Resource Not Found", "\
+      <p>URI: " + _server->uri() + "</p>\
+      <p>Method: " + method + "</p>\
     ");
     _dispatchRequestEnd();
   }

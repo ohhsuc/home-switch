@@ -38,6 +38,7 @@ namespace Victoria::Components {
       void _redirectTo(const String& url);
       void _send200(const String& bodyHtml);
       void _send404(const String& bodyHtml);
+      void _sendHints(const String& title, const String& message);
       String _formatPage(const String& bodyHtml);
       void _dispatchRequestStart();
       void _dispatchRequestEnd();
