@@ -7,31 +7,34 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include "Commons.h"
+#include "ConfigStore.h"
 
 namespace Victoria::Components {
   class WebServer {
-    typedef std::function<std::map<String, AccessorySetting>()> TLoadAccessorySettingsHandler;
-    typedef std::function<void(const String&, const AccessorySetting&)> TAccessorySettingHandler;
-    typedef std::function<AccessoryState(const String&, const AccessorySetting&)> TGetAccessoryStateHandler;
-    typedef std::function<void(const String&, const AccessorySetting&, AccessoryState&)> TSetAccessoryStateHandler;
+    typedef std::function<void(const String&, const ServiceSetting&)> TServiceSettingHandler;
+    typedef std::function<ServiceState(const String&, const ServiceSetting&)> TGetServiceStateHandler;
+    typedef std::function<void(const String&, const ServiceSetting&, ServiceState&)> TSetServiceStateHandler;
     typedef std::function<void()> TServerEventHandler;
     public:
-      WebServer(int port);
+      WebServer(ConfigStore* configStore, int port);
       ~WebServer();
       void setup();
       void loop();
-      // accessory events
-      TLoadAccessorySettingsHandler onLoadSettings;
-      TAccessorySettingHandler onSaveSetting;
-      TAccessorySettingHandler onDeleteSetting;
-      TGetAccessoryStateHandler onGetState;
-      TSetAccessoryStateHandler onSetState;
+      // service events
+      TServiceSettingHandler onSaveService;
+      TServiceSettingHandler onDeleteService;
+      TGetServiceStateHandler onGetServiceState;
+      TSetServiceStateHandler onSetServiceState;
       // server events
       TServerEventHandler onRequestStart;
       TServerEventHandler onRequestEnd;
       TServerEventHandler onResetAccessory;
     private:
+      ConfigStore* _configStore;
       ESP8266WebServer* _server;
+      std::pair<bool, ServiceSetting> _getService(const String& id);
+      void _saveService(const String& serviceId, const ServiceSetting& setting);
+      void _deleteService(const String& serviceId, const ServiceSetting& setting);
       void _redirectTo(const String& url);
       void _send200(const String& bodyHtml);
       void _send404(const String& bodyHtml);
@@ -43,18 +46,17 @@ namespace Victoria::Components {
       void _handleSystemFile();
       void _handleWifiList();
       void _handleWifiJoin();
-      void _handleNewAccessory();
-      void _handleAccessory();
-      void _handleAccessoryState();
-      std::pair<bool, AccessorySetting> _getAccessorySetting(const String& id);
+      void _handleNewService();
+      void _handleService();
+      void _handleServiceState();
       static String _getCheckedAttr(bool checked);
       static String _renderTable(const TableModel& model);
       static String _renderSelectionList(std::vector<std::vector<String>> list);
-      static String _getTypeHtml(const AccessorySetting& setting);
-      static String _getIOHtml(const AccessorySetting& setting);
+      static String _getTypeHtml(const ServiceSetting& setting);
+      static String _getIOHtml(const ServiceSetting& setting);
       static String _getLevelHtml(const String name, const short int level);
-      static String _getBooleanHtml(const AccessoryState& state);
-      static String _getIntegerHtml(const AccessoryState& state);
+      static String _getBooleanHtml(const ServiceState& state);
+      static String _getIntegerHtml(const ServiceState& state);
       static void _onWifiEvent(WiFiEvent_t event);
       void _handleReset();
       void _handleCrossOrigin();

@@ -85,9 +85,9 @@ namespace Victoria::Components {
 
   void ConfigStore::_serializeTo(const SettingModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
     int i = 0;
-    for (const auto& pair : model.settings) {
+    for (const auto& pair : model.services) {
       String id = pair.first;
-      AccessorySetting setting = pair.second;
+      ServiceSetting setting = pair.second;
       int type = setting.type; // convert enum to int
       doc["s"][i][0] = id;
       doc["s"][i][1] = setting.name;
@@ -114,15 +114,15 @@ namespace Victoria::Components {
           break;
         }
         int type = item[2];
-        AccessorySetting setting = {
+        ServiceSetting setting = {
           .name = item[1],
-          .type = AccessoryType(type), // convert int to enum
+          .type = ServiceType(type), // convert int to enum
           .outputIO = item[3],
           .inputIO = item[4],
           .outputLevel = item[5],
           .inputLevel = item[6],
         };
-        model.settings[id] = setting;
+        model.services[id] = setting;
       }
     }
   }

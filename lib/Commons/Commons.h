@@ -18,28 +18,28 @@ namespace Victoria {
     std::vector<std::vector<String>> rows;
   };
 
-  enum AccessoryType {
-    EmptyAccessoryType = 0,
-    BooleanAccessoryType = 1,
-    IntegerAccessoryType = 2,
+  enum ServiceType {
+    EmptyServiceType = 0,
+    BooleanServiceType = 1,
+    IntegerServiceType = 2,
   };
 
-  struct AccessorySetting {
+  struct ServiceSetting {
     String name;
-    AccessoryType type;
+    ServiceType type;
     int outputIO;
     int inputIO;
     int outputLevel;
     int inputLevel;
   };
 
-  struct AccessoryState {
+  struct ServiceState {
     bool boolValue;
     int intValue;
   };
 
   struct SettingModel {
-    std::map<String, AccessorySetting> settings;
+    std::map<String, ServiceSetting> services;
     // ... other items
   };
 

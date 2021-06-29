@@ -9,8 +9,8 @@
 #include "ButtonEvents.h"
 #include "OnOffEvents.h"
 #include "Mesher.h"
-#include "BaseAccessory.h"
-#include "BooleanAccessory.h"
+#include "HomeKitService.h"
+#include "BooleanHomeKitService.h"
 
 using namespace Victoria;
 using namespace Victoria::Events;
@@ -19,7 +19,7 @@ using namespace Victoria::Components;
 Timer timer;
 ConfigStore configStore;
 TimesTrigger timesTrigger(10, 5 * 1000);
-WebServer webServer(80);
+WebServer webServer(&configStore, 80);
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
 
@@ -31,59 +31,44 @@ void ledOff() {
   digitalWrite(LED_BUILTIN, HIGH);
 }
 
-std::map<String, AccessorySetting> loadSettings() {
-  auto model = configStore.load();
-  return model.settings;
-}
-void saveSetting(const String& accessoryId, const AccessorySetting& setting) {
-  auto model = configStore.load();
-  model.settings[accessoryId] = setting;
-  configStore.save(model);
-}
-void deleteSetting(const String& accessoryId, const AccessorySetting& setting) {
-  auto model = configStore.load();
-  model.settings.erase(accessoryId);
-  configStore.save(model);
-  // auto accessory = BaseAccessory::findAccessoryById(accessoryId);
-  // if (accessory) {
-  //   delete accessory;
-  //   accessory = NULL;
+void deleteService(const String& serviceId, const ServiceSetting& setting) {
+  // auto service = HomeKitService::findServiceById(serviceId);
+  // if (service) {
+  //   delete service;
+  //   service = NULL;
   // }
 }
 
-AccessoryState getState(const String& accessoryId, const AccessorySetting& setting) {
-  auto accessory = BaseAccessory::findAccessoryById(accessoryId);
-  if (accessory) {
-    return accessory->getState();
-  }
-}
-void setState(const String& accessoryId, const AccessorySetting& setting, AccessoryState& state) {
-  auto accessory = BaseAccessory::findAccessoryById(accessoryId);
-  if (accessory) {
-    accessory->setState(state);
+ServiceState getServiceState(const String& serviceId, const ServiceSetting& setting) {
+  auto service = HomeKitService::findServiceById(serviceId);
+  if (service) {
+    return service->getState();
   }
 }
 
-void timesOut() {
-  console.log("times out!");
+void setServiceState(const String& serviceId, const ServiceSetting& setting, ServiceState& state) {
+  auto service = HomeKitService::findServiceById(serviceId);
+  if (service) {
+    service->setState(state);
+  }
 }
 
-void onButtonClick(const String& accessoryId, int times) {
+void onButtonClick(const String& serviceId, int times) {
   if (times == 1) {
-    auto accessory = BaseAccessory::findAccessoryById(accessoryId);
-    if (accessory) {
-      AccessoryState state = accessory->getState();
+    auto service = HomeKitService::findServiceById(serviceId);
+    if (service) {
+      ServiceState state = service->getState();
       state.boolValue = !state.boolValue;
-      accessory->setState(state);
+      service->setState(state);
     }
   }
 }
 
-void onToggle(const String& accessoryId, bool isOn) {
+void onToggle(const String& serviceId, bool isOn) {
   console.log("toggle " + String(isOn ? "ON" : "OFF"));
 }
 
-void onStateChange(const AccessoryState& state) {
+void onStateChange(const ServiceState& state) {
   ledOn();
   timesTrigger.count();
   console.log("boolean value " + String(state.boolValue));
@@ -96,27 +81,25 @@ void setup(void) {
   pinMode(LED_BUILTIN, OUTPUT);
   ledOn();
 
-  webServer.onLoadSettings = loadSettings;
-  webServer.onSaveSetting = saveSetting;
-  webServer.onDeleteSetting = deleteSetting;
-  webServer.onGetState = getState;
-  webServer.onSetState = setState;
+  webServer.onDeleteService = deleteService;
+  webServer.onGetServiceState = getServiceState;
+  webServer.onSetServiceState = setServiceState;
   webServer.onRequestStart = ledOn;
   webServer.onRequestEnd = ledOff;
-  webServer.onResetAccessory = []() { BaseAccessory::resetAll(); };
+  webServer.onResetAccessory = []() { HomeKitService::resetAll(); };
   webServer.setup();
 
-  timesTrigger.onTimesOut = timesOut;
+  timesTrigger.onTimesOut = []() { console.log("times out!"); };
   timer.setInterval(5 * 1000, []() { MDNS.announce(); });
-  timer.setInterval(15 * 60 * 1000, []() { BaseAccessory::heartbeatAll(); });
+  timer.setInterval(15 * 60 * 1000, []() { HomeKitService::heartbeatAll(); });
 
   auto mesher = Mesher();
   auto loader = RadioFrequencyMeshLoader(10);
   mesher.setLoader(&loader);
 
-  auto settings = loadSettings();
-  if (settings.size() > 0) {
-    auto pair = settings.begin();
+  auto model = configStore.load();
+  if (model.services.size() > 0) {
+    auto pair = model.services.begin();
     auto id = pair->first;
     auto setting = pair->second;
     // outputs
@@ -126,10 +109,10 @@ void setup(void) {
       if (setting.outputLevel > -1) {
         digitalWrite(outputPin, setting.outputLevel);
       }
-      if (setting.type == BooleanAccessoryType) {
-        auto booleanAccessory = new BooleanAccessory(id, outputPin);
-        booleanAccessory->onStateChange = onStateChange;
-      } else if (setting.type == IntegerAccessoryType) {
+      if (setting.type == BooleanServiceType) {
+        auto booleanService = new BooleanHomeKitService(id, outputPin);
+        booleanService->onStateChange = onStateChange;
+      } else if (setting.type == IntegerServiceType) {
         // TODO:
       }
     }
@@ -154,7 +137,7 @@ void setup(void) {
 void loop(void) {
   timer.loop();
   webServer.loop();
-  BaseAccessory::loopAll();
+  HomeKitService::loopAll();
   if (inputEvents) {
     inputEvents->loop();
   }

@@ -4,8 +4,8 @@
 
 namespace Victoria::Events {
 
-  OnOffEvents::OnOffEvents(String accessoryId, uint8_t inputPin) {
-    _accessoryId = accessoryId;
+  OnOffEvents::OnOffEvents(String serviceId, uint8_t inputPin) {
+    _serviceId = serviceId;
     _inputPin = inputPin;
   }
 
@@ -19,7 +19,7 @@ namespace Victoria::Events {
       if (isOn != _lastState) {
         _lastState = isOn;
         if (onToggle) {
-          onToggle(_accessoryId, isOn);
+          onToggle(_serviceId, isOn);
         }
       }
     }

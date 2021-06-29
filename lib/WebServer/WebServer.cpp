@@ -15,7 +15,8 @@
 
 namespace Victoria::Components {
 
-  WebServer::WebServer(int port) {
+  WebServer::WebServer(ConfigStore* configStore, int port) {
+    _configStore = configStore;
     _server = new ESP8266WebServer(port);
   }
 
@@ -59,11 +60,11 @@ namespace Victoria::Components {
     _server->on("/system/file", HTTP_ANY, std::bind(&WebServer::_handleSystemFile, this));
     _server->on("/wifi/list", HTTP_GET, std::bind(&WebServer::_handleWifiList, this));
     _server->on("/wifi/join", HTTP_POST, std::bind(&WebServer::_handleWifiJoin, this));
-    _server->on("/accessory/new", HTTP_GET, std::bind(&WebServer::_handleNewAccessory, this));
-    _server->on("/accessory", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
-    _server->on("/accessory", HTTP_ANY, std::bind(&WebServer::_handleAccessory, this));
-    _server->on("/accessory/state", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
-    _server->on("/accessory/state", HTTP_ANY, std::bind(&WebServer::_handleAccessoryState, this));
+    _server->on("/service/new", HTTP_GET, std::bind(&WebServer::_handleNewService, this));
+    _server->on("/service", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
+    _server->on("/service", HTTP_ANY, std::bind(&WebServer::_handleService, this));
+    _server->on("/service/state", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
+    _server->on("/service/state", HTTP_ANY, std::bind(&WebServer::_handleServiceState, this));
     _server->on("/reset", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
     _server->on("/reset", HTTP_ANY, std::bind(&WebServer::_handleReset, this));
     _server->onNotFound(std::bind(&WebServer::_handleNotFound, this));
@@ -72,6 +73,45 @@ namespace Victoria::Components {
 
   void WebServer::loop() {
     _server->handleClient();
+  }
+
+  std::pair<bool, ServiceSetting> WebServer::_getService(const String& serviceId) {
+    bool foundSetting = false;
+    auto model = _configStore->load();
+    ServiceSetting setting;
+    if (model.services.count(serviceId) > 0) {
+      setting = model.services[serviceId];
+      foundSetting = true;
+    }
+    if (!foundSetting) {
+      _send200("\
+        <p><a href=\"/\">&lt; Home</a></p>\
+        <fieldset>\
+          <legend>Oops...</legend>\
+          <p>Service Not Found</p>\
+          <p>Service ID: " + serviceId + "</p>\
+        </fieldset>\
+      ");
+    }
+    return std::make_pair(foundSetting, setting);
+  }
+
+  void WebServer::_saveService(const String& serviceId, const ServiceSetting& setting) {
+    auto model = _configStore->load();
+    model.services[serviceId] = setting;
+    _configStore->save(model);
+    if (onSaveService) {
+      onSaveService(serviceId, setting);
+    }
+  }
+
+  void WebServer::_deleteService(const String& serviceId, const ServiceSetting& setting) {
+    auto model = _configStore->load();
+    model.services.erase(serviceId);
+    _configStore->save(model);
+    if (onDeleteService) {
+      onDeleteService(serviceId, setting);
+    }
   }
 
   void WebServer::_redirectTo(const String& url) {
@@ -167,21 +207,18 @@ namespace Victoria::Components {
     }
     // mac
     String macAddr = WiFi.macAddress();
-    // settings
-    String accessoryLinks = "";
-    if (onLoadSettings) {
-      std::map<String, AccessorySetting> settings = onLoadSettings();
-      String randomId = CommonHelpers::randomString(4);
-      String newAccessoryUrl = "/accessory/new?id=" + randomId + "&index=" + String(settings.size() + 1);
-      accessoryLinks += "\
-        <a href=\"" + newAccessoryUrl + "\">Add+</a>\
+    // services
+    auto model = _configStore->load();
+    String randomId = CommonHelpers::randomString(4);
+    String newServiceUrl = "/service/new?id=" + randomId + "&index=" + String(model.services.size() + 1);
+    String serviceLinks = "\
+      <a href=\"" + newServiceUrl + "\">Add+</a>\
+    ";
+    for (const auto& pair : model.services) {
+      String url = ("/service?id=" + pair.first);
+      serviceLinks += "\
+        | <a href=\"" + url + "\">" + pair.second.name + "</a>\
       ";
-      for (const auto& pair : settings) {
-        String url = ("/accessory?id=" + pair.first);
-        accessoryLinks += "\
-          | <a href=\"" + url + "\">" + pair.second.name + "</a>\
-        ";
-      }
     }
     TableModel table = {
       .header = {},
@@ -204,9 +241,9 @@ namespace Victoria::Components {
       <p>\
         " + _renderTable(table) + "\
       </p>\
-      <h3>Accessories</h3>\
+      <h3>Services</h3>\
       <p>\
-        " + accessoryLinks + "\
+        " + serviceLinks + "\
       </p>\
     ");
     _dispatchRequestEnd();
@@ -398,76 +435,70 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-  void WebServer::_handleNewAccessory() {
+  void WebServer::_handleNewService() {
     _dispatchRequestStart();
-    String accessoryId = _server->arg("id");
-    String accessoryIndex = _server->arg("index");
-    if (onSaveSetting) {
-      // save
-      AccessorySetting newSetting = {
-        .name = "New" + accessoryIndex,
-        .type = BooleanAccessoryType,
-        .outputIO = -1,
-        .inputIO = -1,
-        .outputLevel = -1,
-        .inputLevel = -1,
-      };
-      onSaveSetting(accessoryId, newSetting);
-      // redirect
-      String accessoryUrl = "/accessory?id=" + accessoryId;
-      _redirectTo(accessoryUrl);
-    }
+    String serviceId = _server->arg("id");
+    String serviceIndex = _server->arg("index");
+    // new
+    ServiceSetting newSetting = {
+      .name = "New" + serviceIndex,
+      .type = BooleanServiceType,
+      .outputIO = -1,
+      .inputIO = -1,
+      .outputLevel = -1,
+      .inputLevel = -1,
+    };
+    _saveService(serviceId, newSetting);
+    // redirect
+    String url = "/service?id=" + serviceId;
+    _redirectTo(url);
     _dispatchRequestEnd();
   }
 
-  void WebServer::_handleAccessory() {
+  void WebServer::_handleService() {
     _dispatchRequestStart();
-    String accessoryId = _server->arg("id");
-    String currentUrl = "/accessory?id=" + accessoryId;
-    std::pair<bool, AccessorySetting> found = _getAccessorySetting(accessoryId);
-    AccessorySetting setting = found.second;
+    String serviceId = _server->arg("id");
+    String currentUrl = "/service?id=" + serviceId;
+    std::pair<bool, ServiceSetting> found = _getService(serviceId);
+    ServiceSetting setting = found.second;
     if (!found.first) {
       _dispatchRequestEnd();
       return;
     }
     if (_server->method() == HTTP_POST) {
-      String accessoryName = _server->arg("AccessoryName");
-      String accessoryType = _server->arg("AccessoryType");
+      String serviceName = _server->arg("ServiceName");
+      String serviceType = _server->arg("ServiceType");
       String outputIO = _server->arg("OutputIO");
       String inputIO = _server->arg("InputIO");
       String outputLevel = _server->arg("OutputLevel");
       String inputLevel = _server->arg("InputLevel");
       String submit = _server->arg("Submit");
       if (submit == "Delete") {
-        if (onDeleteSetting) {
-          onDeleteSetting(accessoryId, setting);
-        }
+        _deleteService(serviceId, setting);
         _redirectTo("/");
       } else {
-        setting.name = accessoryName;
+        setting.name = serviceName;
         setting.type =
-          accessoryType == "boolean" ? BooleanAccessoryType :
-          accessoryType == "integer" ? IntegerAccessoryType : EmptyAccessoryType;
+          serviceType == "boolean" ? BooleanServiceType :
+          serviceType == "integer" ? IntegerServiceType : EmptyServiceType;
         setting.outputIO = outputIO.toInt();
         setting.inputIO = inputIO.toInt();
         setting.outputLevel = outputLevel.toInt();
         setting.inputLevel = inputLevel.toInt();
-        if (onSaveSetting) {
-          onSaveSetting(accessoryId, setting);
-        }
+        _saveService(serviceId, setting);
         _redirectTo(currentUrl);
       }
     } else {
       _send200("\
         <p>\
           <a href=\"/\">&lt; Home</a> |\
-          <a href=\"/accessory/state?id=" + accessoryId + "\">State</a>\
+          <a href=\"/service/state?id=" + serviceId + "\">State</a>\
         </p>\
         <h3>Setting (" + setting.name + ")</h3>\
         <form method=\"post\" action=\"" + currentUrl + "\">\
           <p>\
-            <label for=\"txtAccessoryName\">Name</label>\
-            <input type=\"text\" id=\"txtAccessoryName\" name=\"AccessoryName\" value=\"" + setting.name + "\" />\
+            <label for=\"txtServiceName\">Name</label>\
+            <input type=\"text\" id=\"txtServiceName\" name=\"ServiceName\" value=\"" + setting.name + "\" />\
           </p>\
           " + _getTypeHtml(setting) + "\
           " + _getIOHtml(setting) + "\
@@ -481,18 +512,18 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-  void WebServer::_handleAccessoryState() {
+  void WebServer::_handleServiceState() {
     _dispatchRequestStart();
-    String accessoryId = _server->arg("id");
-    String backUrl = "/accessory?id=" + accessoryId;
-    String currentUrl = "/accessory/state?id=" + accessoryId;
-    std::pair<bool, AccessorySetting> found = _getAccessorySetting(accessoryId);
-    AccessorySetting setting = found.second;
+    String serviceId = _server->arg("id");
+    String backUrl = "/service?id=" + serviceId;
+    String currentUrl = "/service/state?id=" + serviceId;
+    std::pair<bool, ServiceSetting> found = _getService(serviceId);
+    ServiceSetting setting = found.second;
     if (!found.first) {
       _dispatchRequestEnd();
       return;
     }
-    AccessoryState state = {
+    ServiceState state = {
       .boolValue = false,
       .intValue = 0,
     };
@@ -505,17 +536,17 @@ namespace Victoria::Components {
         String integerValue = _server->arg("IntegerValue");
         state.intValue = integerValue.toInt();
       }
-      if (onSetState) {
-        onSetState(accessoryId, setting, state);
+      if (onSetServiceState) {
+        onSetServiceState(serviceId, setting, state);
       }
       _redirectTo(currentUrl);
     } else {
-      if (onGetState) {
-        state = onGetState(accessoryId, setting);
+      if (onGetServiceState) {
+        state = onGetServiceState(serviceId, setting);
       }
       String stateHtml =
-        setting.type == BooleanAccessoryType ? _getBooleanHtml(state) :
-        setting.type == IntegerAccessoryType ? _getIntegerHtml(state) : "";
+        setting.type == BooleanServiceType ? _getBooleanHtml(state) :
+        setting.type == IntegerServiceType ? _getIntegerHtml(state) : "";
       _send200("\
         <p>\
           <a href=\"" + backUrl + "\">&lt; Setting (" + setting.name + ")</a>\
@@ -530,29 +561,6 @@ namespace Victoria::Components {
       ");
     }
     _dispatchRequestEnd();
-  }
-
-  std::pair<bool, AccessorySetting> WebServer::_getAccessorySetting(const String& id) {
-    bool foundSetting = false;
-    AccessorySetting setting;
-    if (onLoadSettings) {
-      std::map<String, AccessorySetting> settings = onLoadSettings();
-      if (settings.count(id) > 0) {
-        setting = settings[id];
-        foundSetting = true;
-      }
-    }
-    if (!foundSetting) {
-      _send200("\
-        <p><a href=\"/\">&lt; Home</a></p>\
-        <fieldset>\
-          <legend>Oops...</legend>\
-          <p>Accessory Not Found</p>\
-          <p>Accessory ID: " + id + "</p>\
-        </fieldset>\
-      ");
-    }
-    return std::make_pair(foundSetting, setting);
   }
 
   String WebServer::_getCheckedAttr(bool checked) {
@@ -598,22 +606,22 @@ namespace Victoria::Components {
     return html;
   }
 
-  String WebServer::_getTypeHtml(const AccessorySetting& setting) {
-    String booleanAttribute = _getCheckedAttr(setting.type == BooleanAccessoryType);
-    String integerAttribute = _getCheckedAttr(setting.type == IntegerAccessoryType);
+  String WebServer::_getTypeHtml(const ServiceSetting& setting) {
+    String booleanAttribute = _getCheckedAttr(setting.type == BooleanServiceType);
+    String integerAttribute = _getCheckedAttr(setting.type == IntegerServiceType);
     String html = "\
       <fieldset>\
-        <legend>Accessory Type</legend>\
+        <legend>Service Type</legend>\
         " + _renderSelectionList({
-          { "Boolean - Accessory with boolean value such as switcher(on/off), shake sensor(yes/no)", "AccessoryType", "boolean", "radio", booleanAttribute },
-          { "Integer - Accessory with integer value such as temperature, humidness", "AccessoryType", "integer", "radio", integerAttribute },
+          { "Boolean - Service with boolean value such as switcher(on/off), shake sensor(yes/no)", "ServiceType", "boolean", "radio", booleanAttribute },
+          { "Integer - Service with integer value such as temperature, humidness", "ServiceType", "integer", "radio", integerAttribute },
         }) + "\
       </fieldset>\
     ";
     return html;
   }
 
-  String WebServer::_getIOHtml(const AccessorySetting& setting) {
+  String WebServer::_getIOHtml(const ServiceSetting& setting) {
     String html = "\
       <fieldset>\
         <legend>IO Pins</legend>\
@@ -643,7 +651,7 @@ namespace Victoria::Components {
     ";
   }
 
-  String WebServer::_getBooleanHtml(const AccessoryState& state) {
+  String WebServer::_getBooleanHtml(const ServiceState& state) {
     String trueAttribute = _getCheckedAttr(state.boolValue);
     String falseAttribute = _getCheckedAttr(!state.boolValue);
     String html = "\
@@ -658,7 +666,7 @@ namespace Victoria::Components {
     return html;
   }
 
-  String WebServer::_getIntegerHtml(const AccessoryState& state) {
+  String WebServer::_getIntegerHtml(const ServiceState& state) {
     String html = "\
       <fieldset>\
         <legend>Integer Value</legend>\
