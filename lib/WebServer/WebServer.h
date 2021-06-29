@@ -30,7 +30,7 @@ namespace Victoria::Components {
       TServerEventHandler onRequestEnd;
       TServerEventHandler onResetAccessory;
       // static
-      static String getHostName();
+      static String getHostName(bool fullName);
     private:
       ConfigStore* _configStore;
       ESP8266WebServer* _server;

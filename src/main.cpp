@@ -9,6 +9,7 @@
 #include "ButtonEvents.h"
 #include "OnOffEvents.h"
 #include "Mesher.h"
+#include "HomeKitAccessory.h"
 #include "HomeKitService.h"
 #include "BooleanHomeKitService.h"
 
@@ -86,7 +87,7 @@ void setup(void) {
   webServer.onSetServiceState = setServiceState;
   webServer.onRequestStart = ledOn;
   webServer.onRequestEnd = ledOff;
-  webServer.onResetAccessory = []() { HomeKitService::resetAll(); };
+  webServer.onResetAccessory = []() { HomeKitAccessory::reset(); };
   webServer.setup();
 
   timesTrigger.onTimesOut = []() { console.log("times out!"); };
@@ -128,6 +129,8 @@ void setup(void) {
       onOffEvents = new OnOffEvents(id, inputPin);
       onOffEvents->onToggle = onToggle;
     }
+    // setup
+    HomeKitAccessory::setup(webServer.getHostName(false));
   }
 
   console.log("Setup Complete!");
@@ -137,7 +140,7 @@ void setup(void) {
 void loop(void) {
   timer.loop();
   webServer.loop();
-  HomeKitService::loopAll();
+  HomeKitAccessory::loop();
   if (inputEvents) {
     inputEvents->loop();
   }

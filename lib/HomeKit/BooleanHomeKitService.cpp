@@ -2,12 +2,11 @@
 
 namespace Victoria::Components {
 
-  extern "C" homekit_server_config_t boolServerConfig;
   extern "C" homekit_characteristic_t boolCharacteristic;
 
-  BooleanHomeKitService::BooleanHomeKitService(String id, uint8_t outputPin) : HomeKitService(id, outputPin, &boolServerConfig, &boolCharacteristic) {
+  BooleanHomeKitService::BooleanHomeKitService(String id, uint8_t outputPin)
+  : HomeKitService(id, outputPin, &boolCharacteristic) {
     _mainCharacteristic->setter_ex = _setter_ex;
-    _init();
   }
 
   ServiceState BooleanHomeKitService::getState() {

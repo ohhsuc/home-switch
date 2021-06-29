@@ -1,14 +1,6 @@
 #include <LittleFS.h>
 #include "WebServer.h"
 
-#ifndef FIRMWARE_NAME
-#define FIRMWARE_NAME "Victoria"
-#endif
-
-#ifndef FIRMWARE_VERSION
-#define FIRMWARE_VERSION "1.0.0"
-#endif
-
 namespace Victoria::Components {
 
   WebServer::WebServer(ConfigStore* configStore, int port) {
@@ -31,7 +23,7 @@ namespace Victoria::Components {
       wifiMode = WIFI_AP_STA;
     }
 
-    String hostName = getHostName();
+    String hostName = getHostName(true);
     bool isApEnabled = ((wifiMode & WIFI_AP) != 0);
     if (isApEnabled) {
       // IPAddress apIp(192, 168, 1, 33);
@@ -72,17 +64,20 @@ namespace Victoria::Components {
     _server->handleClient();
   }
 
-  String WebServer::getHostName() {
+  String WebServer::getHostName(bool fullName) {
     String id = WiFi.macAddress();
     id.replace(":", "");
     id.toUpperCase();
-    id = id.substring(id.length() - 4);
+    id = id.substring(id.length() - 5);
 
-    String firmwareVersion = FIRMWARE_VERSION;
-    firmwareVersion.replace(".", "");
+    String version = String(FirmwareVersion);
+    version.replace(".", "");
 
-    String productName = FIRMWARE_NAME;
-    String hostName = productName + "-" + firmwareVersion + "-" + id;
+    String productName = FirmwareName;
+    String hostName = fullName
+      ? productName + "-" + version + "-" + id
+      : productName + "-" + id;
+
     return hostName;
   }
 
@@ -144,7 +139,7 @@ namespace Victoria::Components {
   }
 
   String WebServer::_formatPage(const String& bodyHtml) {
-    String productName = FIRMWARE_NAME;
+    String productName = FirmwareName;
     return "\
       <!DOCTYPE HTML>\
       <html>\
@@ -247,7 +242,7 @@ namespace Victoria::Components {
         { "IP Address", strLocalIP != "" ? "<a href=\"http://" + strLocalIP + "\">" + strLocalIP + "</a>" : "-" },
         { "MAC Address", macAddr },
         { "AP Address", strApIP != "" ? "<a href=\"http://" + strApIP + "\">" + strApIP + "</a>" : "-" },
-        { "Firmware Version", FIRMWARE_VERSION },
+        { "Firmware Version", FirmwareVersion },
       },
     };
     // content

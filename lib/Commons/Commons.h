@@ -5,6 +5,7 @@
 #include <vector>
 #include <Arduino.h>
 #include "Console.h"
+#include "BuildFlags.h"
 
 namespace Victoria {
 

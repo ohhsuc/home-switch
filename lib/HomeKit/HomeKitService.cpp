@@ -4,19 +4,14 @@ namespace Victoria::Components {
 
   std::map<homekit_characteristic_t*, HomeKitService*> _services;
 
-  HomeKitService::HomeKitService(String id, uint8_t outputPin, homekit_server_config_t* serverConfig, homekit_characteristic_t* mainCharacteristic) {
+  HomeKitService::HomeKitService(String id, uint8_t outputPin, homekit_characteristic_t* mainCharacteristic) {
     serviceId = id;
     _outputPin = outputPin;
-    _serverConfig = serverConfig;
     _mainCharacteristic = mainCharacteristic;
     _services[_mainCharacteristic] = this;
   }
 
   HomeKitService::~HomeKitService() {
-    if (_serverConfig) {
-      delete _serverConfig;
-      _serverConfig = NULL;
-    }
     if (_mainCharacteristic) {
       if (_services.count(_mainCharacteristic) > 0) {
         _services.erase(_mainCharacteristic);
@@ -34,12 +29,6 @@ namespace Victoria::Components {
   void HomeKitService::setState(const ServiceState& state) {
     if (onStateChange) {
       onStateChange(state);
-    }
-  }
-
-  void HomeKitService::_init() {
-    if (_serverConfig) {
-      arduino_homekit_setup(_serverConfig);
     }
   }
 
@@ -62,14 +51,6 @@ namespace Victoria::Components {
     for (auto const& pair : _services) {
       pair.second->_notify();
     }
-  }
-
-  void HomeKitService::loopAll() {
-    arduino_homekit_loop();
-  }
-
-  void HomeKitService::resetAll() {
-    homekit_server_reset();
   }
 
   HomeKitService* HomeKitService::_findService(homekit_characteristic_t* mainCharacteristic) {
