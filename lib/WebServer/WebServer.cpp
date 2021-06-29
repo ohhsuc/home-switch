@@ -154,14 +154,15 @@ namespace Victoria::Components {
             fieldset { border: 1px solid #00979c; }\
             ul { padding: 0; list-style-type: none; }\
             td { border-bottom: 1px solid #d5e9e9; }\
-            .container { padding: 0 10px; font-size: 14px; }\
+            .main { padding: 0 10px; font-size: 14px; }\
             .title { background: #008184; color: #ffffff; text-align: center; margin: 0; padding: 5px 0; }\
-            .button { background-color: #005c5f; border: 1px solid #005c5f; color: #ffffff; border-radius: 5px; padding: 5px 10px; box-shadow: none; }\
+            .btn { background-color: #005c5f; border: 1px solid #005c5f; color: #ffffff; border-radius: 5px; padding: 5px 10px; box-shadow: none; }\
+            .btnWeak { background: none; border: none; padding: 0; color: #00979d; }}\
           </style>\
         </head>\
         <body>\
           <h2 class=\"title\">" + productName + "</h2>\
-          <div class=\"container\">\
+          <div class=\"main\">\
             " + bodyHtml + "\
           </div>\
         </body>\
@@ -388,7 +389,7 @@ namespace Victoria::Components {
           <label for=\"txtPassword\">Password:</label>\
           <input type=\"text\" id=\"txtPassword\" name=\"password\" length=\"64\" />\
         </p>\
-        <p><input type=\"submit\" class=\"button\" value=\"Join\" /></p>\
+        <p><input type=\"submit\" class=\"btn\" value=\"Join\" /></p>\
       </form>\
     ");
     _dispatchRequestEnd();
@@ -506,8 +507,8 @@ namespace Victoria::Components {
           " + _getTypeHtml(setting) + "\
           " + _getIOHtml(setting) + "\
           <p>\
-            <input type=\"submit\" class=\"button\" name=\"Submit\" value=\"Save\" />\
-            <input type=\"submit\" class=\"button\" name=\"Submit\" value=\"Delete\" />\
+            <input type=\"submit\" class=\"btn\" name=\"Submit\" value=\"Save\" />\
+            <input type=\"submit\" class=\"btnWeak\" name=\"Submit\" value=\"Delete\" onclick=\"return confirm('Are you sure you want to delete?')\" />\
           </p>\
         </form>\
       ");
@@ -558,7 +559,7 @@ namespace Victoria::Components {
         <form method=\"post\" action=\"" + currentUrl + "\">\
           " + stateHtml + "\
           <p>\
-            <input type=\"submit\" class=\"button\" name=\"Submit\" value=\"Save\" />\
+            <input type=\"submit\" class=\"btn\" name=\"Submit\" value=\"Save\" />\
           </p>\
         </form>\
       ");
@@ -740,7 +741,7 @@ namespace Victoria::Components {
             { "ESP Reset", "EspReset", "1", "checkbox", "" },
             { "ESP Erase Config", "EspEraseConfig", "1", "checkbox", "" },
           }) + "\
-          <p><input type=\"submit\" class=\"button\" value=\"Submit\" /></p>\
+          <p><input type=\"submit\" class=\"btn\" value=\"Submit\" /></p>\
         </form>\
       ");
     }
