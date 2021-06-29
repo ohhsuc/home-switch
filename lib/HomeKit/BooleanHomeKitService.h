@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "HomeKitService.h"
 
-namespace Victoria::Components {
+namespace Victoria::HomeKit {
   class BooleanHomeKitService : public HomeKitService {
     public:
       BooleanHomeKitService(String id, uint8_t outputPin);
@@ -14,6 +14,6 @@ namespace Victoria::Components {
       void _innerSetState(const ServiceState& state, bool notify);
       static void _setter_ex(homekit_characteristic_t* ch, const homekit_value_t value);
   };
-} // namespace Victoria::Components
+} // namespace Victoria::HomeKit
 
 #endif // BooleanHomeKitService_h

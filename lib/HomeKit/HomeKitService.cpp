@@ -1,6 +1,6 @@
 #include "HomeKitService.h"
 
-namespace Victoria::Components {
+namespace Victoria::HomeKit {
 
   std::map<homekit_characteristic_t*, HomeKitService*> _services;
 
@@ -60,4 +60,4 @@ namespace Victoria::Components {
     return NULL;
   }
 
-} // namespace Victoria::Components
+} // namespace Victoria::HomeKit

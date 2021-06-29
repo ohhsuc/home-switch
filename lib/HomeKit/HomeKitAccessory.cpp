@@ -1,6 +1,6 @@
 #include "HomeKitAccessory.h"
 
-namespace Victoria::Components {
+namespace Victoria::HomeKit {
 
   extern "C" homekit_characteristic_t accessoryName;
   extern "C" homekit_characteristic_t accessoryManufacturer;
@@ -36,4 +36,4 @@ namespace Victoria::Components {
     homekit_server_reset();
   }
 
-} // namespace Victoria::Components
+} // namespace Victoria::HomeKit

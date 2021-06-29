@@ -16,6 +16,7 @@
 using namespace Victoria;
 using namespace Victoria::Events;
 using namespace Victoria::Components;
+using namespace Victoria::HomeKit;
 
 Timer timer;
 ConfigStore configStore;

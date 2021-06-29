@@ -1,6 +1,7 @@
 {
   "version": "0.1",
   "words": [
+    "platformio",
     "gpio",
     "println",
     "wifi",

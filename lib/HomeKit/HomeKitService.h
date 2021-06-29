@@ -7,7 +7,7 @@
 #include <homekit/characteristics.h>
 #include "Commons.h"
 
-namespace Victoria::Components {
+namespace Victoria::HomeKit {
   class HomeKitService {
     typedef std::function<void(const ServiceState&)> TStateChangeHandler;
     public:
@@ -25,6 +25,6 @@ namespace Victoria::Components {
       void _notify();
       static HomeKitService* _findService(homekit_characteristic_t* mainCharacteristic);
   };
-} // namespace Victoria::Components
+} // namespace Victoria::HomeKit
 
 #endif // HomeKitService_h

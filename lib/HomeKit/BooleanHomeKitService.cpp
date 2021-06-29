@@ -1,6 +1,6 @@
 #include "BooleanHomeKitService.h"
 
-namespace Victoria::Components {
+namespace Victoria::HomeKit {
 
   extern "C" homekit_characteristic_t boolCharacteristic;
 
@@ -43,4 +43,4 @@ namespace Victoria::Components {
     }
   }
 
-} // namespace Victoria::Components
+} // namespace Victoria::HomeKit

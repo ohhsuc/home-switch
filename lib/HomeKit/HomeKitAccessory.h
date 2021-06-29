@@ -7,7 +7,7 @@
 #include <homekit/characteristics.h>
 #include "Commons.h"
 
-namespace Victoria::Components {
+namespace Victoria::HomeKit {
   class HomeKitAccessory {
     public:
       HomeKitAccessory();
@@ -16,6 +16,6 @@ namespace Victoria::Components {
       static void reset();
   };
 
-} // namespace Victoria::Components
+} // namespace Victoria::HomeKit
 
 #endif // HomeKitAccessory_h
