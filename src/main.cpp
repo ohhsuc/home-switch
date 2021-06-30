@@ -92,8 +92,8 @@ void setup(void) {
   webServer.setup();
 
   timesTrigger.onTimesOut = []() { console.log("times out!"); };
-  timer.setInterval(5 * 1000, []() { MDNS.announce(); });
-  timer.setInterval(15 * 60 * 1000, []() { HomeKitService::heartbeatAll(); });
+  timer.setInterval(10 * 60 * 1000, []() { MDNS.announce(); });
+  timer.setInterval(30 * 60 * 1000, []() { HomeKitService::heartbeat(); });
 
   auto mesher = Mesher();
   auto loader = RadioFrequencyMeshLoader(10);

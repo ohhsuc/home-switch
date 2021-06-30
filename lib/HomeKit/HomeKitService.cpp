@@ -47,7 +47,7 @@ namespace Victoria::HomeKit {
     return NULL;
   }
 
-  void HomeKitService::heartbeatAll() {
+  void HomeKitService::heartbeat() {
     for (auto const& pair : _services) {
       pair.second->_notify();
     }

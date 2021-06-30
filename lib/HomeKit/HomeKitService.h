@@ -18,7 +18,7 @@ namespace Victoria::HomeKit {
       virtual ServiceState getState();
       virtual void setState(const ServiceState& state);
       static HomeKitService* findServiceById(const String& serviceId);
-      static void heartbeatAll();
+      static void heartbeat();
     protected:
       uint8_t _outputPin;
       homekit_characteristic_t* _mainCharacteristic;

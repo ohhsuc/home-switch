@@ -735,7 +735,7 @@ namespace Victoria::Components {
         <form method=\"post\" action=\"/reset\">\
           " + _renderSelectionList({
             { "Reset Wifi", "WifiReset", "1", "checkbox", "" },
-            { "Accessory Reset", "AccessoryReset", "1", "checkbox", "" },
+            { "Reset Accessory", "AccessoryReset", "1", "checkbox", "" },
             { "ESP Restart", "EspRestart", "1", "checkbox", "" },
             { "ESP Reset", "EspReset", "1", "checkbox", "" },
             { "ESP Erase Config", "EspEraseConfig", "1", "checkbox", "" },
