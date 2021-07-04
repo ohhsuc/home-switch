@@ -24,6 +24,7 @@ namespace Victoria::HomeKit {
 
   ServiceState HomeKitService::getState() {
     console.log("HomeKitService::getState");
+    return {};
   }
 
   void HomeKitService::setState(const ServiceState& state) {

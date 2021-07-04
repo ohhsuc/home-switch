@@ -28,10 +28,11 @@ namespace Victoria {
   struct ServiceSetting {
     String name;
     ServiceType type;
-    int outputIO;
-    int inputIO;
+    int outputPin;
+    int inputPin;
     int outputLevel;
     int inputLevel;
+    int rfInputPin;
   };
 
   struct ServiceState {
@@ -41,7 +42,6 @@ namespace Victoria {
 
   struct SettingModel {
     std::map<String, ServiceSetting> services;
-    // ... other items
   };
 
   class CommonHelpers {

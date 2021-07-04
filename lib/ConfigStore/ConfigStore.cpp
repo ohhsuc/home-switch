@@ -92,20 +92,21 @@ namespace Victoria::Components {
       doc["s"][i][0] = id;
       doc["s"][i][1] = setting.name;
       doc["s"][i][2] = type;
-      doc["s"][i][3] = setting.outputIO;
-      doc["s"][i][4] = setting.inputIO;
+      doc["s"][i][3] = setting.outputPin;
+      doc["s"][i][4] = setting.inputPin;
       doc["s"][i][5] = setting.outputLevel;
       doc["s"][i][6] = setting.inputLevel;
+      doc["s"][i][7] = setting.rfInputPin;
       i++;
     }
   }
 
   void ConfigStore::_deserializeFrom(SettingModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
-    auto settingsDoc = doc["s"];
-    if (settingsDoc) {
+    auto servicesDoc = doc["s"];
+    if (servicesDoc) {
       int index = -1;
       while (true) {
-        auto item = settingsDoc[++index];
+        auto item = servicesDoc[++index];
         if (!item) {
           break;
         }
@@ -117,10 +118,11 @@ namespace Victoria::Components {
         ServiceSetting setting = {
           .name = item[1],
           .type = ServiceType(type), // convert int to enum
-          .outputIO = item[3],
-          .inputIO = item[4],
+          .outputPin = item[3],
+          .inputPin = item[4],
           .outputLevel = item[5],
           .inputLevel = item[6],
+          .rfInputPin = item[7],
         };
         model.services[id] = setting;
       }

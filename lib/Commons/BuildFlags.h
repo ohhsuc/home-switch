@@ -1,6 +1,10 @@
 #ifndef BuildFlags_h
 #define BuildFlags_h
 
+#ifndef UNIX_TIME
+#define UNIX_TIME 0
+#endif
+
 #ifndef FIRMWARE_NAME
 #define FIRMWARE_NAME "Victoria"
 #endif
@@ -25,15 +29,21 @@
 #define HOMEKIT_SERVER_PASSWORD "111-11-111"
 #endif
 
+#ifndef RF_PROTOCOL
+#define RF_PROTOCOL 1
+#endif
+
 #include <Arduino.h>
 
 namespace Victoria {
+  const unsigned long UnixTime = UNIX_TIME;
   const String FirmwareName = FIRMWARE_NAME;
   const String FirmwareVersion = FIRMWARE_VERSION;
   const String AccessoryInformationManufacturer = ACCESSORY_INFORMATION_MANUFACTURER;
   const String AccessoryInformationModel = ACCESSORY_INFORMATION_MODEL;
   const String AccessoryInformationSerialNumber = ACCESSORY_INFORMATION_SERIAL_NUMBER;
   const String HomekitServerPassword = HOMEKIT_SERVER_PASSWORD;
+  const unsigned int RfProtocol = RF_PROTOCOL;
 } // namespace Victoria
 
 #endif // BuildFlags_h

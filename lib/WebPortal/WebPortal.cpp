@@ -9,9 +9,15 @@ namespace Victoria::Components {
   }
 
   WebPortal::~WebPortal() {
-    _server->stop();
-    delete _server;
-    _server = NULL;
+    if (_server) {
+      _server->stop();
+      delete _server;
+      _server = NULL;
+    }
+    if (_configStore) {
+      delete _configStore;
+      _configStore = NULL;
+    }
   }
 
   void WebPortal::setup() {
@@ -446,10 +452,11 @@ namespace Victoria::Components {
     ServiceSetting newSetting = {
       .name = "New" + serviceIndex,
       .type = BooleanServiceType,
-      .outputIO = -1,
-      .inputIO = -1,
+      .outputPin = -1,
+      .inputPin = -1,
       .outputLevel = -1,
       .inputLevel = -1,
+      .rfInputPin = -1,
     };
     _saveService(serviceId, newSetting);
     // redirect
@@ -471,10 +478,11 @@ namespace Victoria::Components {
     if (_server->method() == HTTP_POST) {
       String serviceName = _server->arg("ServiceName");
       String serviceType = _server->arg("ServiceType");
-      String outputIO = _server->arg("OutputIO");
-      String inputIO = _server->arg("InputIO");
+      String outputPin = _server->arg("OutputPin");
+      String inputPin = _server->arg("InputPin");
       String outputLevel = _server->arg("OutputLevel");
       String inputLevel = _server->arg("InputLevel");
+      String rfInputPin = _server->arg("RfInputPin");
       String submit = _server->arg("Submit");
       if (submit == "Delete") {
         _deleteService(serviceId, setting);
@@ -484,10 +492,11 @@ namespace Victoria::Components {
         setting.type =
           serviceType == "boolean" ? BooleanServiceType :
           serviceType == "integer" ? IntegerServiceType : EmptyServiceType;
-        setting.outputIO = outputIO.toInt();
-        setting.inputIO = inputIO.toInt();
+        setting.outputPin = outputPin.toInt();
+        setting.inputPin = inputPin.toInt();
         setting.outputLevel = outputLevel.toInt();
         setting.inputLevel = inputLevel.toInt();
+        setting.rfInputPin = rfInputPin.toInt();
         _saveService(serviceId, setting);
         _redirectTo(currentUrl);
       }
@@ -629,14 +638,18 @@ namespace Victoria::Components {
       <fieldset>\
         <legend>IO Pins</legend>\
         <p>\
-          <label for=\"txtOutputIO\">Output</label>\
-          <input type=\"number\" id=\"txtOutputIO\" name=\"OutputIO\" value=\"" + String(setting.outputIO) + "\" />\
+          <label for=\"txtOutputPin\">Output</label>\
+          <input type=\"number\" id=\"txtOutputPin\" name=\"OutputPin\" value=\"" + String(setting.outputPin) + "\" />\
           " + _getLevelHtml("OutputLevel", setting.outputLevel) + "\
         </p>\
         <p>\
-          <label for=\"txtInputIO\">Input</label>\
-          <input type=\"number\" id=\"txtInputIO\" name=\"InputIO\" value=\"" + String(setting.inputIO) + "\" />\
+          <label for=\"txtInputPin\">Input</label>\
+          <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" value=\"" + String(setting.inputPin) + "\" />\
           " + _getLevelHtml("InputLevel", setting.inputLevel) + "\
+        </p>\
+        <p>\
+          <label for=\"txtRfInputPin\">RF Input</label>\
+          <input type=\"number\" id=\"txtRfInputPin\" name=\"RfInputPin\" value=\"" + String(setting.rfInputPin) + "\" />\
         </p>\
       </fieldset>\
     ";

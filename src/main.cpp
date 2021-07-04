@@ -4,6 +4,7 @@
 #include "Commons.h"
 #include "ConfigStore.h"
 #include "WebPortal.h"
+#include "RfPortal.h"
 #include "Timer.h"
 #include "TimesTrigger.h"
 #include "ButtonEvents.h"
@@ -22,6 +23,7 @@ Timer timer;
 ConfigStore configStore;
 TimesTrigger timesTrigger(10, 5 * 1000);
 WebPortal webPortal(&configStore, 80);
+RfPortal* rfPortal;
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
 
@@ -46,6 +48,7 @@ ServiceState getServiceState(const String& serviceId, const ServiceSetting& sett
   if (service) {
     return service->getState();
   }
+  return {};
 }
 
 void setServiceState(const String& serviceId, const ServiceSetting& setting, ServiceState& state) {
@@ -55,14 +58,18 @@ void setServiceState(const String& serviceId, const ServiceSetting& setting, Ser
   }
 }
 
+void toggleState(const String& serviceId) {
+  auto service = HomeKitService::findServiceById(serviceId);
+  if (service) {
+    auto state = service->getState();
+    state.boolValue = !state.boolValue;
+    service->setState(state);
+  }
+}
+
 void onButtonClick(const String& serviceId, int times) {
   if (times == 1) {
-    auto service = HomeKitService::findServiceById(serviceId);
-    if (service) {
-      ServiceState state = service->getState();
-      state.boolValue = !state.boolValue;
-      service->setState(state);
-    }
+    toggleState(serviceId);
   }
 }
 
@@ -105,7 +112,7 @@ void setup(void) {
     auto id = pair->first;
     auto setting = pair->second;
     // outputs
-    auto outputPin = setting.outputIO;
+    auto outputPin = setting.outputPin;
     if (outputPin > -1) {
       pinMode(outputPin, OUTPUT);
       if (setting.outputLevel > -1) {
@@ -119,7 +126,7 @@ void setup(void) {
       }
     }
     // inputs
-    auto inputPin = setting.inputIO;
+    auto inputPin = setting.inputPin;
     if (inputPin > -1) {
       pinMode(inputPin, INPUT_PULLUP);
       if (setting.inputLevel > -1) {
@@ -129,6 +136,12 @@ void setup(void) {
       inputEvents->onClick = onButtonClick;
       onOffEvents = new OnOffEvents(id, inputPin);
       onOffEvents->onToggle = onToggle;
+    }
+    // rf input
+    auto rfInputPin = setting.rfInputPin;
+    if (rfInputPin > -1) {
+      rfPortal = new RfPortal(id, rfInputPin);
+      rfPortal->onToggleState = toggleState;
     }
     // setup
     HomeKitAccessory::setup(webPortal.getHostName(false));
@@ -142,6 +155,9 @@ void loop(void) {
   timer.loop();
   webPortal.loop();
   HomeKitAccessory::loop();
+  if (rfPortal) {
+    rfPortal->loop();
+  }
   if (inputEvents) {
     inputEvents->loop();
   }
