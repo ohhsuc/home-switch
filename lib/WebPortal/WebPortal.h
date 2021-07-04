@@ -1,5 +1,5 @@
-#ifndef WebServer_h
-#define WebServer_h
+#ifndef WebPortal_h
+#define WebPortal_h
 
 #include <map>
 #include <functional>
@@ -10,14 +10,14 @@
 #include "ConfigStore.h"
 
 namespace Victoria::Components {
-  class WebServer {
+  class WebPortal {
     typedef std::function<void(const String&, const ServiceSetting&)> TServiceSettingHandler;
     typedef std::function<ServiceState(const String&, const ServiceSetting&)> TGetServiceStateHandler;
     typedef std::function<void(const String&, const ServiceSetting&, ServiceState&)> TSetServiceStateHandler;
     typedef std::function<void()> TServerEventHandler;
     public:
-      WebServer(ConfigStore* configStore, int port);
-      ~WebServer();
+      WebPortal(ConfigStore* configStore, int port);
+      ~WebPortal();
       void setup();
       void loop();
       // service events
@@ -67,4 +67,4 @@ namespace Victoria::Components {
   };
 } // namespace Victoria::Components
 
-#endif // WebServer_h
+#endif // WebPortal_h

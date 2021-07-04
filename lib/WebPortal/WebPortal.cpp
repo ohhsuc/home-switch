@@ -1,20 +1,20 @@
 #include <LittleFS.h>
-#include "WebServer.h"
+#include "WebPortal.h"
 
 namespace Victoria::Components {
 
-  WebServer::WebServer(ConfigStore* configStore, int port) {
+  WebPortal::WebPortal(ConfigStore* configStore, int port) {
     _configStore = configStore;
     _server = new ESP8266WebServer(port);
   }
 
-  WebServer::~WebServer() {
+  WebPortal::~WebPortal() {
     _server->stop();
     delete _server;
     _server = NULL;
   }
 
-  void WebServer::setup() {
+  void WebPortal::setup() {
     WiFiMode_t wifiMode = WiFi.getMode();
     bool apEnabled = ((wifiMode & WIFI_AP) != 0);
     bool staEnabled = ((wifiMode & WIFI_STA) != 0);
@@ -41,30 +41,30 @@ namespace Victoria::Components {
     WiFi.setAutoReconnect(true);
     WiFi.persistent(true);
     WiFi.begin();
-    WiFi.onEvent(WebServer::_onWifiEvent, WiFiEvent::WIFI_EVENT_ANY);
+    WiFi.onEvent(WebPortal::_onWifiEvent, WiFiEvent::WIFI_EVENT_ANY);
 
-    _server->on("/", HTTP_GET, std::bind(&WebServer::_handleRoot, this));
-    _server->on("/system", HTTP_GET, std::bind(&WebServer::_handleSystem, this));
-    _server->on("/system/file", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
-    _server->on("/system/file", HTTP_ANY, std::bind(&WebServer::_handleSystemFile, this));
-    _server->on("/wifi/list", HTTP_GET, std::bind(&WebServer::_handleWifiList, this));
-    _server->on("/wifi/join", HTTP_POST, std::bind(&WebServer::_handleWifiJoin, this));
-    _server->on("/service/new", HTTP_GET, std::bind(&WebServer::_handleNewService, this));
-    _server->on("/service", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
-    _server->on("/service", HTTP_ANY, std::bind(&WebServer::_handleService, this));
-    _server->on("/service/state", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
-    _server->on("/service/state", HTTP_ANY, std::bind(&WebServer::_handleServiceState, this));
-    _server->on("/reset", HTTP_OPTIONS, std::bind(&WebServer::_handleCrossOrigin, this));
-    _server->on("/reset", HTTP_ANY, std::bind(&WebServer::_handleReset, this));
-    _server->onNotFound(std::bind(&WebServer::_handleNotFound, this));
+    _server->on("/", HTTP_GET, std::bind(&WebPortal::_handleRoot, this));
+    _server->on("/system", HTTP_GET, std::bind(&WebPortal::_handleSystem, this));
+    _server->on("/system/file", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
+    _server->on("/system/file", HTTP_ANY, std::bind(&WebPortal::_handleSystemFile, this));
+    _server->on("/wifi/list", HTTP_GET, std::bind(&WebPortal::_handleWifiList, this));
+    _server->on("/wifi/join", HTTP_POST, std::bind(&WebPortal::_handleWifiJoin, this));
+    _server->on("/service/new", HTTP_GET, std::bind(&WebPortal::_handleNewService, this));
+    _server->on("/service", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
+    _server->on("/service", HTTP_ANY, std::bind(&WebPortal::_handleService, this));
+    _server->on("/service/state", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
+    _server->on("/service/state", HTTP_ANY, std::bind(&WebPortal::_handleServiceState, this));
+    _server->on("/reset", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
+    _server->on("/reset", HTTP_ANY, std::bind(&WebPortal::_handleReset, this));
+    _server->onNotFound(std::bind(&WebPortal::_handleNotFound, this));
     _server->begin();
   }
 
-  void WebServer::loop() {
+  void WebPortal::loop() {
     _server->handleClient();
   }
 
-  String WebServer::getHostName(bool fullName) {
+  String WebPortal::getHostName(bool fullName) {
     String id = WiFi.macAddress();
     id.replace(":", "");
     id.toUpperCase();
@@ -81,7 +81,7 @@ namespace Victoria::Components {
     return hostName;
   }
 
-  std::pair<bool, ServiceSetting> WebServer::_getService(const String& serviceId) {
+  std::pair<bool, ServiceSetting> WebPortal::_getService(const String& serviceId) {
     bool foundSetting = false;
     auto model = _configStore->load();
     ServiceSetting setting;
@@ -97,7 +97,7 @@ namespace Victoria::Components {
     return std::make_pair(foundSetting, setting);
   }
 
-  void WebServer::_saveService(const String& serviceId, const ServiceSetting& setting) {
+  void WebPortal::_saveService(const String& serviceId, const ServiceSetting& setting) {
     auto model = _configStore->load();
     model.services[serviceId] = setting;
     _configStore->save(model);
@@ -106,7 +106,7 @@ namespace Victoria::Components {
     }
   }
 
-  void WebServer::_deleteService(const String& serviceId, const ServiceSetting& setting) {
+  void WebPortal::_deleteService(const String& serviceId, const ServiceSetting& setting) {
     auto model = _configStore->load();
     model.services.erase(serviceId);
     _configStore->save(model);
@@ -115,20 +115,20 @@ namespace Victoria::Components {
     }
   }
 
-  void WebServer::_redirectTo(const String& url) {
+  void WebPortal::_redirectTo(const String& url) {
     _server->sendHeader("Location", url, true);
     _server->send(302, "text/plain", "");
   }
 
-  void WebServer::_send200(const String& bodyHtml) {
+  void WebPortal::_send200(const String& bodyHtml) {
     _server->send(200, "text/html", _formatPage(bodyHtml));
   }
 
-  void WebServer::_send404(const String& bodyHtml) {
+  void WebPortal::_send404(const String& bodyHtml) {
     _server->send(404, "text/html", _formatPage(bodyHtml));
   }
 
-  void WebServer::_sendHints(const String& title, const String& message) {
+  void WebPortal::_sendHints(const String& title, const String& message) {
     _send200("\
       <p><a href=\"/\">&lt; Home</a></p>\
       <fieldset>\
@@ -138,7 +138,7 @@ namespace Victoria::Components {
     ");
   }
 
-  String WebServer::_formatPage(const String& bodyHtml) {
+  String WebPortal::_formatPage(const String& bodyHtml) {
     String productName = FirmwareName;
     return "\
       <!DOCTYPE HTML>\
@@ -169,7 +169,7 @@ namespace Victoria::Components {
     ";
   }
 
-  void WebServer::_dispatchRequestStart() {
+  void WebPortal::_dispatchRequestStart() {
     // set cross origin
     _server->sendHeader("Access-Control-Allow-Origin", "*");
     _server->sendHeader("Access-Control-Max-Age", "600"); // 10 minutes
@@ -181,13 +181,13 @@ namespace Victoria::Components {
     }
   }
 
-  void WebServer::_dispatchRequestEnd() {
+  void WebPortal::_dispatchRequestEnd() {
     if (onRequestEnd) {
       onRequestEnd();
     }
   }
 
-  void WebServer::_handleRoot() {
+  void WebPortal::_handleRoot() {
     _dispatchRequestStart();
     // mode
     WiFiMode_t wifiMode = WiFi.getMode();
@@ -265,7 +265,7 @@ namespace Victoria::Components {
   }
 
   // https://arduino-esp8266.readthedocs.io/en/latest/filesystem.html
-  void WebServer::_handleSystem() {
+  void WebPortal::_handleSystem() {
     _dispatchRequestStart();
     if (LittleFS.begin()) {
       FSInfo fsInfo;
@@ -338,7 +338,7 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-  void WebServer::_handleSystemFile() {
+  void WebPortal::_handleSystemFile() {
     _dispatchRequestStart();
     if (LittleFS.begin()) {
       String fileName = _server->arg("name");
@@ -364,7 +364,7 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-  void WebServer::_handleWifiList() {
+  void WebPortal::_handleWifiList() {
     _dispatchRequestStart();
     String list = "";
     int count = WiFi.scanNetworks();
@@ -394,7 +394,7 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-  void WebServer::_handleWifiJoin() {
+  void WebPortal::_handleWifiJoin() {
     _dispatchRequestStart();
     String ssid = _server->arg("ssid");
     String password = _server->arg("password");
@@ -438,7 +438,7 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-  void WebServer::_handleNewService() {
+  void WebPortal::_handleNewService() {
     _dispatchRequestStart();
     String serviceId = _server->arg("id");
     String serviceIndex = _server->arg("index");
@@ -458,7 +458,7 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-  void WebServer::_handleService() {
+  void WebPortal::_handleService() {
     _dispatchRequestStart();
     String serviceId = _server->arg("id");
     String currentUrl = "/service?id=" + serviceId;
@@ -515,7 +515,7 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-  void WebServer::_handleServiceState() {
+  void WebPortal::_handleServiceState() {
     _dispatchRequestStart();
     String serviceId = _server->arg("id");
     String backUrl = "/service?id=" + serviceId;
@@ -566,11 +566,11 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-  String WebServer::_getCheckedAttr(bool checked) {
+  String WebPortal::_getCheckedAttr(bool checked) {
     return checked ? " checked=\"checked\"" : "";
   }
 
-  String WebServer::_renderTable(const TableModel& model) {
+  String WebPortal::_renderTable(const TableModel& model) {
     String tableHeader = "";
     if (model.header.size() > 0) {
       tableHeader += "<tr>";
@@ -596,7 +596,7 @@ namespace Victoria::Components {
     return html;
   }
 
-  String WebServer::_renderSelectionList(std::vector<std::vector<String>> list) {
+  String WebPortal::_renderSelectionList(std::vector<std::vector<String>> list) {
     String html = "";
     for (const auto& item : list) {
       html += "\
@@ -609,7 +609,7 @@ namespace Victoria::Components {
     return html;
   }
 
-  String WebServer::_getTypeHtml(const ServiceSetting& setting) {
+  String WebPortal::_getTypeHtml(const ServiceSetting& setting) {
     String booleanAttribute = _getCheckedAttr(setting.type == BooleanServiceType);
     String integerAttribute = _getCheckedAttr(setting.type == IntegerServiceType);
     String html = "\
@@ -624,7 +624,7 @@ namespace Victoria::Components {
     return html;
   }
 
-  String WebServer::_getIOHtml(const ServiceSetting& setting) {
+  String WebPortal::_getIOHtml(const ServiceSetting& setting) {
     String html = "\
       <fieldset>\
         <legend>IO Pins</legend>\
@@ -643,7 +643,7 @@ namespace Victoria::Components {
     return html;
   }
 
-  String WebServer::_getLevelHtml(const String name, const short int level) {
+  String WebPortal::_getLevelHtml(const String name, const short int level) {
     return "\
       <label for=\"txt" + name + "High\">High</label>\
       <input type=\"radio\" id=\"txt" + name + "High\" name=\"" + name + "\" value=\"1\"" + _getCheckedAttr(level == 1) + " />\
@@ -654,7 +654,7 @@ namespace Victoria::Components {
     ";
   }
 
-  String WebServer::_getBooleanHtml(const ServiceState& state) {
+  String WebPortal::_getBooleanHtml(const ServiceState& state) {
     String trueAttribute = _getCheckedAttr(state.boolValue);
     String falseAttribute = _getCheckedAttr(!state.boolValue);
     String html = "\
@@ -669,7 +669,7 @@ namespace Victoria::Components {
     return html;
   }
 
-  String WebServer::_getIntegerHtml(const ServiceState& state) {
+  String WebPortal::_getIntegerHtml(const ServiceState& state) {
     String html = "\
       <fieldset>\
         <legend>Integer Value</legend>\
@@ -682,7 +682,7 @@ namespace Victoria::Components {
     return html;
   }
 
-  void WebServer::_onWifiEvent(WiFiEvent_t event) {
+  void WebPortal::_onWifiEvent(WiFiEvent_t event) {
     switch (event) {
       case WiFiEvent::WIFI_EVENT_STAMODE_CONNECTED:
         console.log("Wifi > Event > STA connected");
@@ -704,7 +704,7 @@ namespace Victoria::Components {
     }
   }
 
-  void WebServer::_handleReset() {
+  void WebPortal::_handleReset() {
     _dispatchRequestStart();
     if (_server->method() == HTTP_POST) {
       String wifiReset = _server->arg("WifiReset");
@@ -747,13 +747,13 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-  void WebServer::_handleCrossOrigin() {
+  void WebPortal::_handleCrossOrigin() {
     _dispatchRequestStart();
     _server->send(204);
     _dispatchRequestEnd();
   }
 
-  void WebServer::_handleNotFound() {
+  void WebPortal::_handleNotFound() {
     _dispatchRequestStart();
     String method = (_server->method() == HTTP_GET) ? "GET" : "POST";
     _sendHints("Resource Not Found", "\

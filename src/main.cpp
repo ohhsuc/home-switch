@@ -3,7 +3,7 @@
 #include <ESP8266mDNS.h>
 #include "Commons.h"
 #include "ConfigStore.h"
-#include "WebServer.h"
+#include "WebPortal.h"
 #include "Timer.h"
 #include "TimesTrigger.h"
 #include "ButtonEvents.h"
@@ -21,7 +21,7 @@ using namespace Victoria::HomeKit;
 Timer timer;
 ConfigStore configStore;
 TimesTrigger timesTrigger(10, 5 * 1000);
-WebServer webServer(&configStore, 80);
+WebPortal webPortal(&configStore, 80);
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
 
@@ -83,13 +83,13 @@ void setup(void) {
   pinMode(LED_BUILTIN, OUTPUT);
   ledOn();
 
-  webServer.onDeleteService = deleteService;
-  webServer.onGetServiceState = getServiceState;
-  webServer.onSetServiceState = setServiceState;
-  webServer.onRequestStart = ledOn;
-  webServer.onRequestEnd = ledOff;
-  webServer.onResetAccessory = []() { HomeKitAccessory::reset(); };
-  webServer.setup();
+  webPortal.onDeleteService = deleteService;
+  webPortal.onGetServiceState = getServiceState;
+  webPortal.onSetServiceState = setServiceState;
+  webPortal.onRequestStart = ledOn;
+  webPortal.onRequestEnd = ledOff;
+  webPortal.onResetAccessory = []() { HomeKitAccessory::reset(); };
+  webPortal.setup();
 
   timesTrigger.onTimesOut = []() { console.log("times out!"); };
   timer.setInterval(10 * 60 * 1000, []() { MDNS.announce(); });
@@ -131,7 +131,7 @@ void setup(void) {
       onOffEvents->onToggle = onToggle;
     }
     // setup
-    HomeKitAccessory::setup(webServer.getHostName(false));
+    HomeKitAccessory::setup(webPortal.getHostName(false));
   }
 
   console.log("Setup Complete!");
@@ -140,7 +140,7 @@ void setup(void) {
 
 void loop(void) {
   timer.loop();
-  webServer.loop();
+  webPortal.loop();
   HomeKitAccessory::loop();
   if (inputEvents) {
     inputEvents->loop();
