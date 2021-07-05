@@ -70,7 +70,7 @@ namespace Victoria::Components {
     _server->handleClient();
   }
 
-  String WebPortal::getHostName(bool fullName) {
+  String WebPortal::getHostName(bool includeVersion) {
     String id = WiFi.macAddress();
     id.replace(":", "");
     id.toUpperCase();
@@ -80,8 +80,8 @@ namespace Victoria::Components {
     version.replace(".", "");
 
     String productName = FirmwareName;
-    String hostName = fullName
-      ? productName + "-" + version + "-" + id
+    String hostName = includeVersion
+      ? productName + "-" + id + "-" + version
       : productName + "-" + id;
 
     return hostName;
@@ -90,9 +90,9 @@ namespace Victoria::Components {
   std::pair<bool, ServiceSetting> WebPortal::_getService(const String& serviceId) {
     bool foundSetting = false;
     auto model = _configStore->load();
-    ServiceSetting setting;
+    ServiceSetting service;
     if (model.services.count(serviceId) > 0) {
-      setting = model.services[serviceId];
+      service = model.services[serviceId];
       foundSetting = true;
     }
     if (!foundSetting) {
@@ -100,24 +100,24 @@ namespace Victoria::Components {
         <p>Service ID: " + serviceId + "</p>\
       ");
     }
-    return std::make_pair(foundSetting, setting);
+    return std::make_pair(foundSetting, service);
   }
 
-  void WebPortal::_saveService(const String& serviceId, const ServiceSetting& setting) {
+  void WebPortal::_saveService(const String& serviceId, const ServiceSetting& service) {
     auto model = _configStore->load();
-    model.services[serviceId] = setting;
+    model.services[serviceId] = service;
     _configStore->save(model);
     if (onSaveService) {
-      onSaveService(serviceId, setting);
+      onSaveService(serviceId, service);
     }
   }
 
-  void WebPortal::_deleteService(const String& serviceId, const ServiceSetting& setting) {
+  void WebPortal::_deleteService(const String& serviceId, const ServiceSetting& service) {
     auto model = _configStore->load();
     model.services.erase(serviceId);
     _configStore->save(model);
     if (onDeleteService) {
-      onDeleteService(serviceId, setting);
+      onDeleteService(serviceId, service);
     }
   }
 
@@ -470,7 +470,7 @@ namespace Victoria::Components {
     String serviceId = _server->arg("id");
     String currentUrl = "/service?id=" + serviceId;
     std::pair<bool, ServiceSetting> found = _getService(serviceId);
-    ServiceSetting setting = found.second;
+    ServiceSetting service = found.second;
     if (!found.first) {
       _dispatchRequestEnd();
       return;
@@ -485,19 +485,19 @@ namespace Victoria::Components {
       String rfInputPin = _server->arg("RfInputPin");
       String submit = _server->arg("Submit");
       if (submit == "Delete") {
-        _deleteService(serviceId, setting);
+        _deleteService(serviceId, service);
         _redirectTo("/");
       } else {
-        setting.name = serviceName;
-        setting.type =
+        service.name = serviceName;
+        service.type =
           serviceType == "boolean" ? BooleanServiceType :
           serviceType == "integer" ? IntegerServiceType : EmptyServiceType;
-        setting.outputPin = outputPin.toInt();
-        setting.inputPin = inputPin.toInt();
-        setting.outputLevel = outputLevel.toInt();
-        setting.inputLevel = inputLevel.toInt();
-        setting.rfInputPin = rfInputPin.toInt();
-        _saveService(serviceId, setting);
+        service.outputPin = outputPin.toInt();
+        service.inputPin = inputPin.toInt();
+        service.outputLevel = outputLevel.toInt();
+        service.inputLevel = inputLevel.toInt();
+        service.rfInputPin = rfInputPin.toInt();
+        _saveService(serviceId, service);
         _redirectTo(currentUrl);
       }
     } else {
@@ -506,14 +506,14 @@ namespace Victoria::Components {
           <a href=\"/\">&lt; Home</a> |\
           <a href=\"/service/state?id=" + serviceId + "\">State</a>\
         </p>\
-        <h3>Setting (" + setting.name + ")</h3>\
+        <h3>Setting (" + service.name + ")</h3>\
         <form method=\"post\" action=\"" + currentUrl + "\">\
           <p>\
             <label for=\"txtServiceName\">Name</label>\
-            <input type=\"text\" id=\"txtServiceName\" name=\"ServiceName\" value=\"" + setting.name + "\" />\
+            <input type=\"text\" id=\"txtServiceName\" name=\"ServiceName\" value=\"" + service.name + "\" />\
           </p>\
-          " + _getTypeHtml(setting) + "\
-          " + _getIOHtml(setting) + "\
+          " + _getTypeHtml(service) + "\
+          " + _getIOHtml(service) + "\
           <p>\
             <input type=\"submit\" class=\"btn\" name=\"Submit\" value=\"Save\" />\
             <input type=\"submit\" class=\"btnWeak\" name=\"Submit\" value=\"Delete\" onclick=\"return confirm('Are you sure you want to delete?')\" />\
@@ -530,7 +530,7 @@ namespace Victoria::Components {
     String backUrl = "/service?id=" + serviceId;
     String currentUrl = "/service/state?id=" + serviceId;
     std::pair<bool, ServiceSetting> found = _getService(serviceId);
-    ServiceSetting setting = found.second;
+    ServiceSetting service = found.second;
     if (!found.first) {
       _dispatchRequestEnd();
       return;
@@ -549,21 +549,21 @@ namespace Victoria::Components {
         state.intValue = integerValue.toInt();
       }
       if (onSetServiceState) {
-        onSetServiceState(serviceId, setting, state);
+        onSetServiceState(serviceId, service, state);
       }
       _redirectTo(currentUrl);
     } else {
       if (onGetServiceState) {
-        state = onGetServiceState(serviceId, setting);
+        state = onGetServiceState(serviceId, service);
       }
       String stateHtml =
-        setting.type == BooleanServiceType ? _getBooleanHtml(state) :
-        setting.type == IntegerServiceType ? _getIntegerHtml(state) : "";
+        service.type == BooleanServiceType ? _getBooleanHtml(state) :
+        service.type == IntegerServiceType ? _getIntegerHtml(state) : "";
       _send200("\
         <p>\
-          <a href=\"" + backUrl + "\">&lt; Setting (" + setting.name + ")</a>\
+          <a href=\"" + backUrl + "\">&lt; Setting (" + service.name + ")</a>\
         </p>\
-        <h3>State (" + setting.name + ")</h3>\
+        <h3>State (" + service.name + ")</h3>\
         <form method=\"post\" action=\"" + currentUrl + "\">\
           " + stateHtml + "\
           <p>\
@@ -618,9 +618,9 @@ namespace Victoria::Components {
     return html;
   }
 
-  String WebPortal::_getTypeHtml(const ServiceSetting& setting) {
-    String booleanAttribute = _getCheckedAttr(setting.type == BooleanServiceType);
-    String integerAttribute = _getCheckedAttr(setting.type == IntegerServiceType);
+  String WebPortal::_getTypeHtml(const ServiceSetting& service) {
+    String booleanAttribute = _getCheckedAttr(service.type == BooleanServiceType);
+    String integerAttribute = _getCheckedAttr(service.type == IntegerServiceType);
     String html = "\
       <fieldset>\
         <legend>Service Type</legend>\
@@ -633,23 +633,23 @@ namespace Victoria::Components {
     return html;
   }
 
-  String WebPortal::_getIOHtml(const ServiceSetting& setting) {
+  String WebPortal::_getIOHtml(const ServiceSetting& service) {
     String html = "\
       <fieldset>\
         <legend>IO Pins</legend>\
         <p>\
           <label for=\"txtOutputPin\">Output</label>\
-          <input type=\"number\" id=\"txtOutputPin\" name=\"OutputPin\" value=\"" + String(setting.outputPin) + "\" />\
-          " + _getLevelHtml("OutputLevel", setting.outputLevel) + "\
+          <input type=\"number\" id=\"txtOutputPin\" name=\"OutputPin\" value=\"" + String(service.outputPin) + "\" />\
+          " + _getLevelHtml("OutputLevel", service.outputLevel) + "\
         </p>\
         <p>\
           <label for=\"txtInputPin\">Input</label>\
-          <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" value=\"" + String(setting.inputPin) + "\" />\
-          " + _getLevelHtml("InputLevel", setting.inputLevel) + "\
+          <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" value=\"" + String(service.inputPin) + "\" />\
+          " + _getLevelHtml("InputLevel", service.inputLevel) + "\
         </p>\
         <p>\
           <label for=\"txtRfInputPin\">RF Input</label>\
-          <input type=\"number\" id=\"txtRfInputPin\" name=\"RfInputPin\" value=\"" + String(setting.rfInputPin) + "\" />\
+          <input type=\"number\" id=\"txtRfInputPin\" name=\"RfInputPin\" value=\"" + String(service.rfInputPin) + "\" />\
         </p>\
       </fieldset>\
     ";

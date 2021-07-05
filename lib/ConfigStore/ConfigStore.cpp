@@ -38,6 +38,7 @@ namespace Victoria::Components {
               _deserializeFrom(model, doc);
             } else {
               console.error("Failed to parse config file");
+              console.error(error.f_str());
             }
           } else {
             console.error("Config file size is too large");
@@ -84,29 +85,28 @@ namespace Victoria::Components {
   }
 
   void ConfigStore::_serializeTo(const SettingModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
-    int i = 0;
+    JsonArray items = doc.createNestedArray("s");
     for (const auto& pair : model.services) {
-      String id = pair.first;
       ServiceSetting setting = pair.second;
       int type = setting.type; // convert enum to int
-      doc["s"][i][0] = id;
-      doc["s"][i][1] = setting.name;
-      doc["s"][i][2] = type;
-      doc["s"][i][3] = setting.outputPin;
-      doc["s"][i][4] = setting.inputPin;
-      doc["s"][i][5] = setting.outputLevel;
-      doc["s"][i][6] = setting.inputLevel;
-      doc["s"][i][7] = setting.rfInputPin;
-      i++;
+      JsonArray item = items.createNestedArray();
+      item[0] = pair.first; // id
+      item[1] = setting.name;
+      item[2] = type;
+      item[3] = setting.outputPin;
+      item[4] = setting.inputPin;
+      item[5] = setting.outputLevel;
+      item[6] = setting.inputLevel;
+      item[7] = setting.rfInputPin;
     }
   }
 
   void ConfigStore::_deserializeFrom(SettingModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
-    auto servicesDoc = doc["s"];
-    if (servicesDoc) {
+    auto items = doc["s"];
+    if (items) {
       int index = -1;
       while (true) {
-        auto item = servicesDoc[++index];
+        auto item = items[++index];
         if (!item) {
           break;
         }
@@ -114,15 +114,14 @@ namespace Victoria::Components {
         if (!id) {
           break;
         }
-        int type = item[2];
         ServiceSetting setting = {
           .name = item[1],
-          .type = ServiceType(type), // convert int to enum
-          .outputPin = item[3],
-          .inputPin = item[4],
-          .outputLevel = item[5],
-          .inputLevel = item[6],
-          .rfInputPin = item[7],
+          .type = ServiceType(item[2].as<int>()), // convert int to enum
+          .outputPin = item[3].as<int>(),
+          .inputPin = item[4].as<int>(),
+          .outputLevel = item[5].as<int>(),
+          .inputLevel = item[6].as<int>(),
+          .rfInputPin = item[7].as<int>(),
         };
         model.services[id] = setting;
       }
