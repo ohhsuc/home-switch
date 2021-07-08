@@ -40,8 +40,12 @@ namespace Victoria {
     int intValue;
   };
 
-  struct SettingModel {
+  struct ServicesModel {
     std::map<String, ServiceSetting> services;
+  };
+
+  struct RadioModel {
+    int inputPin;
   };
 
   class CommonHelpers {

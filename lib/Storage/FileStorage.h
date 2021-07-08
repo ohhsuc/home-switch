@@ -1,19 +1,44 @@
+
+#ifndef FileStorage_h
+#define FileStorage_h
+
+#include <Arduino.h>
+#include <ArduinoJson.h>
 #include <LittleFS.h>
-#include "ConfigStore.h"
+#include "Commons.h"
+
+#define DEFAULT_FILE_SIZE 1024
 
 namespace Victoria::Components {
 
-  ConfigStore::ConfigStore() {}
+  template<class TModel>
+  class FileStorage {
+    public:
+      FileStorage();
+      TModel load();
+      bool save(TModel model);
+    protected:
+      String _filePath;
+      virtual void _serializeTo(const TModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc);
+      virtual void _deserializeFrom(TModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc);
+  };
 
-  SettingModel ConfigStore::load() {
+  template <class TModel>
+  FileStorage<TModel>::FileStorage() {}
+
+  template <class TModel>
+  TModel FileStorage<TModel>::load() {
     // default result
-    SettingModel model;
+    TModel model;
     // begin
     if (LittleFS.begin()) {
+      if (LittleFS.exists("/Victoria.json")) {
+        LittleFS.remove("/Victoria.json");
+      }
       // check exists
-      if (LittleFS.exists(CONFIG_FILE_PATH)) {
+      if (LittleFS.exists(_filePath)) {
         // open file
-        File file = LittleFS.open(CONFIG_FILE_PATH, "r");
+        File file = LittleFS.open(_filePath, "r");
         if (file) {
           // validate size
           size_t size = file.size();
@@ -47,7 +72,7 @@ namespace Victoria::Components {
           console.error("Failed to open config file");
         }
       } else {
-        console.error("File notfound " + String(CONFIG_FILE_PATH));
+        console.error("File notfound " + _filePath);
       }
     } else {
       console.error("Failed to mount file system");
@@ -57,7 +82,8 @@ namespace Victoria::Components {
     return model;
   }
 
-  bool ConfigStore::save(SettingModel model) {
+  template<class TModel>
+  bool FileStorage<TModel>::save(TModel model) {
     // convert
     // DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
     StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
@@ -66,7 +92,7 @@ namespace Victoria::Components {
     // begin
     if (LittleFS.begin()) {
       // open file
-      File file = LittleFS.open(CONFIG_FILE_PATH, "w");
+      File file = LittleFS.open(_filePath, "w");
       if (file) {
         // write
         serializeJson(doc, file);
@@ -84,48 +110,12 @@ namespace Victoria::Components {
     return success;
   }
 
-  void ConfigStore::_serializeTo(const SettingModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
-    JsonArray items = doc.createNestedArray("s");
-    for (const auto& pair : model.services) {
-      ServiceSetting setting = pair.second;
-      int type = setting.type; // convert enum to int
-      JsonArray item = items.createNestedArray();
-      item[0] = pair.first; // id
-      item[1] = setting.name;
-      item[2] = type;
-      item[3] = setting.outputPin;
-      item[4] = setting.inputPin;
-      item[5] = setting.outputLevel;
-      item[6] = setting.inputLevel;
-      item[7] = setting.rfInputPin;
-    }
-  }
+  template<class TModel>
+  void FileStorage<TModel>::_serializeTo(const TModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) { }
 
-  void ConfigStore::_deserializeFrom(SettingModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
-    auto items = doc["s"];
-    if (items) {
-      int index = -1;
-      while (true) {
-        auto item = items[++index];
-        if (!item) {
-          break;
-        }
-        String id = item[0];
-        if (!id) {
-          break;
-        }
-        ServiceSetting setting = {
-          .name = item[1],
-          .type = ServiceType(item[2].as<int>()), // convert int to enum
-          .outputPin = item[3].as<int>(),
-          .inputPin = item[4].as<int>(),
-          .outputLevel = item[5].as<int>(),
-          .inputLevel = item[6].as<int>(),
-          .rfInputPin = item[7].as<int>(),
-        };
-        model.services[id] = setting;
-      }
-    }
-  }
+  template<class TModel>
+  void FileStorage<TModel>::_deserializeFrom(TModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) { }
 
 } // namespace Victoria::Components
+
+#endif // FileStorage_h

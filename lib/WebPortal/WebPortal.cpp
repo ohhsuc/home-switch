@@ -1,10 +1,8 @@
-#include <LittleFS.h>
 #include "WebPortal.h"
 
 namespace Victoria::Components {
 
-  WebPortal::WebPortal(ConfigStore* configStore, int port) {
-    _configStore = configStore;
+  WebPortal::WebPortal(int port) {
     _server = new ESP8266WebServer(port);
   }
 
@@ -13,10 +11,6 @@ namespace Victoria::Components {
       _server->stop();
       delete _server;
       _server = NULL;
-    }
-    if (_configStore) {
-      delete _configStore;
-      _configStore = NULL;
     }
   }
 
@@ -89,7 +83,7 @@ namespace Victoria::Components {
 
   std::pair<bool, ServiceSetting> WebPortal::_getService(const String& serviceId) {
     bool foundSetting = false;
-    auto model = _configStore->load();
+    auto model = serviceStorage.load();
     ServiceSetting service;
     if (model.services.count(serviceId) > 0) {
       service = model.services[serviceId];
@@ -104,18 +98,18 @@ namespace Victoria::Components {
   }
 
   void WebPortal::_saveService(const String& serviceId, const ServiceSetting& service) {
-    auto model = _configStore->load();
+    auto model = serviceStorage.load();
     model.services[serviceId] = service;
-    _configStore->save(model);
+    serviceStorage.save(model);
     if (onSaveService) {
       onSaveService(serviceId, service);
     }
   }
 
   void WebPortal::_deleteService(const String& serviceId, const ServiceSetting& service) {
-    auto model = _configStore->load();
+    auto model = serviceStorage.load();
     model.services.erase(serviceId);
-    _configStore->save(model);
+    serviceStorage.save(model);
     if (onDeleteService) {
       onDeleteService(serviceId, service);
     }
@@ -228,7 +222,7 @@ namespace Victoria::Components {
     // mac
     String macAddr = WiFi.macAddress();
     // services
-    auto model = _configStore->load();
+    auto model = serviceStorage.load();
     String randomId = CommonHelpers::randomString(4);
     String newServiceUrl = "/service/new?id=" + randomId + "&index=" + String(model.services.size() + 1);
     String serviceLinks = "\

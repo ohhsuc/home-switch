@@ -2,7 +2,6 @@
 #include <Arduino.h>
 #include <ESP8266mDNS.h>
 #include "Commons.h"
-#include "ConfigStore.h"
 #include "WebPortal.h"
 #include "RfPortal.h"
 #include "Timer.h"
@@ -20,9 +19,8 @@ using namespace Victoria::Components;
 using namespace Victoria::HomeKit;
 
 Timer timer;
-ConfigStore configStore;
 TimesTrigger timesTrigger(10, 5 * 1000);
-WebPortal webPortal(&configStore, 80);
+WebPortal webPortal(80);
 RfPortal* rfPortal;
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
@@ -106,7 +104,7 @@ void setup(void) {
   auto loader = RadioFrequencyMeshLoader(10);
   mesher.setLoader(&loader);
 
-  auto model = configStore.load();
+  auto model = serviceStorage.load();
   if (model.services.size() > 0) {
     auto pair = model.services.begin();
     auto id = pair->first;

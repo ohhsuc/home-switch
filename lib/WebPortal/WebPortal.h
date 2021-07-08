@@ -4,10 +4,11 @@
 #include <map>
 #include <functional>
 #include <Arduino.h>
+#include <LittleFS.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include "Commons.h"
-#include "ConfigStore.h"
+#include "ServiceStorage.h"
 
 namespace Victoria::Components {
   class WebPortal {
@@ -16,7 +17,7 @@ namespace Victoria::Components {
     typedef std::function<void(const String&, const ServiceSetting&, ServiceState&)> TSetServiceStateHandler;
     typedef std::function<void()> TServerEventHandler;
     public:
-      WebPortal(ConfigStore* configStore, int port);
+      WebPortal(int port);
       ~WebPortal();
       void setup();
       void loop();
@@ -32,7 +33,6 @@ namespace Victoria::Components {
       // static
       static String getHostName(bool fullName);
     private:
-      ConfigStore* _configStore;
       ESP8266WebServer* _server;
       std::pair<bool, ServiceSetting> _getService(const String& id);
       void _saveService(const String& serviceId, const ServiceSetting& setting);
