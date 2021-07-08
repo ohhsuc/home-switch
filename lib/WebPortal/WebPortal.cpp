@@ -49,6 +49,8 @@ namespace Victoria::Components {
     _server->on("/system/file", HTTP_ANY, std::bind(&WebPortal::_handleSystemFile, this));
     _server->on("/wifi/list", HTTP_GET, std::bind(&WebPortal::_handleWifiList, this));
     _server->on("/wifi/join", HTTP_POST, std::bind(&WebPortal::_handleWifiJoin, this));
+    _server->on("/radio", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
+    _server->on("/radio", HTTP_ANY, std::bind(&WebPortal::_handleRadio, this));
     _server->on("/service/new", HTTP_GET, std::bind(&WebPortal::_handleNewService, this));
     _server->on("/service", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
     _server->on("/service", HTTP_ANY, std::bind(&WebPortal::_handleService, this));
@@ -82,19 +84,19 @@ namespace Victoria::Components {
   }
 
   std::pair<bool, ServiceSetting> WebPortal::_getService(const String& serviceId) {
-    bool foundSetting = false;
+    bool found = false;
     auto model = serviceStorage.load();
     ServiceSetting service;
     if (model.services.count(serviceId) > 0) {
       service = model.services[serviceId];
-      foundSetting = true;
+      found = true;
     }
-    if (!foundSetting) {
+    if (!found) {
       _sendHints("Service Not Found", "\
         <p>Service ID: " + serviceId + "</p>\
       ");
     }
-    return std::make_pair(foundSetting, service);
+    return std::make_pair(found, service);
   }
 
   void WebPortal::_saveService(const String& serviceId, const ServiceSetting& service) {
@@ -150,6 +152,7 @@ namespace Victoria::Components {
             html, body { background: transparent; font-family: Arial, Sans-Serif; margin: 0; padding: 0; border: 0; color: #4f4e4e; }\
             h1, h2, h3 { font-weight: 400; }\
             a { color: #00979d; text-decoration: none; }\
+            b { color: #005c5f; }\
             fieldset { border: 1px solid #00979c; }\
             ul { padding: 0; list-style-type: none; }\
             td { border-bottom: 1px solid #d5e9e9; }\
@@ -249,6 +252,7 @@ namespace Victoria::Components {
     _send200("\
       <p>\
         <a href=\"/wifi/list\">Wifi</a> |\
+        <a href=\"/radio\">Radio</a> |\
         <a href=\"/system\">System</a> |\
         <a href=\"/reset\">Reset</a>\
       </p>\
@@ -438,6 +442,38 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
+  void WebPortal::_handleRadio() {
+    _dispatchRequestStart();
+    auto model = radioStorage.load();
+    if (_server->method() == HTTP_POST) {
+      String inputPin = _server->arg("InputPin");
+      model.inputPin = inputPin.toInt();
+      radioStorage.save(model);
+      _redirectTo(_server->uri());
+    } else {
+      _send200("\
+        <p>\
+          <a href=\"/\">&lt; Home</a> |\
+        </p>\
+        <h3>Radio Frequency</h3>\
+        <form method=\"post\">\
+          <p>\
+            <label>Last Received</label>\
+            <b>10835156/24bit Protocol: 1</b>\
+          </p>\
+          <p>\
+            <label for=\"txtInputPin\">Input</label>\
+            <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" value=\"" + String(model.inputPin) + "\" />\
+          </p>\
+          <p>\
+            <input type=\"submit\" class=\"btn\" name=\"Submit\" value=\"Save\" />\
+          </p>\
+        </form>\
+      ");
+    }
+    _dispatchRequestEnd();
+  }
+
   void WebPortal::_handleNewService() {
     _dispatchRequestStart();
     String serviceId = _server->arg("id");
@@ -501,7 +537,7 @@ namespace Victoria::Components {
           <a href=\"/service/state?id=" + serviceId + "\">State</a>\
         </p>\
         <h3>Setting (" + service.name + ")</h3>\
-        <form method=\"post\" action=\"" + currentUrl + "\">\
+        <form method=\"post\">\
           <p>\
             <label for=\"txtServiceName\">Name</label>\
             <input type=\"text\" id=\"txtServiceName\" name=\"ServiceName\" value=\"" + service.name + "\" />\
@@ -558,7 +594,7 @@ namespace Victoria::Components {
           <a href=\"" + backUrl + "\">&lt; Setting (" + service.name + ")</a>\
         </p>\
         <h3>State (" + service.name + ")</h3>\
-        <form method=\"post\" action=\"" + currentUrl + "\">\
+        <form method=\"post\">\
           " + stateHtml + "\
           <p>\
             <input type=\"submit\" class=\"btn\" name=\"Submit\" value=\"Save\" />\
@@ -739,7 +775,7 @@ namespace Victoria::Components {
       _send200("\
         <p><a href=\"/\">&lt; Home</a></p>\
         <h3>Reset</h3>\
-        <form method=\"post\" action=\"/reset\">\
+        <form method=\"post\">\
           " + _renderSelectionList({
             { "Reset Wifi", "WifiReset", "1", "checkbox", "" },
             { "Reset Accessory", "AccessoryReset", "1", "checkbox", "" },

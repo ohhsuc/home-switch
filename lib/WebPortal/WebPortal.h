@@ -9,6 +9,7 @@
 #include <ESP8266WebServer.h>
 #include "Commons.h"
 #include "ServiceStorage.h"
+#include "RadioStorage.h"
 
 namespace Victoria::Components {
   class WebPortal {
@@ -49,6 +50,7 @@ namespace Victoria::Components {
       void _handleSystemFile();
       void _handleWifiList();
       void _handleWifiJoin();
+      void _handleRadio();
       void _handleNewService();
       void _handleService();
       void _handleServiceState();
