@@ -453,7 +453,6 @@ namespace Victoria::Components {
     } else {
       RadioMessage lastReceived = radioStorage.getLastReceived();
       bool hasValue = lastReceived.value > 0;
-      int seconds = floor((millis() - lastReceived.timestamp) / 1000);
       TableModel table = {
         .header = {},
         .rows = {
@@ -473,7 +472,7 @@ namespace Victoria::Components {
             <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" value=\"" + String(model.inputPin) + "\" />\
           </p>\
           <p>\
-            <label>Last received " + (hasValue ? String(seconds) : "-") + " seconds ago</label>\
+            <label>Last received " + (hasValue ? CommonHelpers::timeSince(lastReceived.timestamp) + " ago" : "-") + "</label>\
             " + _renderTable(table) + "\
           </p>\
           <p>\
