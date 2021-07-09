@@ -451,29 +451,30 @@ namespace Victoria::Components {
       radioStorage.save(model);
       _redirectTo(_server->uri());
     } else {
-      unsigned long timespan = millis() - radioStorage.lastReceived.timestamp;
-      TableModel lastReceived = {
+      RadioMessage lastReceived = radioStorage.getLastReceived();
+      bool hasValue = lastReceived.value > 0;
+      int seconds = floor((millis() - lastReceived.timestamp) / 1000);
+      TableModel table = {
         .header = {},
         .rows = {
-          { "Value", String(radioStorage.lastReceived.value) },
-          { "Bits", String(radioStorage.lastReceived.bits) },
-          { "Protocol", String(radioStorage.lastReceived.protocol) },
-          { "When", String(timespan/1000) + "s ago" },
+          { "Value", hasValue ? String(lastReceived.value) : "-" },
+          { "Bits", hasValue ? String(lastReceived.bits) : "-" },
+          { "Protocol", hasValue ? String(lastReceived.protocol) : "-" },
         },
       };
       _send200("\
         <p>\
-          <a href=\"/\">&lt; Home</a> |\
+          <a href=\"/\">&lt; Home</a>\
         </p>\
-        <h3>Radio Frequency</h3>\
+        <h3>Radio</h3>\
         <form method=\"post\">\
           <p>\
             <label for=\"txtInputPin\">Input Pin</label>\
             <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" value=\"" + String(model.inputPin) + "\" />\
           </p>\
           <p>\
-            <label>Last Received</label>\
-            " + _renderTable(lastReceived) + "\
+            <label>Last received " + (hasValue ? String(seconds) : "-") + " seconds ago</label>\
+            " + _renderTable(table) + "\
           </p>\
           <p>\
             <input type=\"submit\" class=\"btn\" name=\"Submit\" value=\"Save\" />\

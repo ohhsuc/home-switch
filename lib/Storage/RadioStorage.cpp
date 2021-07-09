@@ -7,7 +7,11 @@ namespace Victoria::Components {
   }
 
   void RadioStorage::broadcast(RadioMessage message) {
-    lastReceived = message;
+    _lastReceived = message;
+  }
+
+  RadioMessage RadioStorage::getLastReceived() {
+    return _lastReceived;
   }
 
   void RadioStorage::_serializeTo(const RadioModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {

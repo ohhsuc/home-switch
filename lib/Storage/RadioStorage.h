@@ -7,9 +7,10 @@ namespace Victoria::Components {
   class RadioStorage : public FileStorage<RadioModel> {
     public:
       RadioStorage();
-      RadioMessage lastReceived;
       void broadcast(RadioMessage message);
+      RadioMessage getLastReceived();
     protected:
+      RadioMessage _lastReceived;
       void _serializeTo(const RadioModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) override;
       void _deserializeFrom(RadioModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) override;
   };
