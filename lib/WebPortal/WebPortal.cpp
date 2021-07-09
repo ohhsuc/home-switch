@@ -451,6 +451,16 @@ namespace Victoria::Components {
       radioStorage.save(model);
       _redirectTo(_server->uri());
     } else {
+      unsigned long timespan = millis() - radioStorage.lastReceived.timestamp;
+      TableModel lastReceived = {
+        .header = {},
+        .rows = {
+          { "Value", String(radioStorage.lastReceived.value) },
+          { "Bits", String(radioStorage.lastReceived.bits) },
+          { "Protocol", String(radioStorage.lastReceived.protocol) },
+          { "When", String(timespan/1000) + "s ago" },
+        },
+      };
       _send200("\
         <p>\
           <a href=\"/\">&lt; Home</a> |\
@@ -458,12 +468,12 @@ namespace Victoria::Components {
         <h3>Radio Frequency</h3>\
         <form method=\"post\">\
           <p>\
-            <label>Last Received</label>\
-            <b>10835156/24bit Protocol: 1</b>\
+            <label for=\"txtInputPin\">Input Pin</label>\
+            <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" value=\"" + String(model.inputPin) + "\" />\
           </p>\
           <p>\
-            <label for=\"txtInputPin\">Input</label>\
-            <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" value=\"" + String(model.inputPin) + "\" />\
+            <label>Last Received</label>\
+            " + _renderTable(lastReceived) + "\
           </p>\
           <p>\
             <input type=\"submit\" class=\"btn\" name=\"Submit\" value=\"Save\" />\
@@ -486,7 +496,6 @@ namespace Victoria::Components {
       .inputPin = -1,
       .outputLevel = -1,
       .inputLevel = -1,
-      .rfInputPin = -1,
     };
     _saveService(serviceId, newSetting);
     // redirect
@@ -512,7 +521,6 @@ namespace Victoria::Components {
       String inputPin = _server->arg("InputPin");
       String outputLevel = _server->arg("OutputLevel");
       String inputLevel = _server->arg("InputLevel");
-      String rfInputPin = _server->arg("RfInputPin");
       String submit = _server->arg("Submit");
       if (submit == "Delete") {
         _deleteService(serviceId, service);
@@ -526,7 +534,6 @@ namespace Victoria::Components {
         service.inputPin = inputPin.toInt();
         service.outputLevel = outputLevel.toInt();
         service.inputLevel = inputLevel.toInt();
-        service.rfInputPin = rfInputPin.toInt();
         _saveService(serviceId, service);
         _redirectTo(currentUrl);
       }
@@ -677,10 +684,6 @@ namespace Victoria::Components {
           <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" value=\"" + String(service.inputPin) + "\" />\
           " + _getLevelHtml("InputLevel", service.inputLevel) + "\
         </p>\
-        <p>\
-          <label for=\"txtRfInputPin\">RF Input</label>\
-          <input type=\"number\" id=\"txtRfInputPin\" name=\"RfInputPin\" value=\"" + String(service.rfInputPin) + "\" />\
-        </p>\
       </fieldset>\
     ";
     return html;
@@ -790,12 +793,6 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-  void WebPortal::_handleCrossOrigin() {
-    _dispatchRequestStart();
-    _server->send(204);
-    _dispatchRequestEnd();
-  }
-
   void WebPortal::_handleNotFound() {
     _dispatchRequestStart();
     String method = (_server->method() == HTTP_GET) ? "GET" : "POST";
@@ -803,6 +800,12 @@ namespace Victoria::Components {
       <p>URI: " + _server->uri() + "</p>\
       <p>Method: " + method + "</p>\
     ");
+    _dispatchRequestEnd();
+  }
+
+  void WebPortal::_handleCrossOrigin() {
+    _dispatchRequestStart();
+    _server->send(204);
     _dispatchRequestEnd();
   }
 

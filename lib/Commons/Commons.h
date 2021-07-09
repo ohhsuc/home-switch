@@ -2,6 +2,7 @@
 #define Commons_h
 
 #include <map>
+#include <list>
 #include <vector>
 #include <Arduino.h>
 #include "Console.h"
@@ -19,6 +20,34 @@ namespace Victoria {
     std::vector<std::vector<String>> rows;
   };
 
+  struct RadioMessage {
+    unsigned long value;
+    unsigned int bits;
+    unsigned int protocol;
+    unsigned long timestamp;
+  };
+
+  enum RadioAction {
+    RadioActionNone = 0,
+    RadioActionTrue = 1,
+    RadioActionFalse = 2,
+    RadioActionToggle = 3,
+    RadioActionWiFiSta = 4,
+    RadioActionWiFiApSta = 5,
+  };
+
+  struct RadioRule {
+    unsigned long value;
+    unsigned int protocol;
+    String serviceId;
+    RadioAction action;
+  };
+
+  struct RadioModel {
+    int inputPin;
+    std::list<RadioRule> rules;
+  };
+
   enum ServiceType {
     EmptyServiceType = 0,
     BooleanServiceType = 1,
@@ -32,7 +61,6 @@ namespace Victoria {
     int inputPin;
     int outputLevel;
     int inputLevel;
-    int rfInputPin;
   };
 
   struct ServiceState {
@@ -42,10 +70,6 @@ namespace Victoria {
 
   struct ServicesModel {
     std::map<String, ServiceSetting> services;
-  };
-
-  struct RadioModel {
-    int inputPin;
   };
 
   class CommonHelpers {

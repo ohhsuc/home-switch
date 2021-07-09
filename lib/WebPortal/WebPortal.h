@@ -8,8 +8,8 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include "Commons.h"
-#include "ServiceStorage.h"
 #include "RadioStorage.h"
+#include "ServiceStorage.h"
 
 namespace Victoria::Components {
   class WebPortal {
@@ -36,8 +36,8 @@ namespace Victoria::Components {
     private:
       ESP8266WebServer* _server;
       std::pair<bool, ServiceSetting> _getService(const String& id);
-      void _saveService(const String& serviceId, const ServiceSetting& setting);
-      void _deleteService(const String& serviceId, const ServiceSetting& setting);
+      void _saveService(const String& serviceId, const ServiceSetting& service);
+      void _deleteService(const String& serviceId, const ServiceSetting& service);
       void _redirectTo(const String& url);
       void _send200(const String& bodyHtml);
       void _send404(const String& bodyHtml);
@@ -57,15 +57,15 @@ namespace Victoria::Components {
       static String _getCheckedAttr(bool checked);
       static String _renderTable(const TableModel& model);
       static String _renderSelectionList(std::vector<std::vector<String>> list);
-      static String _getTypeHtml(const ServiceSetting& setting);
-      static String _getIOHtml(const ServiceSetting& setting);
+      static String _getTypeHtml(const ServiceSetting& service);
+      static String _getIOHtml(const ServiceSetting& service);
       static String _getLevelHtml(const String name, const short int level);
       static String _getBooleanHtml(const ServiceState& state);
       static String _getIntegerHtml(const ServiceState& state);
       static void _onWifiEvent(WiFiEvent_t event);
       void _handleReset();
-      void _handleCrossOrigin();
       void _handleNotFound();
+      void _handleCrossOrigin();
   };
 } // namespace Victoria::Components
 

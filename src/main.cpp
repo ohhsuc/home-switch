@@ -1,9 +1,8 @@
 #include <map>
 #include <Arduino.h>
 #include <ESP8266mDNS.h>
-#include "Commons.h"
 #include "WebPortal.h"
-#include "RfPortal.h"
+#include "RadioPortal.h"
 #include "Timer.h"
 #include "TimesTrigger.h"
 #include "ButtonEvents.h"
@@ -21,7 +20,7 @@ using namespace Victoria::HomeKit;
 Timer timer;
 TimesTrigger timesTrigger(10, 5 * 1000);
 WebPortal webPortal(80);
-RfPortal* rfPortal;
+RadioPortal radioPortal;
 ButtonEvents* inputEvents;
 OnOffEvents* onOffEvents;
 
@@ -56,18 +55,36 @@ void setServiceState(const String& serviceId, const ServiceSetting& setting, Ser
   }
 }
 
-void toggleState(const String& serviceId) {
+void setSwitchAction(const String& serviceId, const RadioAction& radioAction) {
   auto service = HomeKitService::findServiceById(serviceId);
   if (service) {
     auto state = service->getState();
-    state.boolValue = !state.boolValue;
+    switch (radioAction) {
+      case RadioActionToggle:
+        state.boolValue = !state.boolValue;
+        break;
+      case RadioActionTrue:
+        state.boolValue = true;
+        break;
+      case RadioActionFalse:
+        state.boolValue = false;
+        break;
+      default:
+        break;
+    }
     service->setState(state);
+  }
+}
+
+void setRadioAction(const RadioRule& rule) {
+  if (rule.serviceId) {
+    setSwitchAction(rule.serviceId, rule.action);
   }
 }
 
 void onButtonClick(const String& serviceId, int times) {
   if (times == 1) {
-    toggleState(serviceId);
+    setSwitchAction(serviceId, RadioActionToggle);
   }
 }
 
@@ -96,6 +113,9 @@ void setup(void) {
   webPortal.onResetAccessory = []() { HomeKitAccessory::reset(); };
   webPortal.setup();
 
+  radioPortal.onAction = setRadioAction;
+  radioPortal.setup();
+
   timesTrigger.onTimesOut = []() { console.log("times out!"); };
   timer.setInterval(10 * 60 * 1000, []() { MDNS.announce(); });
   timer.setInterval(30 * 60 * 1000, []() { HomeKitService::heartbeat(); });
@@ -107,39 +127,33 @@ void setup(void) {
   auto model = serviceStorage.load();
   if (model.services.size() > 0) {
     auto pair = model.services.begin();
-    auto id = pair->first;
-    auto setting = pair->second;
+    auto serviceId = pair->first;
+    auto service = pair->second;
     // outputs
-    auto outputPin = setting.outputPin;
+    auto outputPin = service.outputPin;
     if (outputPin > -1) {
       pinMode(outputPin, OUTPUT);
-      if (setting.outputLevel > -1) {
-        digitalWrite(outputPin, setting.outputLevel);
+      if (service.outputLevel > -1) {
+        digitalWrite(outputPin, service.outputLevel);
       }
-      if (setting.type == BooleanServiceType) {
-        auto booleanService = new BooleanHomeKitService(id, outputPin);
+      if (service.type == BooleanServiceType) {
+        auto booleanService = new BooleanHomeKitService(serviceId, outputPin);
         booleanService->onStateChange = onStateChange;
-      } else if (setting.type == IntegerServiceType) {
+      } else if (service.type == IntegerServiceType) {
         // TODO:
       }
     }
     // inputs
-    auto inputPin = setting.inputPin;
+    auto inputPin = service.inputPin;
     if (inputPin > -1) {
       pinMode(inputPin, INPUT_PULLUP);
-      if (setting.inputLevel > -1) {
-        digitalWrite(inputPin, setting.inputLevel);
+      if (service.inputLevel > -1) {
+        digitalWrite(inputPin, service.inputLevel);
       }
-      inputEvents = new ButtonEvents(id, inputPin);
+      inputEvents = new ButtonEvents(serviceId, inputPin);
       inputEvents->onClick = onButtonClick;
-      onOffEvents = new OnOffEvents(id, inputPin);
+      onOffEvents = new OnOffEvents(serviceId, inputPin);
       onOffEvents->onToggle = onToggle;
-    }
-    // rf input
-    auto rfInputPin = setting.rfInputPin;
-    if (rfInputPin > -1) {
-      rfPortal = new RfPortal(id, rfInputPin);
-      rfPortal->onToggleState = toggleState;
     }
     // setup
     HomeKitAccessory::setup(webPortal.getHostName(false));
@@ -151,11 +165,9 @@ void setup(void) {
 
 void loop(void) {
   timer.loop();
+  radioPortal.loop();
   webPortal.loop();
   HomeKitAccessory::loop();
-  if (rfPortal) {
-    rfPortal->loop();
-  }
   if (inputEvents) {
     inputEvents->loop();
   }
