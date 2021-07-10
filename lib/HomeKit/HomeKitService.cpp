@@ -19,11 +19,11 @@ namespace Victoria::HomeKit {
       delete _mainCharacteristic;
       _mainCharacteristic = NULL;
     }
-    console.log("Service disposed " + serviceId);
+    console.log("service disposed " + serviceId);
   }
 
   ServiceState HomeKitService::getState() {
-    console.log("HomeKitService::getState");
+    console.log("[HomeKitService] getState()");
     return {};
   }
 

@@ -2,7 +2,6 @@
 #define Commons_h
 
 #include <map>
-#include <list>
 #include <vector>
 #include <Arduino.h>
 #include "Console.h"
@@ -39,13 +38,13 @@ namespace Victoria {
   struct RadioRule {
     unsigned long value;
     unsigned int protocol;
-    String serviceId;
     RadioAction action;
+    String serviceId;
   };
 
   struct RadioModel {
     int inputPin;
-    std::list<RadioRule> rules;
+    std::vector<RadioRule> rules;
   };
 
   enum ServiceType {

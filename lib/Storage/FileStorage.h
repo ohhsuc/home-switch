@@ -24,7 +24,7 @@ namespace Victoria::Components {
   };
 
   template <class TModel>
-  FileStorage<TModel>::FileStorage() {}
+  FileStorage<TModel>::FileStorage() { }
 
   template <class TModel>
   TModel FileStorage<TModel>::load() {
@@ -32,9 +32,6 @@ namespace Victoria::Components {
     TModel model;
     // begin
     if (LittleFS.begin()) {
-      if (LittleFS.exists("/Victoria.json")) {
-        LittleFS.remove("/Victoria.json");
-      }
       // check exists
       if (LittleFS.exists(_filePath)) {
         // open file
@@ -62,20 +59,20 @@ namespace Victoria::Components {
               // convert
               _deserializeFrom(model, doc);
             } else {
-              console.error("Failed to parse config file");
+              console.error("failed to parse config file");
               console.error(error.f_str());
             }
           } else {
-            console.error("Config file size is too large");
+            console.error("config file size is too large");
           }
         } else {
-          console.error("Failed to open config file");
+          console.error("failed to open config file");
         }
       } else {
-        console.error("File notfound " + _filePath);
+        console.error("file notfound " + _filePath);
       }
     } else {
-      console.error("Failed to mount file system");
+      console.error("failed to mount file system");
     }
     // end
     LittleFS.end();
@@ -100,10 +97,10 @@ namespace Victoria::Components {
         file.close();
         success = true;
       } else {
-        console.error("Failed to open config file for writing");
+        console.error("failed to open config file for writing");
       }
     } else {
-      console.error("Failed to mount file system");
+      console.error("failed to mount file system");
     }
     // end
     LittleFS.end();

@@ -32,7 +32,7 @@ namespace Victoria::Components {
       WiFi.softAP(hostName); // name which is displayed on AP list
       IPAddress currentApIp = WiFi.softAPIP();
       if (currentApIp) {
-        console.log("Wifi > AP Address > " + currentApIp.toString());
+        console.log("[Wifi] AP Address > " + currentApIp.toString());
       }
     }
 
@@ -70,7 +70,7 @@ namespace Victoria::Components {
     String id = WiFi.macAddress();
     id.replace(":", "");
     id.toUpperCase();
-    id = id.substring(id.length() - 5);
+    id = id.substring(id.length() - 6);
 
     String version = String(FirmwareVersion);
     version.replace(".", "");
@@ -333,10 +333,10 @@ namespace Victoria::Components {
           </p>\
         ");
       } else {
-        console.error("LittleFS > Read fs info failed");
+        console.error("read fs info failed");
       }
     } else {
-      console.error("LittleFS > Failed to mount file system");
+      console.error("failed to mount file system");
     }
     LittleFS.end();
     _dispatchRequestEnd();
@@ -359,10 +359,10 @@ namespace Victoria::Components {
           </p>\
         ");
       } else {
-        console.error("LittleFS > Failed to open file " + fileName);
+        console.error("failed to open file " + fileName);
       }
     } else {
-      console.error("LittleFS > Failed to mount file system");
+      console.error("failed to mount file system");
     }
     LittleFS.end();
     _dispatchRequestEnd();
@@ -390,9 +390,9 @@ namespace Victoria::Components {
         <ul>" + list + "</ul>\
         <p>\
           <label for=\"txtPassword\">Password:</label>\
-          <input type=\"text\" id=\"txtPassword\" name=\"password\" length=\"64\" />\
+          <input type=\"text\" id=\"txtPassword\" name=\"password\" maxlength=\"32\" />\
         </p>\
-        <p><input type=\"submit\" class=\"btn\" value=\"Join\" /></p>\
+        <p><button type=\"submit\" class=\"btn\">Join</button></p>\
       </form>\
     ");
     _dispatchRequestEnd();
@@ -411,8 +411,8 @@ namespace Victoria::Components {
       return;
     }
 
-    console.log("Wifi > SSID > " + ssid);
-    console.log("Wifi > Password > " + password);
+    console.log("[Wifi] ssid > " + ssid);
+    console.log("[Wifi] password > " + password);
     WiFi.persistent(true);
     WiFi.begin(ssid, password);
     // Wait for connecting
@@ -428,7 +428,7 @@ namespace Victoria::Components {
     }
     console.newline();
     bool isConnected = WiFi.status() == WL_CONNECTED;
-    console.log("Wifi > Connected > " + String(isConnected));
+    console.log("[Wifi] connected > " + String(isConnected));
     if (isConnected) {
       _sendHints("Success", "\
         <p>Joined to <b>" + ssid + "</b></p>\
@@ -446,37 +446,75 @@ namespace Victoria::Components {
     _dispatchRequestStart();
     auto model = radioStorage.load();
     if (_server->method() == HTTP_POST) {
+      String submit = _server->arg("Submit");
       String inputPin = _server->arg("InputPin");
-      model.inputPin = inputPin.toInt();
+      if (submit == "Add") {
+        model.rules.push_back({
+          .value = 0,
+          .protocol = 1,
+          .action = RadioActionNone,
+          .serviceId = "abcd",
+        });
+      } else if (submit.startsWith("Remove")) {
+        submit.remove(0, 6);
+        int removeIndex = submit.toInt();
+        int ruleIndex = -1;
+        for (auto it = model.rules.begin(); it != model.rules.end();) {
+          if (++ruleIndex == removeIndex) {
+            model.rules.erase(it);
+            break;
+          }
+        }
+      } else {
+        model.inputPin = inputPin.toInt();
+      }
       radioStorage.save(model);
       _redirectTo(_server->uri());
     } else {
       RadioMessage lastReceived = radioStorage.getLastReceived();
-      bool hasValue = lastReceived.value > 0;
-      TableModel table = {
+      bool hasReceived = lastReceived.value > 0;
+      TableModel receivedTable = {
         .header = {},
         .rows = {
-          { "Value", hasValue ? String(lastReceived.value) : "-" },
-          { "Bits", hasValue ? String(lastReceived.bits) : "-" },
-          { "Protocol", hasValue ? String(lastReceived.protocol) : "-" },
+          { "Value", hasReceived ? String(lastReceived.value) : "-" },
+          { "Bits", hasReceived ? String(lastReceived.bits) : "-" },
+          { "Protocol", hasReceived ? String(lastReceived.protocol) : "-" },
         },
       };
+      TableModel rulesTable = {
+        .header = { "", "Value", "Protocol", "Action", "Service" },
+        .rows = {},
+      };
+      int ruleIndex = -1;
+      for (const auto& rule : model.rules) {
+        ruleIndex++;
+        rulesTable.rows.push_back({
+          "<button type=\"submit\" name=\"Submit\" value=\"Remove" + String(ruleIndex) + "\" class=\"btn\" onclick=\"return confirm('Are you sure you want to remove?')\">Remove</button>",
+          "<input type=\"number\" name=\"Value\" min=\"-1\" max=\"99999999\" value=\"" + String(rule.value) + "\" />",
+          "<input type=\"number\" name=\"Protocol\" min=\"-1\" max=\"100\" value=\"" + String(rule.protocol) + "\" />",
+          "<input type=\"number\" name=\"Action\" min=\"-1\" max=\"100\" value=\"" + String(rule.action) + "\" />",
+          "<input type=\"text\" name=\"ServiceId\" maxlength=\"8\" value=\"" + String(rule.serviceId) + "\" />"
+        });
+      }
       _send200("\
-        <p>\
-          <a href=\"/\">&lt; Home</a>\
-        </p>\
+        <p><a href=\"/\">&lt; Home</a></p>\
         <h3>Radio</h3>\
         <form method=\"post\">\
           <p>\
             <label for=\"txtInputPin\">Input Pin</label>\
-            <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" value=\"" + String(model.inputPin) + "\" />\
+            <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" min=\"-1\" max=\"100\" value=\"" + String(model.inputPin) + "\" />\
           </p>\
           <p>\
-            <label>Last received " + (hasValue ? CommonHelpers::timeSince(lastReceived.timestamp) + " ago" : "-") + "</label>\
-            " + _renderTable(table) + "\
+            <label>Last received " + (hasReceived ? CommonHelpers::timeSince(lastReceived.timestamp) + " ago" : "-") + "</label>\
+            " + _renderTable(receivedTable) + "\
           </p>\
           <p>\
-            <input type=\"submit\" class=\"btn\" name=\"Submit\" value=\"Save\" />\
+            <label>Define your rules</label>\
+            " + _renderTable(rulesTable) + "\
+          </p>\
+          <p>\
+            <button type=\"submit\" name=\"Submit\" value=\"Add\" class=\"btn\">Add+</button>\
+            <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
           </p>\
         </form>\
       ");
@@ -547,13 +585,13 @@ namespace Victoria::Components {
         <form method=\"post\">\
           <p>\
             <label for=\"txtServiceName\">Name</label>\
-            <input type=\"text\" id=\"txtServiceName\" name=\"ServiceName\" value=\"" + service.name + "\" />\
+            <input type=\"text\" id=\"txtServiceName\" name=\"ServiceName\" maxlength=\"20\" value=\"" + service.name + "\" />\
           </p>\
           " + _getTypeHtml(service) + "\
           " + _getIOHtml(service) + "\
           <p>\
-            <input type=\"submit\" class=\"btn\" name=\"Submit\" value=\"Save\" />\
-            <input type=\"submit\" class=\"btnWeak\" name=\"Submit\" value=\"Delete\" onclick=\"return confirm('Are you sure you want to delete?')\" />\
+            <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
+            <button type=\"submit\" name=\"Submit\" value=\"Delete\" class=\"btnWeak\" onclick=\"return confirm('Are you sure you want to delete?')\">Delete</button>\
           </p>\
         </form>\
       ");
@@ -604,7 +642,7 @@ namespace Victoria::Components {
         <form method=\"post\">\
           " + stateHtml + "\
           <p>\
-            <input type=\"submit\" class=\"btn\" name=\"Submit\" value=\"Save\" />\
+            <button type=\"submit\" class=\"btn\">Save</button>\
           </p>\
         </form>\
       ");
@@ -676,12 +714,12 @@ namespace Victoria::Components {
         <legend>IO Pins</legend>\
         <p>\
           <label for=\"txtOutputPin\">Output</label>\
-          <input type=\"number\" id=\"txtOutputPin\" name=\"OutputPin\" value=\"" + String(service.outputPin) + "\" />\
+          <input type=\"number\" id=\"txtOutputPin\" name=\"OutputPin\" min=\"-1\" max=\"100\" value=\"" + String(service.outputPin) + "\" />\
           " + _getLevelHtml("OutputLevel", service.outputLevel) + "\
         </p>\
         <p>\
           <label for=\"txtInputPin\">Input</label>\
-          <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" value=\"" + String(service.inputPin) + "\" />\
+          <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" min=\"-1\" max=\"100\" value=\"" + String(service.inputPin) + "\" />\
           " + _getLevelHtml("InputLevel", service.inputLevel) + "\
         </p>\
       </fieldset>\
@@ -731,19 +769,19 @@ namespace Victoria::Components {
   void WebPortal::_onWifiEvent(WiFiEvent_t event) {
     switch (event) {
       case WiFiEvent::WIFI_EVENT_STAMODE_CONNECTED:
-        console.log("Wifi > Event > STA connected");
+        console.log("[Wifi] event > STA connected");
         break;
       case WiFiEvent::WIFI_EVENT_STAMODE_DISCONNECTED:
-        console.log("Wifi > Event > STA disconnected");
+        console.log("[Wifi] event > STA disconnected");
         break;
       case WiFiEvent::WIFI_EVENT_STAMODE_GOT_IP:
-        console.log("Wifi > Event > STA got ip");
+        console.log("[Wifi] event > STA got ip");
         break;
       case WiFiEvent::WIFI_EVENT_SOFTAPMODE_STACONNECTED:
-        console.log("Wifi > Event > AP connected");
+        console.log("[Wifi] event > AP connected");
         break;
       case WiFiEvent::WIFI_EVENT_SOFTAPMODE_STADISCONNECTED:
-        console.log("Wifi > Event > AP disconnected");
+        console.log("[Wifi] event > AP disconnected");
         break;
       default:
         break;
@@ -758,7 +796,7 @@ namespace Victoria::Components {
         // wifi_config_reset();
         WiFi.disconnect(true);
         WiFi.mode(WIFI_AP_STA);
-        console.log("Wifi > Mode > WIFI_AP_STA");
+        console.log("[Wifi] mode > WIFI_AP_STA");
       }
       if (_server->arg("AccessoryReset") == "1" && onResetAccessory) {
         onResetAccessory();
@@ -786,7 +824,7 @@ namespace Victoria::Components {
             { "ESP Reset", "EspReset", "1", "checkbox", "" },
             { "ESP Erase Config", "EspEraseConfig", "1", "checkbox", "" },
           }) + "\
-          <p><input type=\"submit\" class=\"btn\" value=\"Submit\" /></p>\
+          <p><button type=\"submit\" class=\"btn\">Submit</button></p>\
         </form>\
       ");
     }

@@ -10,21 +10,21 @@ namespace Victoria::Components {
     _messageHandler = handler;
   }
   void IMeshLoader::send(const MeshMessage& message) {
-    console.log("IMeshLoader send()");
+    console.log("[IMeshLoader] send()");
   }
 
   // RadioFrequencyMeshLoader
   RadioFrequencyMeshLoader::RadioFrequencyMeshLoader(uint8_t inputPin) : IMeshLoader(inputPin) {
   }
   void RadioFrequencyMeshLoader::send(const MeshMessage& message) {
-    console.log("RadioFrequencyMeshLoader send()");
+    console.log("[RadioFrequencyMeshLoader] send()");
   }
 
   // BluetoothMeshLoader
   BluetoothMeshLoader::BluetoothMeshLoader(uint8_t inputPin) : IMeshLoader(inputPin) {
   }
   void BluetoothMeshLoader::send(const MeshMessage& message) {
-    console.log("BluetoothMeshLoader send()");
+    console.log("[BluetoothMeshLoader] send()");
   }
 
   // Mesher

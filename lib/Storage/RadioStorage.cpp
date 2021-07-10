@@ -21,8 +21,8 @@ namespace Victoria::Components {
       JsonArray item = items.createNestedArray();
       item[0] = rule.value;
       item[1] = rule.protocol;
-      item[2] = rule.serviceId;
-      item[3] = rule.action;
+      item[2] = rule.action;
+      item[3] = rule.serviceId;
     }
   }
 
@@ -34,8 +34,8 @@ namespace Victoria::Components {
       RadioRule rule = {
         .value = item[0],
         .protocol = item[1],
-        .serviceId = item[2],
-        .action = item[3],
+        .action = item[2],
+        .serviceId = item[3],
       };
       model.rules.push_back(rule);
     }

@@ -159,7 +159,7 @@ void setup(void) {
     HomeKitAccessory::setup(webPortal.getHostName(false));
   }
 
-  console.log("Setup Complete!");
+  console.log("setup complete");
   ledOff();
 }
 
