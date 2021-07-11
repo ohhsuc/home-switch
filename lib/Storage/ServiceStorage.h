@@ -8,8 +8,8 @@ namespace Victoria::Components {
     public:
       ServiceStorage();
     protected:
-      void _serializeTo(const ServicesModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) override;
-      void _deserializeFrom(ServicesModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) override;
+      void _serializeTo(const ServicesModel& model, DynamicJsonDocument& doc) override;
+      void _deserializeFrom(ServicesModel& model, const DynamicJsonDocument& doc) override;
   };
   // global
   extern ServiceStorage serviceStorage;

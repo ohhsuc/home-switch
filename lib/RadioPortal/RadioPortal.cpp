@@ -44,8 +44,8 @@ namespace Victoria::Components {
   }
 
   void RadioPortal::_handleMessage(RadioMessage message) {
-    auto rules = radioStorage.load().rules;
-    for (const auto& rule : rules) {
+    auto model = radioStorage.load();
+    for (const auto& rule : model.rules) {
       if (
         rule.value == message.value &&
         rule.protocol == message.protocol

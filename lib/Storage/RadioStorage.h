@@ -11,8 +11,8 @@ namespace Victoria::Components {
       RadioMessage getLastReceived();
     protected:
       RadioMessage _lastReceived;
-      void _serializeTo(const RadioModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) override;
-      void _deserializeFrom(RadioModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) override;
+      void _serializeTo(const RadioModel& model, DynamicJsonDocument& doc) override;
+      void _deserializeFrom(RadioModel& model, const DynamicJsonDocument& doc) override;
   };
   // global
   extern RadioStorage radioStorage;

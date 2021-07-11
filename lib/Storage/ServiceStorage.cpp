@@ -6,7 +6,7 @@ namespace Victoria::Components {
     _filePath = "/services.json";
   }
 
-  void ServiceStorage::_serializeTo(const ServicesModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
+  void ServiceStorage::_serializeTo(const ServicesModel& model, DynamicJsonDocument& doc) {
     JsonArray items = doc.createNestedArray("s");
     for (const auto& pair : model.services) {
       ServiceSetting service = pair.second;
@@ -21,7 +21,7 @@ namespace Victoria::Components {
     }
   }
 
-  void ServiceStorage::_deserializeFrom(ServicesModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
+  void ServiceStorage::_deserializeFrom(ServicesModel& model, const DynamicJsonDocument& doc) {
     auto items = doc["s"];
     for (size_t i = 0; i < items.size(); i++) {
       auto item = items[i];

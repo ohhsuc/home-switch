@@ -335,10 +335,10 @@ namespace Victoria::Components {
       } else {
         console.error("read fs info failed");
       }
+      LittleFS.end();
     } else {
       console.error("failed to mount file system");
     }
-    LittleFS.end();
     _dispatchRequestEnd();
   }
 
@@ -361,10 +361,10 @@ namespace Victoria::Components {
       } else {
         console.error("failed to open file " + fileName);
       }
+      LittleFS.end();
     } else {
       console.error("failed to mount file system");
     }
-    LittleFS.end();
     _dispatchRequestEnd();
   }
 
@@ -509,7 +509,7 @@ namespace Victoria::Components {
             " + _renderTable(receivedTable) + "\
           </p>\
           <p>\
-            <label>Define your rules</label>\
+            <label>Matching Rules</label>\
             " + _renderTable(rulesTable) + "\
           </p>\
           <p>\

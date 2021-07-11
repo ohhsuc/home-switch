@@ -7,7 +7,7 @@
 #include <LittleFS.h>
 #include "Commons.h"
 
-#define DEFAULT_FILE_SIZE 1024
+#define DEFAULT_FILE_SIZE 2048 // block siz 4096
 
 namespace Victoria::Components {
 
@@ -16,11 +16,11 @@ namespace Victoria::Components {
     public:
       FileStorage();
       TModel load();
-      bool save(TModel model);
+      bool save(const TModel& model);
     protected:
       String _filePath;
-      virtual void _serializeTo(const TModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc);
-      virtual void _deserializeFrom(TModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc);
+      virtual void _serializeTo(const TModel& model, DynamicJsonDocument& doc);
+      virtual void _deserializeFrom(TModel& model, const DynamicJsonDocument& doc);
   };
 
   template <class TModel>
@@ -52,8 +52,8 @@ namespace Victoria::Components {
           if (size <= DEFAULT_FILE_SIZE) {
             // https://arduinojson.org/
             // https://cpp4arduino.com/2018/11/06/what-is-heap-fragmentation.html
-            // DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
-            StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
+            DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
+            // StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
             auto error = deserializeJson(doc, buffer);
             if (!error) {
               // convert
@@ -71,19 +71,19 @@ namespace Victoria::Components {
       } else {
         console.error("file notfound " + _filePath);
       }
+      // end
+      LittleFS.end();
     } else {
       console.error("failed to mount file system");
     }
-    // end
-    LittleFS.end();
     return model;
   }
 
   template<class TModel>
-  bool FileStorage<TModel>::save(TModel model) {
+  bool FileStorage<TModel>::save(const TModel& model) {
     // convert
-    // DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
-    StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
+    DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
+    // StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
     _serializeTo(model, doc);
     auto success = false;
     // begin
@@ -99,19 +99,19 @@ namespace Victoria::Components {
       } else {
         console.error("failed to open config file for writing");
       }
+      // end
+      LittleFS.end();
     } else {
       console.error("failed to mount file system");
     }
-    // end
-    LittleFS.end();
     return success;
   }
 
   template<class TModel>
-  void FileStorage<TModel>::_serializeTo(const TModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) { }
+  void FileStorage<TModel>::_serializeTo(const TModel& model, DynamicJsonDocument& doc) { }
 
   template<class TModel>
-  void FileStorage<TModel>::_deserializeFrom(TModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) { }
+  void FileStorage<TModel>::_deserializeFrom(TModel& model, const DynamicJsonDocument& doc) { }
 
 } // namespace Victoria::Components
 

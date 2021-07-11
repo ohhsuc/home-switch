@@ -21,7 +21,7 @@ namespace Victoria::Components {
     return _lastReceived;
   }
 
-  void RadioStorage::_serializeTo(const RadioModel& model, StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
+  void RadioStorage::_serializeTo(const RadioModel& model, DynamicJsonDocument& doc) {
     doc["i"] = model.inputPin;
     JsonArray items = doc.createNestedArray("r");
     for (const auto& rule : model.rules) {
@@ -33,7 +33,7 @@ namespace Victoria::Components {
     }
   }
 
-  void RadioStorage::_deserializeFrom(RadioModel& model, const StaticJsonDocument<DEFAULT_FILE_SIZE>& doc) {
+  void RadioStorage::_deserializeFrom(RadioModel& model, const DynamicJsonDocument& doc) {
     model.inputPin = doc["i"];
     auto items = doc["r"];
     for (size_t i = 0; i < items.size(); i++) {
