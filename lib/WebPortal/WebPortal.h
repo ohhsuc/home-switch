@@ -32,10 +32,10 @@ namespace Victoria::Components {
       TServerEventHandler onRequestEnd;
       TServerEventHandler onResetAccessory;
       // static
-      static String getHostName(bool fullName);
+      static String getHostName(bool includeVersion);
     private:
       ESP8266WebServer* _server;
-      std::pair<bool, ServiceSetting> _getService(const String& id);
+      std::pair<bool, ServiceSetting> _getService(const String& serviceId);
       void _saveService(const String& serviceId, const ServiceSetting& service);
       void _deleteService(const String& serviceId, const ServiceSetting& service);
       void _redirectTo(const String& url);
@@ -59,7 +59,7 @@ namespace Victoria::Components {
       static String _renderSelectionList(std::vector<std::vector<String>> list);
       static String _getTypeHtml(const ServiceSetting& service);
       static String _getIOHtml(const ServiceSetting& service);
-      static String _getLevelHtml(const String name, const short int level);
+      static String _getLevelHtml(const String& name, const int& level);
       static String _getBooleanHtml(const ServiceState& state);
       static String _getIntegerHtml(const ServiceState& state);
       static void _onWifiEvent(WiFiEvent_t event);

@@ -4,6 +4,13 @@ namespace Victoria::Components {
 
   RadioStorage::RadioStorage() {
     _filePath = "/radio.json";
+    // empty value
+    _lastReceived = {
+      .value = 0,
+      .bits = 0,
+      .protocol = 0,
+      .timestamp = 0,
+    };
   }
 
   void RadioStorage::broadcast(RadioMessage message) {

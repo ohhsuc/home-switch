@@ -2,7 +2,7 @@
 
 namespace Victoria::Components {
 
-  WebPortal::WebPortal(int port) {
+  WebPortal::WebPortal(int port = 80) {
     _server = new ESP8266WebServer(port);
   }
 
@@ -66,7 +66,7 @@ namespace Victoria::Components {
     _server->handleClient();
   }
 
-  String WebPortal::getHostName(bool includeVersion) {
+  String WebPortal::getHostName(bool includeVersion = false) {
     String id = WiFi.macAddress();
     id.replace(":", "");
     id.toUpperCase();
@@ -459,7 +459,7 @@ namespace Victoria::Components {
         submit.remove(0, 6);
         int removeIndex = submit.toInt();
         int ruleIndex = -1;
-        for (auto it = model.rules.begin(); it != model.rules.end();) {
+        for (const auto it = model.rules.begin(); it != model.rules.end();) {
           if (++ruleIndex == removeIndex) {
             model.rules.erase(it);
             break;
@@ -727,7 +727,7 @@ namespace Victoria::Components {
     return html;
   }
 
-  String WebPortal::_getLevelHtml(const String name, const short int level) {
+  String WebPortal::_getLevelHtml(const String& name, const int& level) {
     return "\
       <label for=\"txt" + name + "High\">High</label>\
       <input type=\"radio\" id=\"txt" + name + "High\" name=\"" + name + "\" value=\"1\"" + _getCheckedAttr(level == 1) + " />\
