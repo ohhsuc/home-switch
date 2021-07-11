@@ -11,13 +11,13 @@ namespace Victoria::Events {
   }
 
   void ShakeEvents::loop() {
-    int state = digitalRead(_inputPin);
+    auto state = digitalRead(_inputPin);
     if (_inputState != state) {
       _inputState = state;
       _shaked = true;
     }
     if (_shaked) {
-      unsigned long now = millis();
+      auto now = millis();
       if (now - _lastFire > DEFAULT_DEBOUNCE_MILLIS) {
         _lastFire = now;
         _shaked = false;

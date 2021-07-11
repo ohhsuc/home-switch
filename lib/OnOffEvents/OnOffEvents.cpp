@@ -10,7 +10,7 @@ namespace Victoria::Events {
   }
 
   void OnOffEvents::loop() {
-    bool isOn = digitalRead(_inputPin) == LOW;
+    auto isOn = digitalRead(_inputPin) == LOW;
     if (isOn != _lastState) {
       _lastTimeRead = millis();
       return;

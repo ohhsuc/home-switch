@@ -27,7 +27,7 @@ namespace Victoria::Components {
       unsigned long value = _rf->getReceivedValue();
       unsigned int bits = _rf->getReceivedBitlength();
       // logs
-      String received = String(protocol) + "/" + String(value) + "/" + String(bits) + "bits";
+      auto received = String(protocol) + "/" + String(value) + "/" + String(bits) + "bits";
       console.log("[RadioPortal] received " + received);
       // handle message
       RadioMessage message = {

@@ -23,7 +23,7 @@ namespace Victoria::HomeKit {
     accessorySerialNumber.value.string_value = const_cast<char*>(AccessoryInformationSerialNumber.c_str());
     accessoryVersion.value.string_value      = const_cast<char*>(FirmwareVersion.c_str());
     // server configuration
-    char* password = const_cast<char*>(HomekitServerPassword.c_str());
+    auto password = const_cast<char*>(HomekitServerPassword.c_str());
     boolServerConfig.password = password;
     arduino_homekit_setup(&boolServerConfig);
   }

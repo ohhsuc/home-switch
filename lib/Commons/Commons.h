@@ -74,7 +74,7 @@ namespace Victoria {
   class CommonHelpers {
     public:
       static String randomString(int length) {
-        String result = "";
+        auto result = String("");
         int generated = 0;
         while (generated < length) {
           byte randomValue = random(0, 26);

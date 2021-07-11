@@ -15,22 +15,22 @@ namespace Victoria::Components {
   }
 
   void WebPortal::setup() {
-    WiFiMode_t wifiMode = WiFi.getMode();
-    bool apEnabled = ((wifiMode & WIFI_AP) != 0);
-    bool staEnabled = ((wifiMode & WIFI_STA) != 0);
+    auto wifiMode = WiFi.getMode();
+    auto apEnabled = ((wifiMode & WIFI_AP) != 0);
+    auto staEnabled = ((wifiMode & WIFI_STA) != 0);
     if (!apEnabled && !staEnabled) {
       WiFi.mode(WIFI_AP_STA);
       wifiMode = WIFI_AP_STA;
     }
 
-    String hostName = getHostName(true);
-    bool isApEnabled = ((wifiMode & WIFI_AP) != 0);
+    auto hostName = getHostName(true);
+    auto isApEnabled = ((wifiMode & WIFI_AP) != 0);
     if (isApEnabled) {
       // IPAddress apIp(192, 168, 1, 33);
       // IPAddress apSubnet(255, 255, 255, 0);
       // WiFi.softAPConfig(apIp, apIp, apSubnet);
       WiFi.softAP(hostName); // name which is displayed on AP list
-      IPAddress currentApIp = WiFi.softAPIP();
+      auto currentApIp = WiFi.softAPIP();
       if (currentApIp) {
         console.log("[Wifi] AP Address > " + currentApIp.toString());
       }
@@ -67,16 +67,16 @@ namespace Victoria::Components {
   }
 
   String WebPortal::getHostName(bool includeVersion = false) {
-    String id = WiFi.macAddress();
+    auto id = WiFi.macAddress();
     id.replace(":", "");
     id.toUpperCase();
     id = id.substring(id.length() - 6);
 
-    String version = String(FirmwareVersion);
+    auto version = String(FirmwareVersion);
     version.replace(".", "");
 
-    String productName = FirmwareName;
-    String hostName = includeVersion
+    auto productName = FirmwareName;
+    auto hostName = includeVersion
       ? productName + "-" + id + "-" + version
       : productName + "-" + id;
 
@@ -84,7 +84,7 @@ namespace Victoria::Components {
   }
 
   std::pair<bool, ServiceSetting> WebPortal::_getService(const String& serviceId) {
-    bool found = false;
+    auto found = false;
     auto model = serviceStorage.load();
     ServiceSetting service;
     if (model.services.count(serviceId) > 0) {
@@ -141,7 +141,7 @@ namespace Victoria::Components {
   }
 
   String WebPortal::_formatPage(const String& bodyHtml) {
-    String productName = FirmwareName;
+    auto productName = FirmwareName;
     return "\
       <!DOCTYPE HTML>\
       <html>\
@@ -193,8 +193,8 @@ namespace Victoria::Components {
   void WebPortal::_handleRoot() {
     _dispatchRequestStart();
     // mode
-    WiFiMode_t wifiMode = WiFi.getMode();
-    String strWifiMode = "WIFI_OFF";
+    auto wifiMode = WiFi.getMode();
+    auto strWifiMode = String("WIFI_OFF");
     if (wifiMode == WIFI_STA) {
       strWifiMode = "WIFI_STA";
     } else if (wifiMode == WIFI_AP) {
@@ -203,8 +203,8 @@ namespace Victoria::Components {
       strWifiMode = "WIFI_AP_STA";
     }
     // ip
-    String strLocalIP = "";
-    bool isStaEnabled = ((wifiMode & WIFI_STA) != 0);
+    auto strLocalIP = String("");
+    auto isStaEnabled = ((wifiMode & WIFI_STA) != 0);
     if (isStaEnabled) {
       IPAddress localIP = WiFi.localIP();
       if (localIP) {
@@ -212,8 +212,8 @@ namespace Victoria::Components {
       }
     }
     // ap
-    String strApIP = "";
-    bool isApEnabled = ((wifiMode & WIFI_AP) != 0);
+    auto strApIP = String("");
+    auto isApEnabled = ((wifiMode & WIFI_AP) != 0);
     if (isApEnabled) {
       IPAddress apIP = WiFi.softAPIP();
       if (apIP) {
@@ -221,18 +221,18 @@ namespace Victoria::Components {
       }
     }
     // ssid
-    String ssidJoined = WiFi.SSID();
+    auto ssidJoined = WiFi.SSID();
     // mac
-    String macAddr = WiFi.macAddress();
+    auto macAddr = WiFi.macAddress();
     // services
     auto model = serviceStorage.load();
-    String randomId = CommonHelpers::randomString(4);
-    String newServiceUrl = "/service/new?id=" + randomId + "&index=" + String(model.services.size() + 1);
-    String serviceLinks = "\
+    auto randomId = CommonHelpers::randomString(4);
+    auto newServiceUrl = "/service/new?id=" + randomId + "&index=" + String(model.services.size() + 1);
+    auto serviceLinks = String("\
       <a href=\"" + newServiceUrl + "\">Add+</a>\
-    ";
+    ");
     for (const auto& pair : model.services) {
-      String url = ("/service?id=" + pair.first);
+      auto url = String("/service?id=" + pair.first);
       serviceLinks += "\
         | <a href=\"" + url + "\">" + pair.second.name + "</a>\
       ";
@@ -291,14 +291,14 @@ namespace Victoria::Components {
         // loop file method 1
         // std::function<void(File)> loopFile;
         // loopFile = [&](File file)->void {
-        //   File next = file.openNextFile();
+        //   auto next = file.openNextFile();
         //   file.close();
         //   if (!next) {
         //     return;
         //   }
         //   if (next.isFile()) {
-        //     String name = String(next.fullName());
-        //     String uri = "/system/file?name=" + name;
+        //     auto name = String(next.fullName());
+        //     auto uri = String("/system/file?name=" + name);
         //     filesTable.rows.push_back({
         //       "<a href=\"" + uri + "\">" + name + "</a>",
         //       String(next.size()),
@@ -309,12 +309,12 @@ namespace Victoria::Components {
         // loopFile(LittleFS.open("/", "r"));
 
         // loop file method 2
-        Dir dir = LittleFS.openDir("/");
+        auto dir = LittleFS.openDir("/");
         while (dir.next()) {
           if (dir.fileSize()) {
-            File file = dir.openFile("r");
-            String name = String(file.fullName());
-            String uri = "/system/file?name=" + name;
+            auto file = dir.openFile("r");
+            auto name = String(file.fullName());
+            auto uri = String("/system/file?name=" + name);
             filesTable.rows.push_back({
               "<a href=\"" + uri + "\">" + name + "</a>",
               String(file.size()),
@@ -345,11 +345,11 @@ namespace Victoria::Components {
   void WebPortal::_handleSystemFile() {
     _dispatchRequestStart();
     if (LittleFS.begin()) {
-      String fileName = _server->arg("name");
-      File file = LittleFS.open("/" + fileName, "r");
+      auto fileName = _server->arg("name");
+      auto file = LittleFS.open("/" + fileName, "r");
       if (file) {
-        size_t size = file.size();
-        String content = file.readString();
+        auto size = file.size();
+        auto content = file.readString();
         file.close();
         _send200("\
           <p><a href=\"/system\">&lt; System</a></p>\
@@ -370,12 +370,12 @@ namespace Victoria::Components {
 
   void WebPortal::_handleWifiList() {
     _dispatchRequestStart();
-    String list = "";
-    int count = WiFi.scanNetworks();
-    String current = WiFi.SSID();
-    for (int i = 0; i < count; ++i) {
-      String ssid = WiFi.SSID(i);
-      String checked = _getCheckedAttr(ssid == current);
+    auto list = String("");
+    auto current = WiFi.SSID();
+    auto count = WiFi.scanNetworks();
+    for (int8_t i = 0; i < count; ++i) {
+      auto ssid = WiFi.SSID(i);
+      auto checked = _getCheckedAttr(ssid == current);
       list += "\
         <li>\
           <input type=\"radio\" id=\"rdoSsid" + String(i) + "\" name=\"ssid\" value=\"" + ssid + "\"" + checked + " />\
@@ -400,8 +400,8 @@ namespace Victoria::Components {
 
   void WebPortal::_handleWifiJoin() {
     _dispatchRequestStart();
-    String ssid = _server->arg("ssid");
-    String password = _server->arg("password");
+    auto ssid = _server->arg("ssid");
+    auto password = _server->arg("password");
 
     if (!ssid || ssid == "") {
       _sendHints("Failed", "\
@@ -416,7 +416,7 @@ namespace Victoria::Components {
     WiFi.persistent(true);
     WiFi.begin(ssid, password);
     // Wait for connecting
-    int checkTimes = 60;
+    auto checkTimes = 60;
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
       console.write(".");
@@ -427,7 +427,7 @@ namespace Victoria::Components {
       }
     }
     console.newline();
-    bool isConnected = WiFi.status() == WL_CONNECTED;
+    auto isConnected = WiFi.status() == WL_CONNECTED;
     console.log("[Wifi] connected > " + String(isConnected));
     if (isConnected) {
       _sendHints("Success", "\
@@ -446,8 +446,8 @@ namespace Victoria::Components {
     _dispatchRequestStart();
     auto model = radioStorage.load();
     if (_server->method() == HTTP_POST) {
-      String submit = _server->arg("Submit");
-      String inputPin = _server->arg("InputPin");
+      auto submit = _server->arg("Submit");
+      auto inputPin = _server->arg("InputPin");
       if (submit == "Add") {
         model.rules.push_back({
           .value = 0,
@@ -471,8 +471,8 @@ namespace Victoria::Components {
       radioStorage.save(model);
       _redirectTo(_server->uri());
     } else {
-      RadioMessage lastReceived = radioStorage.getLastReceived();
-      bool hasReceived = lastReceived.value > 0;
+      auto lastReceived = radioStorage.getLastReceived();
+      auto hasReceived = lastReceived.value > 0;
       TableModel receivedTable = {
         .header = {},
         .rows = {
@@ -524,8 +524,8 @@ namespace Victoria::Components {
 
   void WebPortal::_handleNewService() {
     _dispatchRequestStart();
-    String serviceId = _server->arg("id");
-    String serviceIndex = _server->arg("index");
+    auto serviceId = _server->arg("id");
+    auto serviceIndex = _server->arg("index");
     // new
     ServiceSetting newSetting = {
       .name = "New" + serviceIndex,
@@ -537,29 +537,29 @@ namespace Victoria::Components {
     };
     _saveService(serviceId, newSetting);
     // redirect
-    String url = "/service?id=" + serviceId;
+    auto url = String("/service?id=" + serviceId);
     _redirectTo(url);
     _dispatchRequestEnd();
   }
 
   void WebPortal::_handleService() {
     _dispatchRequestStart();
-    String serviceId = _server->arg("id");
-    String currentUrl = "/service?id=" + serviceId;
-    std::pair<bool, ServiceSetting> found = _getService(serviceId);
-    ServiceSetting service = found.second;
+    auto serviceId = _server->arg("id");
+    auto currentUrl = String("/service?id=" + serviceId);
+    auto found = _getService(serviceId);
     if (!found.first) {
       _dispatchRequestEnd();
       return;
     }
+    ServiceSetting service = found.second;
     if (_server->method() == HTTP_POST) {
-      String serviceName = _server->arg("ServiceName");
-      String serviceType = _server->arg("ServiceType");
-      String outputPin = _server->arg("OutputPin");
-      String inputPin = _server->arg("InputPin");
-      String outputLevel = _server->arg("OutputLevel");
-      String inputLevel = _server->arg("InputLevel");
-      String submit = _server->arg("Submit");
+      auto serviceName = _server->arg("ServiceName");
+      auto serviceType = _server->arg("ServiceType");
+      auto outputPin = _server->arg("OutputPin");
+      auto inputPin = _server->arg("InputPin");
+      auto outputLevel = _server->arg("OutputLevel");
+      auto inputLevel = _server->arg("InputLevel");
+      auto submit = _server->arg("Submit");
       if (submit == "Delete") {
         _deleteService(serviceId, service);
         _redirectTo("/");
@@ -601,26 +601,26 @@ namespace Victoria::Components {
 
   void WebPortal::_handleServiceState() {
     _dispatchRequestStart();
-    String serviceId = _server->arg("id");
-    String backUrl = "/service?id=" + serviceId;
-    String currentUrl = "/service/state?id=" + serviceId;
-    std::pair<bool, ServiceSetting> found = _getService(serviceId);
-    ServiceSetting service = found.second;
+    auto serviceId = _server->arg("id");
+    auto backUrl = String("/service?id=" + serviceId);
+    auto currentUrl = String("/service/state?id=" + serviceId);
+    auto found = _getService(serviceId);
     if (!found.first) {
       _dispatchRequestEnd();
       return;
     }
+    ServiceSetting service = found.second;
     ServiceState state = {
       .boolValue = false,
       .intValue = 0,
     };
     if (_server->method() == HTTP_POST) {
       if (_server->hasArg("BooleanValue")) {
-        String booleanValue = _server->arg("BooleanValue");
+        auto booleanValue = _server->arg("BooleanValue");
         state.boolValue = (booleanValue == "true");
       }
       if (_server->hasArg("IntegerValue")) {
-        String integerValue = _server->arg("IntegerValue");
+        auto integerValue = _server->arg("IntegerValue");
         state.intValue = integerValue.toInt();
       }
       if (onSetServiceState) {
@@ -631,9 +631,9 @@ namespace Victoria::Components {
       if (onGetServiceState) {
         state = onGetServiceState(serviceId, service);
       }
-      String stateHtml =
+      auto stateHtml =
         service.type == BooleanServiceType ? _getBooleanHtml(state) :
-        service.type == IntegerServiceType ? _getIntegerHtml(state) : "";
+        service.type == IntegerServiceType ? _getIntegerHtml(state) : String("");
       _send200("\
         <p>\
           <a href=\"" + backUrl + "\">&lt; Setting (" + service.name + ")</a>\
@@ -651,11 +651,11 @@ namespace Victoria::Components {
   }
 
   String WebPortal::_getCheckedAttr(bool checked) {
-    return checked ? " checked=\"checked\"" : "";
+    return checked ? String(" checked=\"checked\"") : String("");
   }
 
   String WebPortal::_renderTable(const TableModel& model) {
-    String tableHeader = "";
+    auto tableHeader = String("");
     if (model.header.size() > 0) {
       tableHeader += "<tr>";
       for (const auto& headerCell : model.header) {
@@ -663,7 +663,7 @@ namespace Victoria::Components {
       }
       tableHeader += "</tr>";
     }
-    String tableRows = "";
+    auto tableRows = String("");
     for (const auto& row : model.rows) {
       tableRows += "<tr>";
       for (const auto rowCell : row) {
@@ -671,32 +671,32 @@ namespace Victoria::Components {
       }
       tableRows += "</tr>";
     }
-    String html = "\
+    auto html = String("\
       <table>\
         " + tableHeader + "\
         " + tableRows + "\
       </table>\
-    ";
+    ");
     return html;
   }
 
   String WebPortal::_renderSelectionList(std::vector<std::vector<String>> list) {
-    String html = "";
+    auto html = String("");
     for (const auto& item : list) {
-      html += "\
+      html += String("\
         <p>\
           <input type=\"" + item[3] + "\" id=\"id" + item[1] + item[2] + "\" name=\"" + item[1] + "\" value=\"" + item[2] + "\"" + item[4] + " />\
           <label for=\"id" + item[1] + item[2] + "\">" + item[0] + "</label>\
         </p>\
-      ";
+      ");
     }
     return html;
   }
 
   String WebPortal::_getTypeHtml(const ServiceSetting& service) {
-    String booleanAttribute = _getCheckedAttr(service.type == BooleanServiceType);
-    String integerAttribute = _getCheckedAttr(service.type == IntegerServiceType);
-    String html = "\
+    auto booleanAttribute = _getCheckedAttr(service.type == BooleanServiceType);
+    auto integerAttribute = _getCheckedAttr(service.type == IntegerServiceType);
+    auto html = String("\
       <fieldset>\
         <legend>Service Type</legend>\
         " + _renderSelectionList({
@@ -704,12 +704,12 @@ namespace Victoria::Components {
           { "Integer - Service with integer value such as temperature, humidness", "ServiceType", "integer", "radio", integerAttribute },
         }) + "\
       </fieldset>\
-    ";
+    ");
     return html;
   }
 
   String WebPortal::_getIOHtml(const ServiceSetting& service) {
-    String html = "\
+    auto html = String("\
       <fieldset>\
         <legend>IO Pins</legend>\
         <p>\
@@ -723,25 +723,25 @@ namespace Victoria::Components {
           " + _getLevelHtml("InputLevel", service.inputLevel) + "\
         </p>\
       </fieldset>\
-    ";
+    ");
     return html;
   }
 
   String WebPortal::_getLevelHtml(const String& name, const int& level) {
-    return "\
+    return String("\
       <label for=\"txt" + name + "High\">High</label>\
       <input type=\"radio\" id=\"txt" + name + "High\" name=\"" + name + "\" value=\"1\"" + _getCheckedAttr(level == 1) + " />\
       <label for=\"txt" + name + "Low\">Low</label>\
       <input type=\"radio\" id=\"txt" + name + "Low\" name=\"" + name + "\" value=\"0\"" + _getCheckedAttr(level == 0) + " />\
       <label for=\"txt" + name + "No\">No</label>\
       <input type=\"radio\" id=\"txt" + name + "No\" name=\"" + name + "\" value=\"-1\"" + _getCheckedAttr(level == -1) + " />\
-    ";
+    ");
   }
 
   String WebPortal::_getBooleanHtml(const ServiceState& state) {
-    String trueAttribute = _getCheckedAttr(state.boolValue);
-    String falseAttribute = _getCheckedAttr(!state.boolValue);
-    String html = "\
+    auto trueAttribute = _getCheckedAttr(state.boolValue);
+    auto falseAttribute = _getCheckedAttr(!state.boolValue);
+    auto html = String("\
       <fieldset>\
         <legend>Boolean Value</legend>\
         " + _renderSelectionList({
@@ -749,12 +749,12 @@ namespace Victoria::Components {
           { "Off/No/False", "BooleanValue", "false", "radio", falseAttribute },
         }) + "\
       </fieldset>\
-    ";
+    ");
     return html;
   }
 
   String WebPortal::_getIntegerHtml(const ServiceState& state) {
-    String html = "\
+    auto html = String("\
       <fieldset>\
         <legend>Integer Value</legend>\
         <p>\
@@ -762,7 +762,7 @@ namespace Victoria::Components {
           <input type=\"number\" id=\"txtIntegerValue\" name=\"IntegerValue\" value=\"" + String(state.intValue) + "\"/>\
         </p>\
       </fieldset>\
-    ";
+    ");
     return html;
   }
 
@@ -791,7 +791,7 @@ namespace Victoria::Components {
   void WebPortal::_handleReset() {
     _dispatchRequestStart();
     if (_server->method() == HTTP_POST) {
-      String wifiReset = _server->arg("WifiReset");
+      auto wifiReset = _server->arg("WifiReset");
       if (wifiReset == "1") {
         // wifi_config_reset();
         WiFi.disconnect(true);
@@ -833,7 +833,7 @@ namespace Victoria::Components {
 
   void WebPortal::_handleNotFound() {
     _dispatchRequestStart();
-    String method = (_server->method() == HTTP_GET) ? "GET" : "POST";
+    auto method = (_server->method() == HTTP_GET) ? String("GET") : String("POST");
     _sendHints("Resource Not Found", "\
       <p>URI: " + _server->uri() + "</p>\
       <p>Method: " + method + "</p>\

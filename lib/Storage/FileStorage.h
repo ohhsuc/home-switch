@@ -35,10 +35,10 @@ namespace Victoria::Components {
       // check exists
       if (LittleFS.exists(_filePath)) {
         // open file
-        File file = LittleFS.open(_filePath, "r");
+        auto file = LittleFS.open(_filePath, "r");
         if (file) {
           // validate size
-          size_t size = file.size();
+          auto size = file.size();
           // read file
           // Allocate a buffer to store contents of the file.
           char buffer[size];
@@ -85,11 +85,11 @@ namespace Victoria::Components {
     // DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
     StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
     _serializeTo(model, doc);
-    bool success = false;
+    auto success = false;
     // begin
     if (LittleFS.begin()) {
       // open file
-      File file = LittleFS.open(_filePath, "w");
+      auto file = LittleFS.open(_filePath, "w");
       if (file) {
         // write
         serializeJson(doc, file);

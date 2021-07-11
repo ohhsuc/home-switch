@@ -33,7 +33,7 @@ namespace Victoria::Components {
         .outputLevel = item[5],
         .inputLevel = item[6],
       };
-      String id = item[0];
+      auto id = String(item[0]);
       model.services[id] = service;
     }
   }

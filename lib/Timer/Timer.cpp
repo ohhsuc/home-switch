@@ -6,11 +6,11 @@ namespace Victoria::Events {
   Timer::Timer() {
   }
 
-  unsigned int Timer::setTimeout(int timespan, TCallback callback) {
+  unsigned int Timer::setTimeout(unsigned long timespan, TCallback callback) {
     return _addConfig(false, timespan, callback);
   }
 
-  unsigned int Timer::setInterval(int timespan, TCallback callback) {
+  unsigned int Timer::setInterval(unsigned long timespan, TCallback callback) {
     return _addConfig(true, timespan, callback);
   }
 
@@ -24,14 +24,14 @@ namespace Victoria::Events {
 
   void Timer::loop() {
     std::vector<unsigned int> hitIds;
-    unsigned long now = millis();
+    auto now = millis();
     for (const auto& item : _configs) {
       Config config = item.second;
       if (now - config.timestamp > config.timespan) {
         hitIds.push_back(item.first);
       }
     }
-    for (const unsigned int id : hitIds) {
+    for (const auto& id : hitIds) {
       Config& config = _configs[id];
       if (config.repeat) {
         config.timestamp = now;
@@ -44,7 +44,7 @@ namespace Victoria::Events {
     }
   }
 
-  unsigned int Timer::_addConfig(bool repeat, int timespan, TCallback callback) {
+  unsigned int Timer::_addConfig(bool repeat, unsigned long timespan, TCallback callback) {
     Config config = {
       .repeat = repeat,
       .timespan = timespan,
