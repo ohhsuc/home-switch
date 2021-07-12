@@ -552,10 +552,6 @@ namespace Victoria::Components {
     ServiceSetting newSetting = {
       .name = "New" + serviceIndex,
       .type = BooleanServiceType,
-      .outputPin = -1,
-      .inputPin = -1,
-      .outputLevel = -1,
-      .inputLevel = -1,
     };
     _saveService(serviceId, newSetting);
     // redirect

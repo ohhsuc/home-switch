@@ -44,7 +44,7 @@ namespace Victoria {
   };
 
   struct RadioModel {
-    int inputPin;
+    int inputPin = -1;
     std::vector<RadioRule> rules;
   };
 
@@ -57,10 +57,10 @@ namespace Victoria {
   struct ServiceSetting {
     String name;
     ServiceType type;
-    int outputPin;
-    int inputPin;
-    int outputLevel;
-    int inputLevel;
+    int outputPin = -1;
+    int inputPin = -1;
+    int outputLevel = -1;
+    int inputLevel = -1;
   };
 
   struct ServiceState {

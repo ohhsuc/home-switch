@@ -7,6 +7,8 @@
 #include <LittleFS.h>
 #include "Commons.h"
 
+// https://arduinojson.org/v6/assistant/
+// https://cpp4arduino.com/2018/11/06/what-is-heap-fragmentation.html
 #define DEFAULT_FILE_SIZE 2048 // block siz 4096
 
 namespace Victoria::Components {
@@ -51,8 +53,6 @@ namespace Victoria::Components {
           file.close();
           // deserialize
           if (size <= DEFAULT_FILE_SIZE) {
-            // https://arduinojson.org/
-            // https://cpp4arduino.com/2018/11/06/what-is-heap-fragmentation.html
             DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
             // StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
             auto error = deserializeJson(doc, buffer);
