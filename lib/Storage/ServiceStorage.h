@@ -5,11 +5,12 @@
 
 namespace Victoria::Components {
   class ServiceStorage : public FileStorage<ServicesModel> {
-    public:
-      ServiceStorage();
-    protected:
-      void _serializeTo(const ServicesModel& model, DynamicJsonDocument& doc) override;
-      void _deserializeFrom(ServicesModel& model, const DynamicJsonDocument& doc) override;
+   public:
+    ServiceStorage();
+
+   protected:
+    void _serializeTo(const ServicesModel& model, DynamicJsonDocument& doc) override;
+    void _deserializeFrom(ServicesModel& model, const DynamicJsonDocument& doc) override;
   };
   // global
   extern ServiceStorage serviceStorage;

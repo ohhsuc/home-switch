@@ -7,7 +7,6 @@ namespace Victoria {
 
   class GlobalHelpers {
    public:
-
     static String randomString(int length) {
       auto result = String("");
       int generated = 0;

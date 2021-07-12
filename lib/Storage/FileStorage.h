@@ -11,20 +11,21 @@
 
 namespace Victoria::Components {
 
-  template<class TModel>
+  template <class TModel>
   class FileStorage {
-    public:
-      FileStorage();
-      TModel load();
-      bool save(const TModel& model);
-    protected:
-      String _filePath;
-      virtual void _serializeTo(const TModel& model, DynamicJsonDocument& doc);
-      virtual void _deserializeFrom(TModel& model, const DynamicJsonDocument& doc);
+   public:
+    FileStorage();
+    TModel load();
+    bool save(const TModel& model);
+
+   protected:
+    String _filePath;
+    virtual void _serializeTo(const TModel& model, DynamicJsonDocument& doc);
+    virtual void _deserializeFrom(TModel& model, const DynamicJsonDocument& doc);
   };
 
   template <class TModel>
-  FileStorage<TModel>::FileStorage() { }
+  FileStorage<TModel>::FileStorage() {}
 
   template <class TModel>
   TModel FileStorage<TModel>::load() {
@@ -79,7 +80,7 @@ namespace Victoria::Components {
     return model;
   }
 
-  template<class TModel>
+  template <class TModel>
   bool FileStorage<TModel>::save(const TModel& model) {
     // convert
     DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
@@ -107,11 +108,11 @@ namespace Victoria::Components {
     return success;
   }
 
-  template<class TModel>
-  void FileStorage<TModel>::_serializeTo(const TModel& model, DynamicJsonDocument& doc) { }
+  template <class TModel>
+  void FileStorage<TModel>::_serializeTo(const TModel& model, DynamicJsonDocument& doc) {}
 
-  template<class TModel>
-  void FileStorage<TModel>::_deserializeFrom(TModel& model, const DynamicJsonDocument& doc) { }
+  template <class TModel>
+  void FileStorage<TModel>::_deserializeFrom(TModel& model, const DynamicJsonDocument& doc) {}
 
 } // namespace Victoria::Components
 

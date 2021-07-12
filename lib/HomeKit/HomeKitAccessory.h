@@ -9,11 +9,11 @@
 
 namespace Victoria::HomeKit {
   class HomeKitAccessory {
-    public:
-      HomeKitAccessory();
-      static void setup(const String& hostName);
-      static void loop();
-      static void reset();
+   public:
+    HomeKitAccessory();
+    static void setup(const String& hostName);
+    static void loop();
+    static void reset();
   };
 
 } // namespace Victoria::HomeKit

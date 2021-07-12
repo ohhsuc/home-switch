@@ -11,8 +11,7 @@ namespace Victoria::HomeKit {
 
   String _forKeepingHostName;
 
-  HomeKitAccessory::HomeKitAccessory() {
-  }
+  HomeKitAccessory::HomeKitAccessory() {}
 
   void HomeKitAccessory::setup(const String& hostName) {
     _forKeepingHostName = hostName;

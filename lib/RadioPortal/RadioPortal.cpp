@@ -2,7 +2,7 @@
 
 namespace Victoria::Components {
 
-  RadioPortal::RadioPortal() { }
+  RadioPortal::RadioPortal() {}
 
   RadioPortal::~RadioPortal() {
     if (_rf) {

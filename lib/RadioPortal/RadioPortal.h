@@ -1,7 +1,6 @@
 #ifndef RadioPortal_h
 #define RadioPortal_h
 
-#include <map>
 #include <Arduino.h>
 #include <RCSwitch.h>
 #include <ESP8266WiFi.h>
@@ -11,16 +10,18 @@
 namespace Victoria::Components {
   class RadioPortal {
     typedef std::function<void(const RadioRule&)> TRadioAction;
-    public:
-      RadioPortal();
-      ~RadioPortal();
-      void setup();
-      void loop();
-      TRadioAction onAction;
-    private:
-      RCSwitch* _rf;
-      void _handleMessage(RadioMessage message);
-      void _proceedAction(RadioRule rule);
+
+   public:
+    RadioPortal();
+    ~RadioPortal();
+    void setup();
+    void loop();
+    TRadioAction onAction;
+
+   private:
+    RCSwitch* _rf;
+    void _handleMessage(RadioMessage message);
+    void _proceedAction(RadioRule rule);
   };
 } // namespace Victoria::Components
 

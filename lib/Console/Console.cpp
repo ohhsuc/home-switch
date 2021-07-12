@@ -2,7 +2,7 @@
 
 namespace Victoria {
 
-  Console::Console() { }
+  Console::Console() {}
 
   void Console::begin(unsigned long baud) {
     Serial.begin(baud);

@@ -6,13 +6,14 @@
 
 namespace Victoria::HomeKit {
   class BooleanHomeKitService : public HomeKitService {
-    public:
-      BooleanHomeKitService(String id, uint8_t outputPin);
-      ServiceState getState() override;
-      void setState(const ServiceState& state) override;
-    private:
-      void _innerSetState(const ServiceState& state, bool notify);
-      static void _setter_ex(homekit_characteristic_t* ch, const homekit_value_t value);
+   public:
+    BooleanHomeKitService(String id, uint8_t outputPin);
+    ServiceState getState() override;
+    void setState(const ServiceState& state) override;
+
+   private:
+    void _innerSetState(const ServiceState& state, bool notify);
+    static void _setter_ex(homekit_characteristic_t* ch, const homekit_value_t value);
   };
 } // namespace Victoria::HomeKit
 
