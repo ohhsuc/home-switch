@@ -29,7 +29,7 @@ namespace Victoria::Components {
 
   // Mesher
   Mesher::Mesher() {
-    _id = CommonHelpers::randomString(8);
+    _id = GlobalHelpers::randomString(8);
   }
   void Mesher::setLoader(IMeshLoader* loader) {
     _loader = loader;

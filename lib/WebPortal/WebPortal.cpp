@@ -226,7 +226,7 @@ namespace Victoria::Components {
     auto macAddr = WiFi.macAddress();
     // services
     auto model = serviceStorage.load();
-    auto randomId = CommonHelpers::randomString(4);
+    auto randomId = GlobalHelpers::randomString(4);
     auto newServiceUrl = "/service/new?id=" + randomId + "&index=" + String(model.services.size() + 1);
     auto serviceLinks = String("\
       <a href=\"" + newServiceUrl + "\">Add+</a>\
@@ -505,7 +505,7 @@ namespace Victoria::Components {
             <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" min=\"-1\" max=\"100\" value=\"" + String(model.inputPin) + "\" />\
           </p>\
           <p>\
-            <label>Last received " + (hasReceived ? CommonHelpers::timeSince(lastReceived.timestamp) + " ago" : "-") + "</label>\
+            <label>Last received " + (hasReceived ? GlobalHelpers::timeSince(lastReceived.timestamp) + " ago" : "-") + "</label>\
             " + _renderTable(receivedTable) + "\
           </p>\
           <p>\

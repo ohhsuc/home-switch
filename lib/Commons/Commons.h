@@ -6,6 +6,7 @@
 #include <Arduino.h>
 #include "Console.h"
 #include "BuildFlags.h"
+#include "GlobalHelpers.h"
 
 namespace Victoria {
 
@@ -69,61 +70,6 @@ namespace Victoria {
 
   struct ServicesModel {
     std::map<String, ServiceSetting> services;
-  };
-
-  class CommonHelpers {
-    public:
-      static String randomString(int length) {
-        auto result = String("");
-        int generated = 0;
-        while (generated < length) {
-          byte randomValue = random(0, 26);
-          char letter = randomValue + 'a';
-          if (randomValue > 26) {
-            letter = (randomValue - 26);
-          }
-          result += letter;
-          generated++;
-        }
-        return result;
-      }
-      static String timeSince(unsigned long timestamp) {
-        float s = (millis() - timestamp) / 1000;
-        float timespan;
-        // y
-        timespan = s / 31536000;
-        if (timespan > 1) {
-          int years = floor(timespan);
-          return String(years) + " years";
-        }
-        // m
-        timespan = s / 2592000;
-        if (timespan > 1) {
-          int months = floor(timespan);
-          return String(months) + " months";
-        }
-        // d
-        timespan = s / 86400;
-        if (timespan > 1) {
-          int days = floor(timespan);
-          return String(days) + " days";
-        }
-        // h
-        timespan = s / 3600;
-        if (timespan > 1) {
-          int hours = floor(timespan);
-          return String(hours) + " hours";
-        }
-        // m
-        timespan = s / 60;
-        if (timespan > 1) {
-          int minutes = floor(timespan);
-          return String(minutes) + " minutes";
-        }
-        // s
-        int seconds = floor(s);
-        return String(seconds) + " seconds";
-      }
   };
 
   // const int led = LED_BUILTIN;
