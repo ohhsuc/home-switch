@@ -117,7 +117,7 @@ void setup(void) {
   radioPortal.setup();
 
   timesTrigger.onTimesOut = []() { console.log("times out!"); };
-  timer.setInterval(10 * 60 * 1000, []() { MDNS.announce(); });
+  timer.setInterval(10 * 60 * 1000, []() { if (MDNS.isRunning()) { MDNS.announce(); } });
   timer.setInterval(30 * 60 * 1000, []() { HomeKitService::heartbeat(); });
 
   auto mesher = Mesher();
