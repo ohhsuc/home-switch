@@ -21,6 +21,7 @@ namespace Victoria {
 
   // global
   extern Console console;
+
 } // namespace Victoria
 
 #endif // Console_h

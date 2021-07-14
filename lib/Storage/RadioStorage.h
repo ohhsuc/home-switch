@@ -15,8 +15,10 @@ namespace Victoria::Components {
     void _serializeTo(const RadioModel& model, DynamicJsonDocument& doc) override;
     void _deserializeFrom(RadioModel& model, const DynamicJsonDocument& doc) override;
   };
+
   // global
   extern RadioStorage radioStorage;
+
 } // namespace Victoria::Components
 
 #endif // RadioStorage_h

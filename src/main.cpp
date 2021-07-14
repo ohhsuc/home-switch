@@ -1,4 +1,3 @@
-#include <map>
 #include <Arduino.h>
 #include <ESP8266mDNS.h>
 #include "WebPortal.h"
@@ -17,7 +16,6 @@ using namespace Victoria::Events;
 using namespace Victoria::Components;
 using namespace Victoria::HomeKit;
 
-Timer timer;
 TimesTrigger timesTrigger(10, 5 * 1000);
 WebPortal webPortal(80);
 RadioPortal radioPortal;
@@ -117,8 +115,13 @@ void setup(void) {
   radioPortal.setup();
 
   timesTrigger.onTimesOut = []() { console.log("times out!"); };
-  timer.setInterval(10 * 60 * 1000, []() { if (MDNS.isRunning()) { MDNS.announce(); } });
   timer.setInterval(30 * 60 * 1000, []() { HomeKitService::heartbeat(); });
+  timer.setInterval(1 * 60 * 1000, []() {
+    if (MDNS.isRunning()) {
+      MDNS.announce();
+      console.log("MDNS announced");
+    }
+  });
 
   auto mesher = Mesher();
   auto loader = RadioFrequencyMeshLoader(10);
@@ -165,8 +168,8 @@ void setup(void) {
 
 void loop(void) {
   timer.loop();
-  radioPortal.loop();
   webPortal.loop();
+  radioPortal.loop();
   HomeKitAccessory::loop();
   if (inputEvents) {
     inputEvents->loop();

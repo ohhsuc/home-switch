@@ -29,6 +29,10 @@ namespace Victoria::Events {
     unsigned int _addConfig(bool repeat, unsigned long timespan, TCallback callback);
     bool _removeConfig(unsigned int id);
   };
+
+  // global
+  extern Timer timer;
+
 } // namespace Victoria::Events
 
 #endif // Timer_h

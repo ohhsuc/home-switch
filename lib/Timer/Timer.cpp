@@ -3,8 +3,7 @@
 
 namespace Victoria::Events {
 
-  Timer::Timer() {
-  }
+  Timer::Timer() {}
 
   unsigned int Timer::setTimeout(unsigned long timespan, TCallback callback) {
     return _addConfig(false, timespan, callback);
@@ -63,5 +62,8 @@ namespace Victoria::Events {
     }
     return false;
   }
+
+  // global
+  Timer timer;
 
 } // namespace Victoria::Events

@@ -12,8 +12,10 @@ namespace Victoria::Components {
     void _serializeTo(const ServicesModel& model, DynamicJsonDocument& doc) override;
     void _deserializeFrom(ServicesModel& model, const DynamicJsonDocument& doc) override;
   };
+
   // global
   extern ServiceStorage serviceStorage;
+
 } // namespace Victoria::Components
 
 #endif // ServiceStorage_h
