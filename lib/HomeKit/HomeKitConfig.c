@@ -5,8 +5,8 @@ void onAccessoryIdentify(homekit_value_t value) {
   printf("accessory identify\n");
 }
 
-homekit_characteristic_t accessoryName         = HOMEKIT_CHARACTERISTIC_(NAME, "Victoria-21210-ABCD");
-homekit_characteristic_t accessoryManufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER, "Victoria 9# Inc.");
+homekit_characteristic_t accessoryName         = HOMEKIT_CHARACTERISTIC_(NAME, "Victoria-AB12CD-21210");
+homekit_characteristic_t accessoryManufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER, "VictorSmart Co.,Ltd.");
 homekit_characteristic_t accessoryModel        = HOMEKIT_CHARACTERISTIC_(MODEL, "ESP8266/ESP32");
 homekit_characteristic_t accessorySerialNumber = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, "0123456");
 homekit_characteristic_t accessoryVersion      = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, "21.2.10");
