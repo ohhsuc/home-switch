@@ -4,23 +4,17 @@
 #include "RadioPortal.h"
 #include "Timer.h"
 #include "TimesTrigger.h"
-#include "ButtonEvents.h"
-#include "OnOffEvents.h"
 #include "Mesher.h"
-#include "HomeKitAccessory.h"
-#include "HomeKitService.h"
-#include "BooleanHomeKitService.h"
+#include "HomeKitMain.h"
 
 using namespace Victoria;
 using namespace Victoria::Events;
 using namespace Victoria::Components;
 using namespace Victoria::HomeKit;
 
-TimesTrigger timesTrigger(10, 5 * 1000);
 WebPortal webPortal(80);
 RadioPortal radioPortal;
-ButtonEvents* inputEvents;
-OnOffEvents* onOffEvents;
+TimesTrigger timesTrigger(10, 5 * 1000);
 
 void ledOn() {
   digitalWrite(LED_BUILTIN, LOW);
@@ -31,15 +25,11 @@ void ledOff() {
 }
 
 void deleteService(const String& serviceId, const ServiceSetting& setting) {
-  // auto service = HomeKitService::findServiceById(serviceId);
-  // if (service) {
-  //   delete service;
-  //   service = NULL;
-  // }
+  HomeKitMain::removeService(serviceId);
 }
 
 ServiceState getServiceState(const String& serviceId, const ServiceSetting& setting) {
-  auto service = HomeKitService::findServiceById(serviceId);
+  auto service = HomeKitMain::findServiceById(serviceId);
   if (service) {
     return service->getState();
   }
@@ -47,14 +37,14 @@ ServiceState getServiceState(const String& serviceId, const ServiceSetting& sett
 }
 
 void setServiceState(const String& serviceId, const ServiceSetting& setting, ServiceState& state) {
-  auto service = HomeKitService::findServiceById(serviceId);
+  auto service = HomeKitMain::findServiceById(serviceId);
   if (service) {
     service->setState(state);
   }
 }
 
 void setSwitchAction(const String& serviceId, const RadioAction& radioAction) {
-  auto service = HomeKitService::findServiceById(serviceId);
+  auto service = HomeKitMain::findServiceById(serviceId);
   if (service) {
     auto state = service->getState();
     switch (radioAction) {
@@ -80,16 +70,6 @@ void setRadioAction(const RadioRule& rule) {
   }
 }
 
-void onButtonClick(const String& serviceId, int times) {
-  if (times == 1) {
-    setSwitchAction(serviceId, RadioActionToggle);
-  }
-}
-
-void onToggle(const String& serviceId, bool isOn) {
-  console.log("toggle " + String(isOn ? "ON" : "OFF"));
-}
-
 void onStateChange(const ServiceState& state) {
   ledOn();
   timesTrigger.count();
@@ -108,14 +88,14 @@ void setup(void) {
   webPortal.onSetServiceState = setServiceState;
   webPortal.onRequestStart = ledOn;
   webPortal.onRequestEnd = ledOff;
-  webPortal.onResetAccessory = []() { HomeKitAccessory::reset(); };
+  webPortal.onResetAccessory = []() { HomeKitMain::reset(); };
   webPortal.setup();
 
   radioPortal.onAction = setRadioAction;
   radioPortal.setup();
 
   timesTrigger.onTimesOut = []() { console.log("times out!"); };
-  timer.setInterval(30 * 60 * 1000, []() { HomeKitService::heartbeat(); });
+  timer.setInterval(30 * 60 * 1000, []() { HomeKitMain::heartbeat(); });
   timer.setInterval(1 * 60 * 1000, []() {
     if (MDNS.isRunning()) {
       MDNS.announce();
@@ -129,37 +109,16 @@ void setup(void) {
 
   auto model = serviceStorage.load();
   if (model.services.size() > 0) {
-    auto pair = model.services.begin();
-    auto serviceId = pair->first;
-    auto service = pair->second;
-    // outputs
-    auto outputPin = service.outputPin;
-    if (outputPin > -1) {
-      pinMode(outputPin, OUTPUT);
-      if (service.outputLevel > -1) {
-        digitalWrite(outputPin, service.outputLevel);
-      }
-      if (service.type == BooleanServiceType) {
-        auto booleanService = new BooleanHomeKitService(serviceId, outputPin);
-        booleanService->onStateChange = onStateChange;
-      } else if (service.type == IntegerServiceType) {
-        // TODO:
+    for (const auto& pair : model.services) {
+      auto serviceId = pair.first;
+      auto serviceSetting = pair.second;
+      auto service = HomeKitMain::createService(serviceId, serviceSetting);
+      if (service) {
+        service->onStateChange = onStateChange;
       }
     }
-    // inputs
-    auto inputPin = service.inputPin;
-    if (inputPin > -1) {
-      pinMode(inputPin, INPUT_PULLUP);
-      if (service.inputLevel > -1) {
-        digitalWrite(inputPin, service.inputLevel);
-      }
-      inputEvents = new ButtonEvents(serviceId, inputPin);
-      inputEvents->onClick = onButtonClick;
-      onOffEvents = new OnOffEvents(serviceId, inputPin);
-      onOffEvents->onToggle = onToggle;
-    }
-    // setup
-    HomeKitAccessory::setup(webPortal.getHostName(false));
+    auto hostName = webPortal.getHostName(false);
+    HomeKitMain::setup(hostName);
   }
 
   console.log("setup complete");
@@ -170,11 +129,5 @@ void loop(void) {
   timer.loop();
   webPortal.loop();
   radioPortal.loop();
-  HomeKitAccessory::loop();
-  if (inputEvents) {
-    inputEvents->loop();
-  }
-  if (onOffEvents) {
-    onOffEvents->loop();
-  }
+  HomeKitMain::loop();
 }

@@ -2,63 +2,57 @@
 
 namespace Victoria::HomeKit {
 
-  std::map<homekit_characteristic_t*, HomeKitService*> _services;
-
-  HomeKitService::HomeKitService(String id, uint8_t outputPin, homekit_characteristic_t* mainCharacteristic) {
+  HomeKitService::HomeKitService(const String& id, const ServiceSetting& setting, homekit_characteristic_t* characteristic) {
     serviceId = id;
-    _outputPin = outputPin;
-    _mainCharacteristic = mainCharacteristic;
-    _services[_mainCharacteristic] = this;
+    serviceSetting = setting;
+    serviceCharacteristic = characteristic;
   }
 
   HomeKitService::~HomeKitService() {
-    if (_mainCharacteristic) {
-      if (_services.count(_mainCharacteristic) > 0) {
-        _services.erase(_mainCharacteristic);
-      }
-      delete _mainCharacteristic;
-      _mainCharacteristic = NULL;
+    onStateChange = NULL;
+    if (serviceCharacteristic) {
+      serviceCharacteristic->setter_ex = NULL;
+      delete serviceCharacteristic;
+      serviceCharacteristic = NULL;
     }
     console.log("service disposed " + serviceId);
   }
 
-  ServiceState HomeKitService::getState() {
-    console.log("[HomeKitService] getState()");
-    return {};
+  void HomeKitService::setup() {
+    // outputs
+    auto outputPin = serviceSetting.outputPin;
+    if (outputPin > -1) {
+      pinMode(outputPin, OUTPUT);
+      if (serviceSetting.outputLevel > -1) {
+        digitalWrite(outputPin, serviceSetting.outputLevel);
+      }
+    }
+    // inputs
+    auto inputPin = serviceSetting.inputPin;
+    if (inputPin > -1) {
+      pinMode(inputPin, INPUT_PULLUP);
+      if (serviceSetting.inputLevel > -1) {
+        digitalWrite(inputPin, serviceSetting.inputLevel);
+      }
+    }
   }
 
-  void HomeKitService::setState(const ServiceState& state) {
+  void HomeKitService::loop() {}
+
+  ServiceState HomeKitService::getState() { return {}; }
+
+  void HomeKitService::setState(const ServiceState& state) {}
+
+  void HomeKitService::fireStateChange(const ServiceState& state) {
     if (onStateChange) {
       onStateChange(state);
     }
   }
 
-  void HomeKitService::_notify() {
-    if (_mainCharacteristic) {
-      homekit_characteristic_notify(_mainCharacteristic, _mainCharacteristic->value);
+  void HomeKitService::notifyState() {
+    if (serviceCharacteristic) {
+      homekit_characteristic_notify(serviceCharacteristic, serviceCharacteristic->value);
     }
-  }
-
-  HomeKitService* HomeKitService::findServiceById(const String& serviceId) {
-    for (auto const& pair : _services) {
-      if (pair.second->serviceId == serviceId) {
-        return pair.second;
-      }
-    }
-    return NULL;
-  }
-
-  void HomeKitService::heartbeat() {
-    for (auto const& pair : _services) {
-      pair.second->_notify();
-    }
-  }
-
-  HomeKitService* HomeKitService::_findService(homekit_characteristic_t* mainCharacteristic) {
-    if (_services.count(mainCharacteristic) > 0) {
-      return _services[mainCharacteristic];
-    }
-    return NULL;
   }
 
 } // namespace Victoria::HomeKit

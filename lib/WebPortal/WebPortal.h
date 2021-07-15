@@ -36,7 +36,7 @@ namespace Victoria::Components {
     static String getHostName(bool includeVersion);
 
    private:
-    ESP8266WebServer* _server;
+    ESP8266WebServer* _server = NULL;
     std::pair<bool, ServiceSetting> _getService(const String& serviceId);
     void _saveService(const String& serviceId, const ServiceSetting& service);
     void _deleteService(const String& serviceId, const ServiceSetting& service);

@@ -2,8 +2,7 @@
 
 namespace Victoria::Events {
 
-  ButtonEvents::ButtonEvents(String serviceId, uint8_t inputPin) {
-    _serviceId = serviceId;
+  ButtonEvents::ButtonEvents(uint8_t inputPin) {
     _inputPin = inputPin;
   }
 
@@ -12,7 +11,7 @@ namespace Victoria::Events {
     if (state != _lastState) {
       _lastState = state;
       if (onClick) {
-        onClick(_serviceId, state);
+        onClick(state);
       }
     }
   }

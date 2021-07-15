@@ -4,8 +4,7 @@
 
 namespace Victoria::Events {
 
-  OnOffEvents::OnOffEvents(String serviceId, uint8_t inputPin) {
-    _serviceId = serviceId;
+  OnOffEvents::OnOffEvents(uint8_t inputPin) {
     _inputPin = inputPin;
   }
 
@@ -18,8 +17,8 @@ namespace Victoria::Events {
     if (millis() - _lastTimeRead > DEFAULT_DEBOUNCE_DELAY) {
       if (isOn != _lastState) {
         _lastState = isOn;
-        if (onToggle) {
-          onToggle(_serviceId, isOn);
+        if (onChange) {
+          onChange(isOn);
         }
       }
     }

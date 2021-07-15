@@ -19,7 +19,7 @@ namespace Victoria::Components {
     TRadioAction onAction;
 
    private:
-    RCSwitch* _rf;
+    RCSwitch* _rf = NULL;
     void _handleMessage(RadioMessage message);
     void _proceedAction(RadioRule rule);
   };

@@ -6,15 +6,14 @@
 
 namespace Victoria::Events {
   class OnOffEvents {
-    typedef std::function<void(const String&, bool)> TToggleHandler;
+    typedef std::function<void(bool)> TChangeHandler;
 
    public:
-    OnOffEvents(String serviceId, uint8_t inputPin);
-    TToggleHandler onToggle;
+    OnOffEvents(uint8_t inputPin);
+    TChangeHandler onChange;
     void loop();
 
    private:
-    String _serviceId;
     uint8_t _inputPin;
     bool _lastState = false;
     unsigned long _lastTimeRead = 0;

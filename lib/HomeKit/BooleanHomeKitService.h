@@ -3,17 +3,26 @@
 
 #include <Arduino.h>
 #include "HomeKitService.h"
+#include "OnOffEvents.h"
+#include "ButtonEvents.h"
+
+using namespace Victoria::Events;
 
 namespace Victoria::HomeKit {
   class BooleanHomeKitService : public HomeKitService {
    public:
-    BooleanHomeKitService(String id, uint8_t outputPin);
+    BooleanHomeKitService(const String& id, const ServiceSetting& setting);
+    ~BooleanHomeKitService();
+    void setup() override;
+    void loop() override;
     ServiceState getState() override;
     void setState(const ServiceState& state) override;
 
    private:
+    OnOffEvents* _onOffEvents = NULL;
+    ButtonEvents* _buttonEvents = NULL;
     void _innerSetState(const ServiceState& state, bool notify);
-    static void _setter_ex(homekit_characteristic_t* ch, const homekit_value_t value);
+    static void _notifyCallback(homekit_characteristic_t *ch, homekit_value_t value, void *context);
   };
 } // namespace Victoria::HomeKit
 
