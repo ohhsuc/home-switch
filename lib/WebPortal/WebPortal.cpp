@@ -470,26 +470,54 @@ namespace Victoria::Components {
     auto model = radioStorage.load();
     if (_server->method() == HTTP_POST) {
       auto submit = _server->arg("Submit");
-      auto inputPin = _server->arg("InputPin");
       if (submit == "Add") {
         model.rules.push_back({
           .value = 0,
           .protocol = 1,
           .action = RadioActionNone,
-          .serviceId = "abcd",
+          .serviceId = "",
         });
       } else if (submit.startsWith("Remove")) {
         submit.remove(0, 6);
         int removeIndex = submit.toInt();
         int ruleIndex = -1;
-        for (const auto it = model.rules.begin(); it != model.rules.end();) {
+        for (auto it = model.rules.begin(); it != model.rules.end(); it++) {
           if (++ruleIndex == removeIndex) {
             model.rules.erase(it);
             break;
           }
         }
       } else {
+        // pin
+        auto inputPin = _server->arg("InputPin");
         model.inputPin = inputPin.toInt();
+        // rules
+        std::vector<String> values;
+        std::vector<String> protocols;
+        std::vector<String> actionIds;
+        std::vector<String> serviceIds;
+        for (uint8_t i = 0; i < _server->args(); i++) {
+          auto argValue = _server->arg(i);
+          auto argName = _server->argName(i);
+          if (argName == "Value") {
+            values.push_back(argValue);
+          } else if (argName == "Protocol") {
+            protocols.push_back(argValue);
+          } else if (argName == "ActionId") {
+            actionIds.push_back(argValue);
+          } else if (argName == "ServiceId") {
+            serviceIds.push_back(argValue);
+          }
+        }
+        model.rules.clear();
+        for (size_t i = 0; i < values.size(); i++) {
+          model.rules.push_back({
+            .value = values[i].toInt(),
+            .protocol = protocols[i].toInt(),
+            .action = RadioAction(actionIds[i].toInt()),
+            .serviceId = serviceIds[i],
+          });
+        }
       }
       radioStorage.save(model);
       _redirectTo(_server->uri());
@@ -508,15 +536,43 @@ namespace Victoria::Components {
         .header = { "Rule", "Value", "Protocol", "Action", "Service" },
         .rows = {},
       };
+      std::vector<SelectOption> actionOptions = {
+        { .value = "0", .text = "None", },
+        { .value = "1", .text = "True", },
+        { .value = "2", .text = "False", },
+        { .value = "3", .text = "Toggle", },
+        { .value = "4", .text = "WiFiSta", },
+        { .value = "5", .text = "WiFiStaAp", },
+      };
+      std::vector<SelectOption> serviceOptions = {
+        { .value = "", .text = "None", },
+      };
+      auto serviceModel = serviceStorage.load();
+      for (const auto& pair : serviceModel.services) {
+        serviceOptions.push_back({
+          .value = pair.first,
+          .text = pair.second.name,
+        });
+      }
       int ruleIndex = -1;
       for (const auto& rule : model.rules) {
         ruleIndex++;
+        SelectModel actionSelect = {
+          .name = "ActionId",
+          .value = String(rule.action),
+          .options = actionOptions,
+        };
+        SelectModel serviceSelect = {
+          .name = "ServiceId",
+          .value = rule.serviceId,
+          .options = serviceOptions,
+        };
         rulesTable.rows.push_back({
           "<button type=\"submit\" name=\"Submit\" value=\"Remove" + String(ruleIndex) + "\" class=\"btn\" onclick=\"return confirm('Are you sure you want to remove?')\">Remove</button>",
           "<input type=\"number\" name=\"Value\" min=\"-1\" max=\"99999999\" value=\"" + String(rule.value) + "\" />",
           "<input type=\"number\" name=\"Protocol\" min=\"-1\" max=\"100\" value=\"" + String(rule.protocol) + "\" />",
-          "<input type=\"number\" name=\"Action\" min=\"-1\" max=\"100\" value=\"" + String(rule.action) + "\" />",
-          "<input type=\"text\" name=\"ServiceId\" maxlength=\"8\" value=\"" + String(rule.serviceId) + "\" />"
+          _renderSelect(actionSelect),
+          _renderSelect(serviceSelect),
         });
       }
       _send200("\
@@ -694,6 +750,20 @@ namespace Victoria::Components {
         " + tableHeader + "\
         " + tableRows + "\
       </table>\
+    ");
+    return html;
+  }
+
+  String WebPortal::_renderSelect(const SelectModel& model) {
+    auto options = String("");
+    for (const auto& option : model.options) {
+      auto selected = option.value == model.value ? " selected" : "";
+      options += "<option value=\"" + option.value + "\"" + selected + ">" + option.text + "</option>";
+    }
+    auto html = String("\
+      <select name=\"" + model.name + "\">\
+        " + options + "\
+      </select>\
     ");
     return html;
   }

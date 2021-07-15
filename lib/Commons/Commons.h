@@ -20,6 +20,17 @@ namespace Victoria {
     std::vector<std::vector<String>> rows;
   };
 
+  struct SelectOption {
+    String value;
+    String text;
+  };
+
+  struct SelectModel {
+    String name;
+    String value;
+    std::vector<SelectOption> options;
+  };
+
   struct RadioMessage {
     unsigned long value;
     unsigned int bits;
@@ -33,7 +44,7 @@ namespace Victoria {
     RadioActionFalse = 2,
     RadioActionToggle = 3,
     RadioActionWiFiSta = 4,
-    RadioActionWiFiApSta = 5,
+    RadioActionWiFiStaAp = 5,
   };
 
   struct RadioRule {

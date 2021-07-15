@@ -23,9 +23,9 @@ namespace Victoria::Components {
   void RadioPortal::loop() {
     if (_rf && _rf->available()) {
       // payload
-      unsigned int protocol = _rf->getReceivedProtocol();
       unsigned long value = _rf->getReceivedValue();
       unsigned int bits = _rf->getReceivedBitlength();
+      unsigned int protocol = _rf->getReceivedProtocol();
       // logs
       auto received = String(protocol) + "/" + String(value) + "/" + String(bits) + "bits";
       console.log("[RadioPortal] received " + received);
@@ -61,7 +61,7 @@ namespace Victoria::Components {
         WiFi.mode(WIFI_STA);
         console.log("[RadioPortal] set mode WIFI_STA");
         break;
-      case RadioActionWiFiApSta:
+      case RadioActionWiFiStaAp:
         WiFi.mode(WIFI_AP_STA);
         console.log("[RadioPortal] set mode WIFI_AP_STA");
         break;

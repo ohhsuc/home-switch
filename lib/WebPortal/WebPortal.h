@@ -58,6 +58,7 @@ namespace Victoria::Components {
     void _handleServiceState();
     static String _getCheckedAttr(bool checked);
     static String _renderTable(const TableModel& model);
+    static String _renderSelect(const SelectModel& model);
     static String _renderSelectionList(std::vector<std::vector<String>> list);
     static String _getTypeHtml(const ServiceSetting& service);
     static String _getIOHtml(const ServiceSetting& service);
