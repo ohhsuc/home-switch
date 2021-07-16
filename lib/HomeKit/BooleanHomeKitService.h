@@ -21,7 +21,6 @@ namespace Victoria::HomeKit {
    private:
     OnOffEvents* _onOffEvents = NULL;
     ButtonEvents* _buttonEvents = NULL;
-    void _innerSetState(const ServiceState& state, bool notify);
     static void _notifyCallback(homekit_characteristic_t *ch, homekit_value_t value, void *context);
   };
 } // namespace Victoria::HomeKit

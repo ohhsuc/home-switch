@@ -91,19 +91,17 @@ namespace Victoria::HomeKit {
   }
 
   void BooleanHomeKitService::setState(const ServiceState& state) {
-    _innerSetState(state, true);
-  }
-
-  void BooleanHomeKitService::_innerSetState(const ServiceState& state, bool notify) {
-    // update cha
     if (serviceCharacteristic) {
       serviceCharacteristic->value.bool_value = state.boolValue;
-      if (notify) {
-        notifyState();
-      }
+      notifyState();
     }
+  }
+
+  void BooleanHomeKitService::_notifyCallback(homekit_characteristic_t *ch, homekit_value_t value, void *context) {
+    auto service = (BooleanHomeKitService*)context;
+    auto state = service->getState();
     // update pin
-    auto outputPin = serviceSetting.outputPin;
+    auto outputPin = service->serviceSetting.outputPin;
     if (outputPin > -1) {
       if (state.boolValue) {
         digitalWrite(outputPin, LOW);
@@ -112,14 +110,7 @@ namespace Victoria::HomeKit {
       }
     }
     // fire event
-    HomeKitService::fireStateChange(state);
-  }
-
-  void BooleanHomeKitService::_notifyCallback(homekit_characteristic_t *ch, homekit_value_t value, void *context) {
-    auto service = (BooleanHomeKitService*)context;
-    service->_innerSetState({
-      .boolValue = value.bool_value,
-    }, false);
+    service->_fireStateChange(state);
   }
 
 } // namespace Victoria::HomeKit

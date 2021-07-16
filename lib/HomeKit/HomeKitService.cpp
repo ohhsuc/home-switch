@@ -43,15 +43,15 @@ namespace Victoria::HomeKit {
 
   void HomeKitService::setState(const ServiceState& state) {}
 
-  void HomeKitService::fireStateChange(const ServiceState& state) {
-    if (onStateChange) {
-      onStateChange(state);
-    }
-  }
-
   void HomeKitService::notifyState() {
     if (serviceCharacteristic) {
       homekit_characteristic_notify(serviceCharacteristic, serviceCharacteristic->value);
+    }
+  }
+
+  void HomeKitService::_fireStateChange(const ServiceState& state) {
+    if (onStateChange) {
+      onStateChange(state);
     }
   }
 

@@ -21,8 +21,10 @@ namespace Victoria::HomeKit {
     virtual void loop();
     virtual ServiceState getState();
     virtual void setState(const ServiceState& state);
-    virtual void fireStateChange(const ServiceState& state);
     virtual void notifyState();
+
+   protected:
+    void _fireStateChange(const ServiceState& state);
   };
 } // namespace Victoria::HomeKit
 
