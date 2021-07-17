@@ -49,9 +49,16 @@ namespace Victoria {
     RadioActionEspRestart = 7,
   };
 
+  enum PressType {
+    PressTypeClick = 0,
+    PressTypeDoubleClick = 1,
+    PressTypeLongPress = 2,
+  };
+
   struct RadioRule {
     unsigned long value;
     unsigned int protocol;
+    PressType press;
     RadioAction action;
     String serviceId;
   };

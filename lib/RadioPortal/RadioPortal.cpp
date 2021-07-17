@@ -48,8 +48,8 @@ namespace Victoria::Components {
         now - lastMessage.timestamp < MESSAGE_THROTTLE_TIMESPAN
       );
       if (!isThrottled) {
+        _handleMessage(message, PressTypeClick);
         radioStorage.broadcast(message);
-        _handleMessage(message);
       }
       // reset state
       _rf->resetAvailable();
@@ -57,12 +57,13 @@ namespace Victoria::Components {
     }
   }
 
-  void RadioPortal::_handleMessage(const RadioMessage& message) {
+  void RadioPortal::_handleMessage(const RadioMessage& message, PressType press) {
     auto model = radioStorage.load();
     for (const auto& rule : model.rules) {
       if (
         rule.value == message.value &&
-        rule.protocol == message.protocol
+        rule.protocol == message.protocol &&
+        rule.press == press
       ) {
         _proceedAction(rule);
       }
@@ -73,19 +74,19 @@ namespace Victoria::Components {
     switch (rule.action) {
       case RadioActionWiFiSta:
         WiFi.mode(WIFI_STA);
-        console.log("[RadioPortal] wifi mode WIFI_STA");
+        console.log("[RadioPortal] WiFi STA");
         break;
       case RadioActionWiFiStaAp:
         WiFi.mode(WIFI_AP_STA);
-        console.log("[RadioPortal] wifi mode WIFI_AP_STA");
+        console.log("[RadioPortal] WiFi STA+AP");
         break;
       case RadioActionWiFiReset:
         WiFi.disconnect(true);
-        console.log("[RadioPortal] wifi reset");
+        console.log("[RadioPortal] WiFi Reset");
         break;
       case RadioActionEspRestart:
         ESP.restart();
-        console.log("[RadioPortal] esp restart");
+        console.log("[RadioPortal] ESP Restart");
         break;
       default:
         break;

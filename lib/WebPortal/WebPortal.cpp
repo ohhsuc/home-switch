@@ -475,6 +475,7 @@ namespace Victoria::Components {
         model.rules.push_back({
           .value = lastReceived.value,
           .protocol = lastReceived.protocol,
+          .press = PressTypeClick,
           .action = RadioActionNone,
           .serviceId = "",
         });
@@ -495,6 +496,7 @@ namespace Victoria::Components {
         // rules
         std::vector<String> values;
         std::vector<String> protocols;
+        std::vector<String> pressIds;
         std::vector<String> actionIds;
         std::vector<String> serviceIds;
         for (uint8_t i = 0; i < _server->args(); i++) {
@@ -504,6 +506,8 @@ namespace Victoria::Components {
             values.push_back(argValue);
           } else if (argName == "Protocol") {
             protocols.push_back(argValue);
+          } else if(argName == "PressId") {
+            pressIds.push_back(argValue);
           } else if (argName == "ActionId") {
             actionIds.push_back(argValue);
           } else if (argName == "ServiceId") {
@@ -515,6 +519,7 @@ namespace Victoria::Components {
           model.rules.push_back({
             .value = values[i].toInt(),
             .protocol = protocols[i].toInt(),
+            .press = PressType(pressIds[i].toInt()),
             .action = RadioAction(actionIds[i].toInt()),
             .serviceId = serviceIds[i],
           });
@@ -534,18 +539,23 @@ namespace Victoria::Components {
         },
       };
       TableModel rulesTable = {
-        .header = { "Rule", "Value", "Protocol", "Action", "Service" },
+        .header = { "Rule", "Value", "Protocol", "Press", "Action", "Service" },
         .rows = {},
+      };
+      std::vector<SelectOption> pressOptions = {
+        { .value = "0", .text = "Click", },
+        { .value = "1", .text = "Double Click", },
+        { .value = "2", .text = "Long Press", },
       };
       std::vector<SelectOption> actionOptions = {
         { .value = "0", .text = "None", },
         { .value = "1", .text = "True", },
         { .value = "2", .text = "False", },
         { .value = "3", .text = "Toggle", },
-        { .value = "4", .text = "WiFi-Sta", },
-        { .value = "5", .text = "WiFi-StaAp", },
-        { .value = "6", .text = "WiFi-Reset", },
-        { .value = "7", .text = "ESP-Restart", },
+        { .value = "4", .text = "WiFi STA", },
+        { .value = "5", .text = "WiFi STA+AP", },
+        { .value = "6", .text = "WiFi Reset", },
+        { .value = "7", .text = "ESP Restart", },
       };
       std::vector<SelectOption> serviceOptions = {
         { .value = "", .text = "None", },
@@ -560,6 +570,11 @@ namespace Victoria::Components {
       int ruleIndex = -1;
       for (const auto& rule : model.rules) {
         ruleIndex++;
+        SelectModel pressSelect = {
+          .name = "PressId",
+          .value = String(rule.press),
+          .options = pressOptions,
+        };
         SelectModel actionSelect = {
           .name = "ActionId",
           .value = String(rule.action),
@@ -574,6 +589,7 @@ namespace Victoria::Components {
           "<button type=\"submit\" name=\"Submit\" value=\"Remove" + String(ruleIndex) + "\" class=\"btn\" onclick=\"return confirm('Are you sure you want to remove?')\">Remove</button>",
           "<input type=\"number\" name=\"Value\" min=\"-1\" max=\"99999999\" value=\"" + String(rule.value) + "\" />",
           "<input type=\"number\" name=\"Protocol\" min=\"-1\" max=\"100\" value=\"" + String(rule.protocol) + "\" />",
+          _renderSelect(pressSelect),
           _renderSelect(actionSelect),
           _renderSelect(serviceSelect),
         });

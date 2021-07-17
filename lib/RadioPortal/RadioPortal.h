@@ -24,7 +24,7 @@ namespace Victoria::Components {
    private:
     RCSwitch* _rf = NULL;
     unsigned long _lastAvailable = 0;
-    void _handleMessage(const RadioMessage& message);
+    void _handleMessage(const RadioMessage& message, PressType press);
     void _proceedAction(const RadioRule& rule);
   };
 } // namespace Victoria::Components
