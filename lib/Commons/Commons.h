@@ -45,6 +45,8 @@ namespace Victoria {
     RadioActionToggle = 3,
     RadioActionWiFiSta = 4,
     RadioActionWiFiStaAp = 5,
+    RadioActionWiFiReset = 6,
+    RadioActionEspRestart = 7,
   };
 
   struct RadioRule {

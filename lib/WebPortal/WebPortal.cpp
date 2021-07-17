@@ -471,9 +471,10 @@ namespace Victoria::Components {
     if (_server->method() == HTTP_POST) {
       auto submit = _server->arg("Submit");
       if (submit == "Add") {
+        auto lastReceived = radioStorage.getLastReceived();
         model.rules.push_back({
-          .value = 0,
-          .protocol = 1,
+          .value = lastReceived.value,
+          .protocol = lastReceived.protocol,
           .action = RadioActionNone,
           .serviceId = "",
         });
@@ -541,8 +542,10 @@ namespace Victoria::Components {
         { .value = "1", .text = "True", },
         { .value = "2", .text = "False", },
         { .value = "3", .text = "Toggle", },
-        { .value = "4", .text = "WiFiSta", },
-        { .value = "5", .text = "WiFiStaAp", },
+        { .value = "4", .text = "WiFi-Sta", },
+        { .value = "5", .text = "WiFi-StaAp", },
+        { .value = "6", .text = "WiFi-Reset", },
+        { .value = "7", .text = "ESP-Restart", },
       };
       std::vector<SelectOption> serviceOptions = {
         { .value = "", .text = "None", },

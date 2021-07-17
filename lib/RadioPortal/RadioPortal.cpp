@@ -71,11 +71,19 @@ namespace Victoria::Components {
     switch (rule.action) {
       case RadioActionWiFiSta:
         WiFi.mode(WIFI_STA);
-        console.log("[RadioPortal] set mode WIFI_STA");
+        console.log("[RadioPortal] wifi mode WIFI_STA");
         break;
       case RadioActionWiFiStaAp:
         WiFi.mode(WIFI_AP_STA);
-        console.log("[RadioPortal] set mode WIFI_AP_STA");
+        console.log("[RadioPortal] wifi mode WIFI_AP_STA");
+        break;
+      case RadioActionWiFiReset:
+        WiFi.disconnect(true);
+        console.log("[RadioPortal] wifi reset");
+        break;
+      case RadioActionEspRestart:
+        ESP.restart();
+        console.log("[RadioPortal] esp restart");
         break;
       default:
         break;
