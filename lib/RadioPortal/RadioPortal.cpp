@@ -21,7 +21,11 @@ namespace Victoria::Components {
   }
 
   void RadioPortal::loop() {
-    if (_rf && _rf->available()) {
+    auto now = millis();
+    if (
+      now - _lastAvailable > AVAILABLE_THROTTLE_TIMESPAN &&
+      _rf && _rf->available()
+    ) {
       // payload
       unsigned long value = _rf->getReceivedValue();
       unsigned int bits = _rf->getReceivedBitlength();
@@ -34,25 +38,23 @@ namespace Victoria::Components {
         .value = value,
         .bits = bits,
         .protocol = protocol,
-        .timestamp = millis(),
+        .timestamp = now,
       };
       // throttle
-      if (!_isThrottled(message)) {
+      auto lastMessage = radioStorage.getLastReceived();
+      auto isThrottled = (
+        lastMessage.value == message.value &&
+        lastMessage.protocol == message.protocol &&
+        now - lastMessage.timestamp < MESSAGE_THROTTLE_TIMESPAN
+      );
+      if (!isThrottled) {
         radioStorage.broadcast(message);
         _handleMessage(message);
       }
       // reset state
       _rf->resetAvailable();
+      _lastAvailable = now;
     }
-  }
-
-  bool RadioPortal::_isThrottled(const RadioMessage& message) {
-    auto lastMessage = radioStorage.getLastReceived();
-    return (
-      lastMessage.value == message.value &&
-      lastMessage.protocol == message.protocol &&
-      millis() - lastMessage.timestamp < THROTTLE_TIMESPAN
-    );
   }
 
   void RadioPortal::_handleMessage(const RadioMessage& message) {

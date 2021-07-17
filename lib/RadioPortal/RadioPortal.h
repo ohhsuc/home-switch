@@ -7,7 +7,8 @@
 #include "Commons.h"
 #include "RadioStorage.h"
 
-#define THROTTLE_TIMESPAN 500 // millianseconds
+#define AVAILABLE_THROTTLE_TIMESPAN 100 // millianseconds
+#define MESSAGE_THROTTLE_TIMESPAN 500 // millianseconds
 
 namespace Victoria::Components {
   class RadioPortal {
@@ -22,7 +23,7 @@ namespace Victoria::Components {
 
    private:
     RCSwitch* _rf = NULL;
-    bool _isThrottled(const RadioMessage& message);
+    unsigned long _lastAvailable = 0;
     void _handleMessage(const RadioMessage& message);
     void _proceedAction(const RadioRule& rule);
   };
