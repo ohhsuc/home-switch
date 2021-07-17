@@ -22,9 +22,9 @@ namespace Victoria::Components {
 
    private:
     RCSwitch* _rf = NULL;
-    bool _isThrottled(RadioMessage message);
-    void _handleMessage(RadioMessage message);
-    void _proceedAction(RadioRule rule);
+    bool _isThrottled(const RadioMessage& message);
+    void _handleMessage(const RadioMessage& message);
+    void _proceedAction(const RadioRule& rule);
   };
 } // namespace Victoria::Components
 

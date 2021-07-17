@@ -7,7 +7,7 @@ namespace Victoria::Components {
   class RadioStorage : public FileStorage<RadioModel> {
    public:
     RadioStorage();
-    void broadcast(RadioMessage message);
+    void broadcast(RadioMessage message); // message object should be copied
     RadioMessage getLastReceived();
 
    protected:

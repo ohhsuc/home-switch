@@ -46,7 +46,7 @@ namespace Victoria::Components {
     }
   }
 
-  bool RadioPortal::_isThrottled(RadioMessage message) {
+  bool RadioPortal::_isThrottled(const RadioMessage& message) {
     auto lastMessage = radioStorage.getLastReceived();
     return (
       lastMessage.value == message.value &&
@@ -55,7 +55,7 @@ namespace Victoria::Components {
     );
   }
 
-  void RadioPortal::_handleMessage(RadioMessage message) {
+  void RadioPortal::_handleMessage(const RadioMessage& message) {
     auto model = radioStorage.load();
     for (const auto& rule : model.rules) {
       if (
@@ -67,7 +67,7 @@ namespace Victoria::Components {
     }
   }
 
-  void RadioPortal::_proceedAction(RadioRule rule) {
+  void RadioPortal::_proceedAction(const RadioRule& rule) {
     switch (rule.action) {
       case RadioActionWiFiSta:
         WiFi.mode(WIFI_STA);

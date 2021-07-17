@@ -73,7 +73,7 @@ namespace Victoria {
       return (0);
     }
 
-    static String urlDecode(String str) {
+    static String urlDecode(const String& str) {
       auto encodedString = String("");
       char c;
       char code0;
@@ -97,7 +97,7 @@ namespace Victoria {
       return encodedString;
     }
 
-    static String urlEncode(String str) {
+    static String urlEncode(const String& str) {
       auto encodedString = String("");
       char c;
       char code0;
