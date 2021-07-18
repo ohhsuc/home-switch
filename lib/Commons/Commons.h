@@ -20,6 +20,14 @@ namespace Victoria {
     std::vector<std::vector<String>> rows;
   };
 
+  struct SelectionOptions {
+    String inputType;
+    String inputName;
+    String inputValue;
+    bool isChecked;
+    String labelText;
+  };
+
   struct SelectOption {
     String value;
     String text;
