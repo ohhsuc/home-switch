@@ -24,7 +24,7 @@ namespace Victoria {
     String inputType;
     String inputName;
     String inputValue;
-    bool isChecked;
+    bool isChecked = false;
     String labelText;
   };
 
@@ -40,10 +40,10 @@ namespace Victoria {
   };
 
   struct RadioMessage {
-    unsigned long value;
-    unsigned int bits;
-    unsigned int protocol;
-    unsigned long timestamp;
+    unsigned long value = 0;
+    unsigned int bits = 0;
+    unsigned int protocol = 0;
+    unsigned long timestamp = 0;
   };
 
   enum RadioAction {
@@ -57,17 +57,18 @@ namespace Victoria {
     RadioActionEspRestart = 7,
   };
 
-  enum PressType {
-    PressTypeClick = 0,
-    PressTypeDoubleClick = 1,
-    PressTypeLongPress = 2,
+  enum RadioPressState {
+    PressStateAwait = 0,
+    PressStateClick = 1,
+    PressStateDoubleClick = 2,
+    PressStateLongPress = 3,
   };
 
   struct RadioRule {
-    unsigned long value;
-    unsigned int protocol;
-    PressType press;
-    RadioAction action;
+    unsigned long value = 0;
+    unsigned int protocol = 0;
+    RadioPressState press = PressStateClick;
+    RadioAction action = RadioActionNone;
     String serviceId;
   };
 
@@ -92,8 +93,8 @@ namespace Victoria {
   };
 
   struct ServiceState {
-    bool boolValue;
-    int intValue;
+    bool boolValue = false;
+    int intValue = 0;
   };
 
   struct ServicesModel {

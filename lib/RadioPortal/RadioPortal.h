@@ -7,8 +7,12 @@
 #include "Commons.h"
 #include "RadioStorage.h"
 
-#define AVAILABLE_THROTTLE_TIMESPAN 100 // millianseconds
-#define MESSAGE_THROTTLE_TIMESPAN 500 // millianseconds
+// timespan in millianseconds
+#define AVAILABLE_THROTTLE_TIMESPAN 100
+#define DOUBLE_CLICK_TIMESPAN_FROM 300
+#define DOUBLE_CLICK_TIMESPAN_TO 500
+#define LONG_PRESS_TIMESPAN 2000
+#define RESET_PRESS_TIMESPAN 2500
 
 namespace Victoria::Components {
   class RadioPortal {
@@ -23,8 +27,10 @@ namespace Victoria::Components {
 
    private:
     RCSwitch* _rf = NULL;
+    RadioMessage _lastMessage = {};
+    RadioPressState _lastPressState = PressStateAwait;
     unsigned long _lastAvailable = 0;
-    void _handleMessage(const RadioMessage& message, PressType press);
+    void _handleMessage(const RadioMessage& message, RadioPressState press);
     void _proceedAction(const RadioRule& rule);
   };
 } // namespace Victoria::Components

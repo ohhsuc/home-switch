@@ -30,9 +30,6 @@ namespace Victoria::Components {
       unsigned long value = _rf->getReceivedValue();
       unsigned int bits = _rf->getReceivedBitlength();
       unsigned int protocol = _rf->getReceivedProtocol();
-      // logs
-      auto received = String(protocol) + "/" + String(value) + "/" + String(bits) + "bits";
-      console.log("[RadioPortal] received " + received);
       // message
       RadioMessage message = {
         .value = value,
@@ -40,24 +37,43 @@ namespace Victoria::Components {
         .protocol = protocol,
         .timestamp = now,
       };
-      // throttle
-      auto lastMessage = radioStorage.getLastReceived();
-      auto isThrottled = (
-        lastMessage.value == message.value &&
-        lastMessage.protocol == message.protocol &&
-        now - lastMessage.timestamp < MESSAGE_THROTTLE_TIMESPAN
-      );
-      if (!isThrottled) {
-        _handleMessage(message, PressTypeClick);
-        radioStorage.broadcast(message);
+      if (now - _lastMessage.timestamp > RESET_PRESS_TIMESPAN) {
+        RadioMessage empty {};
+        _lastMessage = empty;
+        _lastPressState = PressStateAwait;
+      }
+      if (
+        _lastPressState != PressStateClick &&
+        (_lastMessage.value != message.value || _lastMessage.protocol != message.protocol)
+      ) {
+        _handleMessage(message, PressStateClick);
+      } else if (
+        _lastPressState != PressStateDoubleClick &&
+        now - _lastMessage.timestamp >= DOUBLE_CLICK_TIMESPAN_FROM &&
+        now - _lastMessage.timestamp < DOUBLE_CLICK_TIMESPAN_TO
+      ) {
+        _handleMessage(_lastMessage, PressStateDoubleClick);
+      } else if (
+        _lastPressState != PressStateLongPress &&
+        (now - _lastMessage.timestamp >= LONG_PRESS_TIMESPAN)
+      ) {
+        _handleMessage(_lastMessage, PressStateLongPress);
       }
       // reset state
       _rf->resetAvailable();
       _lastAvailable = now;
+      radioStorage.broadcast(message);
     }
   }
 
-  void RadioPortal::_handleMessage(const RadioMessage& message, PressType press) {
+  void RadioPortal::_handleMessage(const RadioMessage& message, RadioPressState press) {
+    // logs
+    auto received = String(message.protocol) + "/" + String(message.value) + "/" + String(message.bits) + "bits press " + String(press);
+    console.log("[RadioPortal] received " + received);
+    // log states
+    _lastMessage = message;
+    _lastPressState = press;
+    // check rules
     auto model = radioStorage.load();
     for (const auto& rule : model.rules) {
       if (

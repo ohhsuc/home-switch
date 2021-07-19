@@ -92,7 +92,7 @@ namespace Victoria::Components {
         model.rules.push_back({
           .value = lastReceived.value,
           .protocol = lastReceived.protocol,
-          .press = PressTypeClick,
+          .press = PressStateClick,
           .action = RadioActionNone,
           .serviceId = "",
         });
@@ -136,7 +136,7 @@ namespace Victoria::Components {
           model.rules.push_back({
             .value = values[i].toInt(),
             .protocol = protocols[i].toInt(),
-            .press = PressType(pressIds[i].toInt()),
+            .press = RadioPressState(pressIds[i].toInt()),
             .action = RadioAction(actionIds[i].toInt()),
             .serviceId = serviceIds[i],
           });
@@ -160,9 +160,10 @@ namespace Victoria::Components {
         .rows = {},
       };
       std::vector<SelectOption> pressOptions = {
-        { .value = "0", .text = "Click" },
-        { .value = "1", .text = "Double Click" },
-        { .value = "2", .text = "Long Press" },
+        // { .value = "0", .text = "Await" },
+        { .value = "1", .text = "Click" },
+        { .value = "2", .text = "Double Click" },
+        { .value = "3", .text = "Long Press" },
       };
       std::vector<SelectOption> actionOptions = {
         { .value = "0", .text = "None" },
