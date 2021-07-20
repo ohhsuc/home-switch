@@ -1,104 +1,18 @@
 #ifndef Commons_h
 #define Commons_h
 
-#include <map>
-#include <vector>
-#include <Arduino.h>
 #include "Console.h"
 #include "BuildFlags.h"
 #include "GlobalHelpers.h"
+#include "RadioModels.h"
+#include "ServiceModels.h"
+#include "WebModels.h"
 
 namespace Victoria {
 
   enum VEnvironment {
     VTest,
     VProd,
-  };
-
-  struct TableModel {
-    std::vector<String> header;
-    std::vector<std::vector<String>> rows;
-  };
-
-  struct SelectionOptions {
-    String inputType;
-    String inputName;
-    String inputValue;
-    bool isChecked = false;
-    String labelText;
-  };
-
-  struct SelectOption {
-    String value;
-    String text;
-  };
-
-  struct SelectModel {
-    String name;
-    String value;
-    std::vector<SelectOption> options;
-  };
-
-  struct RadioMessage {
-    unsigned long value = 0;
-    unsigned int bits = 0;
-    unsigned int protocol = 0;
-    unsigned long timestamp = 0;
-  };
-
-  enum RadioAction {
-    RadioActionNone = 0,
-    RadioActionTrue = 1,
-    RadioActionFalse = 2,
-    RadioActionToggle = 3,
-    RadioActionWiFiSta = 4,
-    RadioActionWiFiStaAp = 5,
-    RadioActionWiFiReset = 6,
-    RadioActionEspRestart = 7,
-  };
-
-  enum RadioPressState {
-    PressStateAwait = 0,
-    PressStateClick = 1,
-    PressStateDoubleClick = 2,
-    PressStateLongPress = 3,
-  };
-
-  struct RadioRule {
-    unsigned long value = 0;
-    unsigned int protocol = 0;
-    RadioPressState press = PressStateClick;
-    RadioAction action = RadioActionNone;
-    String serviceId;
-  };
-
-  struct RadioModel {
-    int inputPin = -1;
-    std::vector<RadioRule> rules;
-  };
-
-  enum ServiceType {
-    EmptyServiceType = 0,
-    BooleanServiceType = 1,
-    IntegerServiceType = 2,
-  };
-
-  struct ServiceSetting {
-    String name;
-    ServiceType type;
-    int outputPin = -1;
-    int inputPin = -1;
-    int outputLevel = -1;
-    int inputLevel = -1;
-  };
-
-  struct ServiceState {
-    bool boolValue = false;
-    int intValue = 0;
-  };
-
-  struct ServicesModel {
-    std::map<String, ServiceSetting> services;
   };
 
   // const int led = LED_BUILTIN;
@@ -109,6 +23,7 @@ namespace Victoria {
 
   // globals
   const VEnvironment VEnv = VTest;
+
 } // namespace Victoria
 
 #endif // Commons_h
