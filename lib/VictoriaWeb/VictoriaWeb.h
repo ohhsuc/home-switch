@@ -1,5 +1,5 @@
-#ifndef WebPortalBase_h
-#define WebPortalBase_h
+#ifndef VictoriaWeb_h
+#define VictoriaWeb_h
 
 #include <functional>
 #include <Arduino.h>
@@ -52,4 +52,4 @@ namespace Victoria::Components {
   };
 } // namespace Victoria::Components
 
-#endif // WebPortalBase_h
+#endif // VictoriaWeb_h

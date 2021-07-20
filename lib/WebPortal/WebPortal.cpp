@@ -134,8 +134,8 @@ namespace Victoria::Components {
         model.rules.clear();
         for (size_t i = 0; i < values.size(); i++) {
           model.rules.push_back({
-            .value = values[i].toInt(),
-            .protocol = protocols[i].toInt(),
+            .value = strtoul(values[i].c_str(), NULL, 10),
+            .protocol = strtoul(protocols[i].c_str(), NULL, 10),
             .press = RadioPressState(pressIds[i].toInt()),
             .action = RadioAction(actionIds[i].toInt()),
             .serviceId = serviceIds[i],

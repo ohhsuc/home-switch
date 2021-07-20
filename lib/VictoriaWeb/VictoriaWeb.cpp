@@ -52,6 +52,7 @@ namespace Victoria::Components {
   }
 
   void VictoriaWeb::_registerHandlers() {
+    _server->onNotFound(std::bind(&VictoriaWeb::_handleNotFound, this));
     _server->on("/", HTTP_GET, std::bind(&VictoriaWeb::_handleHome, this));
     _server->on("/system", HTTP_GET, std::bind(&VictoriaWeb::_handleSystem, this));
     _server->on("/system/file", HTTP_OPTIONS, std::bind(&VictoriaWeb::_handleCrossOrigin, this));
@@ -60,7 +61,6 @@ namespace Victoria::Components {
     _server->on("/wifi/join", HTTP_POST, std::bind(&VictoriaWeb::_handleWifiJoin, this));
     _server->on("/reset", HTTP_OPTIONS, std::bind(&VictoriaWeb::_handleCrossOrigin, this));
     _server->on("/reset", HTTP_ANY, std::bind(&VictoriaWeb::_handleReset, this));
-    _server->onNotFound(std::bind(&VictoriaWeb::_handleNotFound, this));
   }
 
   String VictoriaWeb::getHostName(bool includeVersion = false) {
