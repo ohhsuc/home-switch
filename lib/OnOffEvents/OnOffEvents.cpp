@@ -1,6 +1,6 @@
 #include "OnOffEvents.h"
 
-#define DEFAULT_DEBOUNCE_DELAY 50
+#define DEBOUNCE_TIMESPAN 500
 
 namespace Victoria::Events {
 
@@ -9,16 +9,14 @@ namespace Victoria::Events {
   }
 
   void OnOffEvents::loop() {
-    auto isOn = digitalRead(_inputPin) == LOW;
-    if (isOn != _lastState) {
-      _lastTimeRead = millis();
-      return;
-    }
-    if (millis() - _lastTimeRead > DEFAULT_DEBOUNCE_DELAY) {
-      if (isOn != _lastState) {
-        _lastState = isOn;
+    auto now = millis();
+    if (now - _lastTime > DEBOUNCE_TIMESPAN) {
+      auto state = digitalRead(_inputPin) == LOW;
+      if (state != _lastState) {
+        _lastState = state;
+        _lastTime = now;
         if (onChange) {
-          onChange(isOn);
+          onChange(state);
         }
       }
     }

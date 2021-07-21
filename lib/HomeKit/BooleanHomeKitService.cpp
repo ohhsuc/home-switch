@@ -8,10 +8,6 @@ namespace Victoria::HomeKit {
   : HomeKitService(id, setting, &boolCharacteristic) {}
 
   BooleanHomeKitService::~BooleanHomeKitService() {
-    if (_onOffEvents) {
-      delete _onOffEvents;
-      _onOffEvents = NULL;
-    }
     if (_buttonEvents) {
       delete _buttonEvents;
       _buttonEvents = NULL;
@@ -59,26 +55,20 @@ namespace Victoria::HomeKit {
     homekit_characteristic_add_notify_callback(serviceCharacteristic, BooleanHomeKitService::_notifyCallback, this);
 
     // setup inputs
-    auto inputPin = serviceSetting.inputPin;
-    if (inputPin > -1) {
-      _onOffEvents = new OnOffEvents(inputPin);
-      _onOffEvents->onChange = [](bool isOn)->void {
-        console.log("[OnOffEvents] is on " + String(isOn));
-        // auto state = this->getState();
-        // state.boolValue = isOn;
-        // this->setState(state);
-      };
-      _buttonEvents = new ButtonEvents(inputPin);
-      _buttonEvents->onClick = [](int times)->void {
-        console.log("[ButtonEvents] click times " + String(times));
+    if (serviceSetting.inputPin > -1) {
+      _buttonEvents = new ButtonEvents(serviceSetting.inputPin);
+      _buttonEvents->onClick = [this](int times)->void {
+        console.log("[ButtonEvents] > times " + String(times));
+        if (times == 1) {
+          auto state = this->getState();
+          state.boolValue = !state.boolValue;
+          this->setState(state);
+        }
       };
     }
   }
 
   void BooleanHomeKitService::loop() {
-    if (_onOffEvents) {
-      _onOffEvents->loop();
-    }
     if (_buttonEvents) {
       _buttonEvents->loop();
     }

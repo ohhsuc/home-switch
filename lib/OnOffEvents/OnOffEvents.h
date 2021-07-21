@@ -16,7 +16,7 @@ namespace Victoria::Events {
    private:
     uint8_t _inputPin;
     bool _lastState = false;
-    unsigned long _lastTimeRead = 0;
+    unsigned long _lastTime = 0;
   };
 } // namespace Victoria::Events
 

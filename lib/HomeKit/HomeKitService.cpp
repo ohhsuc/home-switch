@@ -20,19 +20,19 @@ namespace Victoria::HomeKit {
 
   void HomeKitService::setup() {
     // outputs
-    auto outputPin = serviceSetting.outputPin;
-    if (outputPin > -1) {
-      pinMode(outputPin, OUTPUT);
+    if (serviceSetting.outputPin > -1) {
+      pinMode(serviceSetting.outputPin, OUTPUT);
       if (serviceSetting.outputLevel > -1) {
-        digitalWrite(outputPin, serviceSetting.outputLevel);
+        auto outputLevel = serviceSetting.outputLevel == 0 ? LOW : HIGH;
+        digitalWrite(serviceSetting.outputPin, outputLevel);
       }
     }
     // inputs
-    auto inputPin = serviceSetting.inputPin;
-    if (inputPin > -1) {
-      pinMode(inputPin, INPUT_PULLUP);
+    if (serviceSetting.inputPin > -1) {
+      pinMode(serviceSetting.inputPin, INPUT_PULLUP);
       if (serviceSetting.inputLevel > -1) {
-        digitalWrite(inputPin, serviceSetting.inputLevel);
+        auto inputLevel = serviceSetting.inputLevel == 0 ? LOW : HIGH;
+        digitalWrite(serviceSetting.inputPin, inputLevel);
       }
     }
   }
