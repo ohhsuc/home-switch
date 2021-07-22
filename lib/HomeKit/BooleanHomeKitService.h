@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "HomeKitService.h"
-#include "OnOffEvents.h"
 #include "ButtonEvents.h"
 
 using namespace Victoria::Events;
@@ -19,7 +18,6 @@ namespace Victoria::HomeKit {
     void setState(const ServiceState& state) override;
 
    private:
-    OnOffEvents* _onOffEvents = NULL;
     ButtonEvents* _buttonEvents = NULL;
     static void _notifyCallback(homekit_characteristic_t *ch, homekit_value_t value, void *context);
   };

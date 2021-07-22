@@ -2,8 +2,12 @@
 
 namespace Victoria::Events {
 
-  ButtonEvents::ButtonEvents(uint8_t inputPin) {
-    _inputPin = inputPin;
+  ButtonEvents::ButtonEvents(TInputHandler getPressed) {
+    _getPressed = getPressed;
+  }
+
+  ButtonEvents::~ButtonEvents() {
+    _getPressed = NULL;
   }
 
   void ButtonEvents::loop() {
@@ -19,7 +23,7 @@ namespace Victoria::Events {
   int ButtonEvents::_loadState() {
     if (_buttonState == AWAIT_PRESS) {
       _clicks = 0;
-      if (digitalRead(_inputPin) == LOW) {
+      if (_getPressed()) {
         _buttonState = DEBOUNCE_PRESS;
         _eventTime = millis();
       }
@@ -33,7 +37,7 @@ namespace Victoria::Events {
     }
 
     else if (_buttonState == AWAIT_RELEASE) {
-      if (digitalRead(_inputPin) == HIGH) {
+      if (!_getPressed()) {
         if ((millis() - _eventTime) > HOLD_TIME) {
           _clicks = -1;
         }
@@ -55,7 +59,7 @@ namespace Victoria::Events {
     }
 
     else { // (_buttonState == AWAIT_MULTI_PRESS)
-      if (digitalRead(_inputPin) == LOW) {
+      if (_getPressed()) {
         _buttonState = DEBOUNCE_PRESS;
         _eventTime = millis();
       } else if ((millis() - _eventTime) > MULTI_CLICK_TIME) {

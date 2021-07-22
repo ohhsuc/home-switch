@@ -15,15 +15,17 @@
 
 namespace Victoria::Events {
   class ButtonEvents {
+    typedef std::function<bool()> TInputHandler;
     typedef std::function<void(int)> TClickHandler;
 
    public:
-    ButtonEvents(uint8_t inputPin);
+    ButtonEvents(TInputHandler getPressed);
+    ~ButtonEvents();
     TClickHandler onClick;
     void loop();
 
    private:
-    uint8_t _inputPin;
+    TInputHandler _getPressed;
     // states
     int _clicks = 0;
     unsigned long _eventTime = 0;

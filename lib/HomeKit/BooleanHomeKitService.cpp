@@ -55,7 +55,10 @@ namespace Victoria::HomeKit {
 
     // setup inputs
     if (serviceSetting.inputPin > -1) {
-      _buttonEvents = new ButtonEvents(serviceSetting.inputPin);
+      _buttonEvents = new ButtonEvents([&]()->bool {
+        auto isPressed = digitalRead(serviceSetting.inputPin) == LOW;
+        return isPressed;
+      });
       _buttonEvents->onClick = [this](int times)->void {
         console.log("[ButtonEvents] > times " + String(times));
         if (times == 1) {
