@@ -32,9 +32,9 @@ namespace Victoria::HomeKit {
 
   void HomeKitMain::removeService(const String& serviceId) {
     if (_id_service_map.count(serviceId) > 0) {
-      // auto service = _id_service_map[serviceId];
-      // delete service;
+      auto service = _id_service_map[serviceId];
       _id_service_map.erase(serviceId);
+      delete service;
     }
   }
 

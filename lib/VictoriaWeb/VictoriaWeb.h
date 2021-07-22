@@ -12,7 +12,7 @@ namespace Victoria::Components {
   class VictoriaWeb {
    public:
     VictoriaWeb(int port);
-    ~VictoriaWeb();
+    virtual ~VictoriaWeb();
     void setup();
     void loop();
     // server events

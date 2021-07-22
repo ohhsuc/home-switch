@@ -12,7 +12,7 @@ namespace Victoria::HomeKit {
 
    public:
     HomeKitService(const String& id, const ServiceSetting& setting, homekit_characteristic_t* characteristic);
-    ~HomeKitService();
+    virtual ~HomeKitService();
     String serviceId;
     ServiceSetting serviceSetting;
     homekit_characteristic_t* serviceCharacteristic = NULL;

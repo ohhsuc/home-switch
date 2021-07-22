@@ -5,9 +5,7 @@ namespace Victoria::Components {
   WebPortal::WebPortal(int port = 80)
   : VictoriaWeb(port) {}
 
-  WebPortal::~WebPortal() {
-    VictoriaWeb::~VictoriaWeb();
-  }
+  WebPortal::~WebPortal() {}
 
   void WebPortal::_registerHandlers() {
     VictoriaWeb::_registerHandlers();

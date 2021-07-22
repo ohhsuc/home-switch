@@ -15,7 +15,6 @@ namespace Victoria::HomeKit {
     if (homekit_characteristic_has_notify_callback(serviceCharacteristic, BooleanHomeKitService::_notifyCallback, this)) {
       homekit_characteristic_remove_notify_callback(serviceCharacteristic, BooleanHomeKitService::_notifyCallback, this);
     }
-    HomeKitService::~HomeKitService();
   }
 
   void BooleanHomeKitService::setup() {
