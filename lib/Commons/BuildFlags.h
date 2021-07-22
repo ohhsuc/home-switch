@@ -29,10 +29,6 @@
 #define HOMEKIT_SERVER_PASSWORD "111-11-111"
 #endif
 
-#ifndef RF_PROTOCOL
-#define RF_PROTOCOL 1
-#endif
-
 #include <Arduino.h>
 
 namespace Victoria {
@@ -43,7 +39,6 @@ namespace Victoria {
   const String AccessoryInformationModel = ACCESSORY_INFORMATION_MODEL;
   const String AccessoryInformationSerialNumber = ACCESSORY_INFORMATION_SERIAL_NUMBER;
   const String HomekitServerPassword = HOMEKIT_SERVER_PASSWORD;
-  const unsigned int RfProtocol = RF_PROTOCOL;
 } // namespace Victoria
 
 #endif // BuildFlags_h
