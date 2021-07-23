@@ -6,7 +6,6 @@
     "println",
     "wifi",
     "ssid",
-    "mDNS",
-    "onclick"
+    "mDNS"
   ]
 }

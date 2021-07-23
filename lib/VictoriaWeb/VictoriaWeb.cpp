@@ -61,6 +61,9 @@ namespace Victoria::Components {
     _server->on("/wifi/join", HTTP_POST, std::bind(&VictoriaWeb::_handleWifiJoin, this));
     _server->on("/reset", HTTP_OPTIONS, std::bind(&VictoriaWeb::_handleCrossOrigin, this));
     _server->on("/reset", HTTP_ANY, std::bind(&VictoriaWeb::_handleReset, this));
+    _server->serveStatic("/fav", LittleFS, "/fav.ico", "max-age=43200");
+    _server->serveStatic("/css", LittleFS, "/style.css", "max-age=43200");
+    _server->serveStatic("/js", LittleFS, "/app.js", "max-age=43200");
   }
 
   String VictoriaWeb::getHostName(bool includeVersion = false) {
@@ -111,20 +114,9 @@ namespace Victoria::Components {
         <head>\
           <title>" + productName + "</title>\
           <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
-          <style>\
-            html, body { background: transparent; font-family: Arial, Sans-Serif; margin: 0; padding: 0; border: 0; color: #4f4e4e; }\
-            h1, h2, h3 { font-weight: 400; }\
-            a { color: #00979d; text-decoration: none; }\
-            b { color: #005c5f; }\
-            fieldset { border: 1px solid #00979c; }\
-            ul { padding: 0; list-style-type: none; }\
-            td { border-bottom: 1px solid #d5e9e9; }\
-            .lt { text-align: left; } .rt { text-align: right; }\
-            .main { padding: 0 10px; font-size: 14px; }\
-            .title { background: #008184; color: #ffffff; text-align: center; margin: 0; padding: 5px 0; }\
-            .btn { background-color: #005c5f; border: 1px solid #005c5f; color: #ffffff; border-radius: 5px; padding: 5px 10px; box-shadow: none; }\
-            .btnWeak { background: none; border: none; padding: 0; color: #00979d; }}\
-          </style>\
+          <link rel=\"icon\" href=\"/fav\">\
+          <link rel=\"stylesheet\" href=\"/css\">\
+          <script src=\"/js\"></script>\
         </head>\
         <body>\
           <h2 class=\"title\">" + productName + "</h2>\
@@ -337,7 +329,7 @@ namespace Victoria::Components {
             </p>\
             <p>\
               <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
-              <button type=\"submit\" name=\"Submit\" value=\"Delete\" class=\"btnWeak\" onclick=\"return confirm('Are you sure you want to delete?')\">Delete</button>\
+              <button type=\"submit\" name=\"Submit\" value=\"Delete\" class=\"btnWeak confirm\">Delete</button>\
             </p>\
           </form>\
         ");
@@ -505,11 +497,7 @@ namespace Victoria::Components {
       auto selected = option.value == model.value ? " selected" : "";
       options += "<option value=\"" + option.value + "\"" + selected + ">" + option.text + "</option>";
     }
-    auto html = String("\
-      <select name=\"" + model.name + "\">\
-        " + options + "\
-      </select>\
-    ");
+    auto html = "<select name=\"" + model.name + "\">" + options + "</select>";
     return html;
   }
 

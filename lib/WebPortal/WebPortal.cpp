@@ -202,7 +202,7 @@ namespace Victoria::Components {
           .options = serviceOptions,
         };
         rulesTable.rows.push_back({
-          "<button type=\"submit\" name=\"Submit\" value=\"Remove" + String(ruleIndex) + "\" class=\"btn\" onclick=\"return confirm('Are you sure you want to remove?')\">Remove</button>",
+          "<button type=\"submit\" name=\"Submit\" value=\"Remove" + String(ruleIndex) + "\" class=\"btn confirm\">Remove</button>",
           "<input type=\"number\" name=\"Value\" min=\"-1\" max=\"99999999\" value=\"" + String(rule.value) + "\" />",
           "<input type=\"number\" name=\"Protocol\" min=\"-1\" max=\"100\" value=\"" + String(rule.protocol) + "\" />",
           _renderSelect(pressSelect),
@@ -300,7 +300,7 @@ namespace Victoria::Components {
           " + _getIOHtml(service) + "\
           <p>\
             <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
-            <button type=\"submit\" name=\"Submit\" value=\"Delete\" class=\"btnWeak\" onclick=\"return confirm('Are you sure you want to delete?')\">Delete</button>\
+            <button type=\"submit\" name=\"Submit\" value=\"Delete\" class=\"btnWeak confirm\">Delete</button>\
           </p>\
         </form>\
       ");

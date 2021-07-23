@@ -3,7 +3,7 @@
 namespace Victoria::Components {
 
   ServiceStorage::ServiceStorage() {
-    _filePath = "/services.json";
+    _filePath = "/service.json";
   }
 
   void ServiceStorage::_serializeTo(const ServicesModel& model, DynamicJsonDocument& doc) {
