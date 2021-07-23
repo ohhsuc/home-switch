@@ -12,3 +12,6 @@ indent_size = 4
 
 [*.ini]
 trim_trailing_whitespace = false
+
+[/data/*]
+insert_final_newline = false
