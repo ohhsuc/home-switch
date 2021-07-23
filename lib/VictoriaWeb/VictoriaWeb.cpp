@@ -63,6 +63,7 @@ namespace Victoria::Components {
     _server->on("/reset", HTTP_ANY, std::bind(&VictoriaWeb::_handleReset, this));
     _server->serveStatic("/fav", LittleFS, "/fav.ico", "max-age=43200");
     _server->serveStatic("/css", LittleFS, "/style.css", "max-age=43200");
+    _server->serveStatic("/tmpl", LittleFS, "/tmpl.min.js", "max-age=43200");
     _server->serveStatic("/js", LittleFS, "/app.js", "max-age=43200");
   }
 
@@ -116,9 +117,17 @@ namespace Victoria::Components {
           <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
           <link rel=\"icon\" href=\"/fav\">\
           <link rel=\"stylesheet\" href=\"/css\">\
+          <script src=\"/tmpl\"></script>\
           <script src=\"/js\"></script>\
         </head>\
         <body>\
+          <script type=\"text/x-tmpl\" id=\"html-select\">\
+            <select name=\"{%=o.name%}\">\
+              {% for (var i=0; i<o.options.length; i++) { var opt=o.options[i]; %}\
+              <option value=\"{%=opt.ov%}\"{% if(o.value===opt.ov)print(' selected');%}>{%=opt.ot%}</option>\
+              {% } %}\
+            </select>\
+          </script>\
           <h2 class=\"title\">" + productName + "</h2>\
           <div class=\"main\">\
             " + bodyHtml + "\
