@@ -153,62 +153,14 @@ namespace Victoria::Components {
           { "Protocol", hasReceived ? String(lastReceived.protocol) : "-" },
         },
       };
-      TableModel rulesTable = {
-        .header = { "Rule", "Value", "Protocol", "Press", "Action", "Service" },
-        .rows = {},
-      };
-      std::vector<SelectOption> pressOptions = {
-        // { .value = "0", .text = "Await" },
-        { .value = "1", .text = "Click" },
-        { .value = "2", .text = "Double Click" },
-        { .value = "3", .text = "Long Press" },
-      };
-      std::vector<SelectOption> actionOptions = {
-        { .value = "0", .text = "None" },
-        { .value = "1", .text = "True" },
-        { .value = "2", .text = "False" },
-        { .value = "3", .text = "Toggle" },
-        { .value = "4", .text = "WiFi STA" },
-        { .value = "5", .text = "WiFi STA+AP" },
-        { .value = "6", .text = "WiFi Reset" },
-        { .value = "7", .text = "ESP Restart" },
-      };
-      std::vector<SelectOption> serviceOptions = {
-        { .value = "", .text = "None" },
-      };
+      auto serviceOptionJson = String("{ov:'',ot:'None'},");
       auto serviceModel = serviceStorage.load();
       for (const auto& pair : serviceModel.services) {
-        serviceOptions.push_back({
-          .value = pair.first,
-          .text = pair.second.name,
-        });
+        serviceOptionJson += "{ov:'" + pair.first + "',ot:'" + pair.second.name + "'},";
       }
-      int ruleIndex = -1;
+      auto radioRulesJson = String("");
       for (const auto& rule : model.rules) {
-        ruleIndex++;
-        SelectModel pressSelect = {
-          .name = "PressId",
-          .value = String(rule.press),
-          .options = pressOptions,
-        };
-        SelectModel actionSelect = {
-          .name = "ActionId",
-          .value = String(rule.action),
-          .options = actionOptions,
-        };
-        SelectModel serviceSelect = {
-          .name = "ServiceId",
-          .value = rule.serviceId,
-          .options = serviceOptions,
-        };
-        rulesTable.rows.push_back({
-          "<button type=\"submit\" name=\"Submit\" value=\"Remove" + String(ruleIndex) + "\" class=\"btn confirm\">Remove</button>",
-          "<input type=\"number\" name=\"Value\" min=\"-1\" max=\"99999999\" value=\"" + String(rule.value) + "\" />",
-          "<input type=\"number\" name=\"Protocol\" min=\"-1\" max=\"100\" value=\"" + String(rule.protocol) + "\" />",
-          _renderSelect(pressSelect),
-          _renderSelect(actionSelect),
-          _renderSelect(serviceSelect),
-        });
+        radioRulesJson += "{value:'" + String(rule.value) + "',protocol:'" + String(rule.protocol) + "',press:'" + String(rule.press) + "',action:'" + String(rule.action) + "',service:'" + rule.serviceId + "'},";
       }
       _send200("\
         <p><a href=\"/\">&lt; Home</a></p>\
@@ -222,9 +174,43 @@ namespace Victoria::Components {
             <label>Last received " + (hasReceived ? GlobalHelpers::timeSince(lastReceived.timestamp) + " ago" : "-") + "</label>\
             " + _renderTable(receivedTable) + "\
           </p>\
-          <p>\
-            " + _renderTable(rulesTable) + "\
+          <p id=\"radioRules\">\
           </p>\
+          <script type=\"text/x-tmpl\" id=\"radio-rules\">\
+            <table>\
+              <tr>\
+                <th class=\"lt\">Rule</th>\
+                <th class=\"lt\">Value</th>\
+                <th class=\"lt\">Protocol</th>\
+                <th class=\"lt\">Press</th>\
+                <th class=\"lt\">Action</th>\
+                <th class=\"lt\">Service</th>\
+              </tr>\
+              {% for (var i=0; i<o.radioRules.length; i++) { var rule=o.radioRules[i]; %}\
+              <tr>\
+                <td><button type=\"submit\" name=\"Submit\" value=\"Remove{%=i%}\" class=\"btn confirm\">Remove</button></td>\
+                <td><input type=\"number\" name=\"Value\" min=\"-1\" max=\"99999999\" value=\"{%=rule.value%}\" /></td>\
+                <td><input type=\"number\" name=\"Protocol\" min=\"-1\" max=\"100\" value=\"{%=rule.protocol%}\" /></td>\
+                <td>{% include('html-select',{name:'PressId',value:rule.press,options:o.pressOptions}); %}</td>\
+                <td>{% include('html-select',{name:'ActionId',value:rule.action,options:o.actionOptions}); %}</td>\
+                <td>{% include('html-select',{name:'ServiceId',value:rule.service,options:o.serviceOptions}); %}</td>\
+              </tr>\
+              {% } %}\
+            </table>\
+          </script>\
+          <script>\
+          document.addEventListener('DOMContentLoaded', () => {\
+            var radioRules = document.querySelector('#radioRules');\
+            if (radioRules) {\
+              radioRules.innerHTML = tmpl('radio-rules', {\
+                radioRules: [" + radioRulesJson + "],\
+                serviceOptions: [" + serviceOptionJson + "],\
+                pressOptions: [{ov:'1',ot:'Click'},{ov:'2',ot:'Double Click'},{ov:'3',ot:'Long Press'}],\
+                actionOptions: [{ov:'0',ot:'None'},{ov:'1',ot:'True'},{ov:'2',ot:'False'},{ov:'3',ot:'Toggle'},{ov:'4',ot:'WiFi STA'},{ov:'5',ot:'WiFi STA+AP'},{ov:'6',ot:'WiFi Reset'},{ov:'7',ot:'ESP Restart'}],\
+              });\
+            }\
+          });\
+          </script>\
           <p>\
             <button type=\"submit\" name=\"Submit\" value=\"Add\" class=\"btn\">Add+</button>\
             <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
