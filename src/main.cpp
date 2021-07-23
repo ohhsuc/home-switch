@@ -79,6 +79,7 @@ void onStateChange(const ServiceState& state) {
 }
 
 void setup(void) {
+  LittleFS.begin();
   console.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   ledOn();

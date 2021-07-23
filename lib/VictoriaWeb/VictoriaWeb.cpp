@@ -239,72 +239,67 @@ namespace Victoria::Components {
   // https://arduino-esp8266.readthedocs.io/en/latest/filesystem.html
   void VictoriaWeb::_handleSystem() {
     _dispatchRequestStart();
-    if (LittleFS.begin()) {
-      FSInfo fsInfo;
-      if (LittleFS.info(fsInfo)) {
-        TableModel infoTable = {
-          .header = {},
-          .rows = {
-            { "Total Bytes", String(fsInfo.totalBytes) },
-            { "Used Bytes", String(fsInfo.usedBytes) },
-            { "Max Path Length", String(fsInfo.maxPathLength) },
-            { "Max Open Files", String(fsInfo.maxOpenFiles) },
-            { "Block Size", String(fsInfo.blockSize) },
-            { "Page Size", String(fsInfo.pageSize) },
-          },
-        };
-        TableModel filesTable = {
-          .header = { "File", "Bytes" },
-        };
-        // loop file method 1
-        // std::function<void(File)> loopFile;
-        // loopFile = [&](File file)->void {
-        //   auto next = file.openNextFile();
-        //   file.close();
-        //   if (!next) {
-        //     return;
-        //   }
-        //   if (next.isFile()) {
-        //     auto path = "/" + String(next.fullName());
-        //     auto url = String("/system/file?path=" + GlobalHelpers::urlEncode(path));
-        //     filesTable.rows.push_back({
-        //       "<a href=\"" + url + "\">" + path + "</a>",
-        //       String(next.size()),
-        //     });
-        //   }
-        //   loopFile(next);
-        // };
-        // loopFile(LittleFS.open("/", "r"));
+    FSInfo fsInfo;
+    if (LittleFS.info(fsInfo)) {
+      TableModel infoTable = {
+        .header = {},
+        .rows = {
+          { "Total Bytes", String(fsInfo.totalBytes) },
+          { "Used Bytes", String(fsInfo.usedBytes) },
+          { "Max Path Length", String(fsInfo.maxPathLength) },
+          { "Max Open Files", String(fsInfo.maxOpenFiles) },
+          { "Block Size", String(fsInfo.blockSize) },
+          { "Page Size", String(fsInfo.pageSize) },
+        },
+      };
+      TableModel filesTable = {
+        .header = { "File", "Bytes" },
+      };
+      // loop file method 1
+      // std::function<void(File)> loopFile;
+      // loopFile = [&](File file)->void {
+      //   auto next = file.openNextFile();
+      //   file.close();
+      //   if (!next) {
+      //     return;
+      //   }
+      //   if (next.isFile()) {
+      //     auto path = "/" + String(next.fullName());
+      //     auto url = String("/system/file?path=" + GlobalHelpers::urlEncode(path));
+      //     filesTable.rows.push_back({
+      //       "<a href=\"" + url + "\">" + path + "</a>",
+      //       String(next.size()),
+      //     });
+      //   }
+      //   loopFile(next);
+      // };
+      // loopFile(LittleFS.open("/", "r"));
 
-        // loop file method 2
-        auto dir = LittleFS.openDir("/");
-        while (dir.next()) {
-          if (dir.fileSize()) {
-            auto file = dir.openFile("r");
-            auto path = "/" + String(file.fullName());
-            auto url = String("/system/file?path=" + GlobalHelpers::urlEncode(path));
-            filesTable.rows.push_back({
-              "<a href=\"" + url + "\">" + path + "</a>",
-              String(file.size()),
-            });
-          }
+      // loop file method 2
+      auto dir = LittleFS.openDir("/");
+      while (dir.next()) {
+        if (dir.fileSize()) {
+          auto file = dir.openFile("r");
+          auto path = "/" + String(file.fullName());
+          auto url = String("/system/file?path=" + GlobalHelpers::urlEncode(path));
+          filesTable.rows.push_back({
+            "<a href=\"" + url + "\">" + path + "</a>",
+            String(file.size()),
+          });
         }
-        _send200("\
-          <p><a href=\"/\">&lt; Home</a></p>\
-          <h3>System</h3>\
-          <p>\
-            " + _renderTable(infoTable) + "\
-          </p>\
-          <p>\
-            " + _renderTable(filesTable) + "\
-          </p>\
-        ");
-      } else {
-        console.error("read fs info failed");
       }
-      LittleFS.end();
+      _send200("\
+        <p><a href=\"/\">&lt; Home</a></p>\
+        <h3>System</h3>\
+        <p>\
+          " + _renderTable(infoTable) + "\
+        </p>\
+        <p>\
+          " + _renderTable(filesTable) + "\
+        </p>\
+      ");
     } else {
-      console.error("failed to mount file system");
+      console.error("read fs info failed");
     }
     _dispatchRequestEnd();
   }
@@ -312,48 +307,43 @@ namespace Victoria::Components {
   void VictoriaWeb::_handleSystemFile() {
     _dispatchRequestStart();
     auto path = _server->arg("path");
-    if (LittleFS.begin()) {
-      if (_server->method() == HTTP_POST) {
-        auto submit = _server->arg("Submit");
-        if (submit == "Delete") {
-          LittleFS.remove(path);
-          _redirectTo("/system");
-        } else {
-          auto file = LittleFS.open(path, "w");
-          if (file) {
-            auto content = _server->arg("Content");
-            file.print(content);
-            file.close();
-          }
-          _redirectTo("/system/file?path=" + GlobalHelpers::urlEncode(path));
-        }
+    if (_server->method() == HTTP_POST) {
+      auto submit = _server->arg("Submit");
+      if (submit == "Delete") {
+        LittleFS.remove(path);
+        _redirectTo("/system");
       } else {
-        auto file = LittleFS.open(path, "r");
+        auto file = LittleFS.open(path, "w");
         if (file) {
-          auto size = file.size();
-          auto name = String(file.name());
-          auto content = file.readString();
+          auto content = _server->arg("Content");
+          file.print(content);
           file.close();
-          _send200("\
-            <p><a href=\"/system\">&lt; System</a></p>\
-            <h3>" + name + " " + String(size) + " bytes</h3>\
-            <form method=\"post\">\
-              <p>\
-                <textarea name=\"Content\" cols=\"50\" rows=\"10\">" + content + "</textarea>\
-              </p>\
-              <p>\
-                <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
-                <button type=\"submit\" name=\"Submit\" value=\"Delete\" class=\"btnWeak\" onclick=\"return confirm('Are you sure you want to delete?')\">Delete</button>\
-              </p>\
-            </form>\
-          ");
-        } else {
-          console.error("failed to open file " + path);
         }
+        _redirectTo("/system/file?path=" + GlobalHelpers::urlEncode(path));
       }
-      LittleFS.end();
     } else {
-      console.error("failed to mount file system");
+      auto file = LittleFS.open(path, "r");
+      if (file) {
+        auto size = file.size();
+        auto name = String(file.name());
+        auto content = file.readString();
+        file.close();
+        _send200("\
+          <p><a href=\"/system\">&lt; System</a></p>\
+          <h3>" + name + " " + String(size) + " bytes</h3>\
+          <form method=\"post\">\
+            <p>\
+              <textarea name=\"Content\" cols=\"50\" rows=\"10\">" + content + "</textarea>\
+            </p>\
+            <p>\
+              <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
+              <button type=\"submit\" name=\"Submit\" value=\"Delete\" class=\"btnWeak\" onclick=\"return confirm('Are you sure you want to delete?')\">Delete</button>\
+            </p>\
+          </form>\
+        ");
+      } else {
+        console.error("failed to open file " + path);
+      }
     }
     _dispatchRequestEnd();
   }

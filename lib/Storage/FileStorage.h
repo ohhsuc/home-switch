@@ -33,49 +33,42 @@ namespace Victoria::Components {
   TModel FileStorage<TModel>::load() {
     // default result
     TModel model;
-    // begin
-    if (LittleFS.begin()) {
-      // check exists
-      if (LittleFS.exists(_filePath)) {
-        // open file
-        auto file = LittleFS.open(_filePath, "r");
-        if (file) {
-          // validate size
-          auto size = file.size();
-          // read file
-          // Allocate a buffer to store contents of the file.
-          char buffer[size];
-          // We don't use String here because ArduinoJson library requires the input
-          // buffer to be mutable. If you don't use ArduinoJson, you may as well
-          // use file.readString instead.
-          file.readBytes(buffer, size);
-          // close
-          file.close();
-          // deserialize
-          if (size <= DEFAULT_FILE_SIZE) {
-            DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
-            // StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
-            auto error = deserializeJson(doc, buffer);
-            if (!error) {
-              // convert
-              _deserializeFrom(model, doc);
-            } else {
-              console.error("failed to parse config file");
-              console.error(error.f_str());
-            }
+    // check exists
+    if (LittleFS.exists(_filePath)) {
+      // open file
+      auto file = LittleFS.open(_filePath, "r");
+      if (file) {
+        // validate size
+        auto size = file.size();
+        // read file
+        // Allocate a buffer to store contents of the file.
+        char buffer[size];
+        // We don't use String here because ArduinoJson library requires the input
+        // buffer to be mutable. If you don't use ArduinoJson, you may as well
+        // use file.readString instead.
+        file.readBytes(buffer, size);
+        // close
+        file.close();
+        // deserialize
+        if (size <= DEFAULT_FILE_SIZE) {
+          DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
+          // StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
+          auto error = deserializeJson(doc, buffer);
+          if (!error) {
+            // convert
+            _deserializeFrom(model, doc);
           } else {
-            console.error("config file size is too large");
+            console.error("failed to parse config file");
+            console.error(error.f_str());
           }
         } else {
-          console.error("failed to open config file");
+          console.error("config file size is too large");
         }
       } else {
-        console.error("file notfound " + _filePath);
+        console.error("failed to open config file");
       }
-      // end
-      LittleFS.end();
     } else {
-      console.error("failed to mount file system");
+      console.error("file notfound " + _filePath);
     }
     return model;
   }
@@ -87,23 +80,16 @@ namespace Victoria::Components {
     // StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
     _serializeTo(model, doc);
     auto success = false;
-    // begin
-    if (LittleFS.begin()) {
-      // open file
-      auto file = LittleFS.open(_filePath, "w");
-      if (file) {
-        // write
-        serializeJson(doc, file);
-        // close
-        file.close();
-        success = true;
-      } else {
-        console.error("failed to open config file for writing");
-      }
-      // end
-      LittleFS.end();
+    // open file
+    auto file = LittleFS.open(_filePath, "w");
+    if (file) {
+      // write
+      serializeJson(doc, file);
+      // close
+      file.close();
+      success = true;
     } else {
-      console.error("failed to mount file system");
+      console.error("failed to open config file for writing");
     }
     return success;
   }
