@@ -174,8 +174,7 @@ namespace Victoria::Components {
             <label>Last received " + (hasReceived ? GlobalHelpers::timeSince(lastReceived.timestamp) + " ago" : "-") + "</label>\
             " + _renderTable(receivedTable) + "\
           </p>\
-          <p id=\"radioRules\">\
-          </p>\
+          <p id=\"radioRules\"></p>\
           <script type=\"text/x-tmpl\" id=\"radio-rules\">\
             <table>\
               <tr>\

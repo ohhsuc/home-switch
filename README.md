@@ -1,5 +1,5 @@
-# Victoria
-HomeKit for Victoria 9#
+# Home Victoria
+Apple HomeKit firmware for Victoria 9#
 
 ### Development Tools
 - [Visual Studio Code](https://code.visualstudio.com/)
