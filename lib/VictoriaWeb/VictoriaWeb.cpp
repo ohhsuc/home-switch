@@ -64,6 +64,7 @@ namespace Victoria::Components {
     _server->serveStatic("/fav", LittleFS, "/fav.ico", "max-age=43200");
     _server->serveStatic("/css", LittleFS, "/style.css", "max-age=43200");
     _server->serveStatic("/tmpl", LittleFS, "/tmpl.min.js", "max-age=43200");
+    _server->serveStatic("/tmpl/htm", LittleFS, "/tmpl.htm", "max-age=43200");
     _server->serveStatic("/js", LittleFS, "/app.js", "max-age=43200");
   }
 
@@ -121,13 +122,7 @@ namespace Victoria::Components {
           <script src=\"/js\"></script>\
         </head>\
         <body>\
-          <script type=\"text/x-tmpl\" id=\"html-select\">\
-            <select name=\"{%=o.name%}\">\
-              {% for (var i=0; i<o.options.length; i++) { var opt=o.options[i]; %}\
-              <option value=\"{%=opt.ov%}\"{% if(o.value===opt.ov)print(' selected');%}>{%=opt.ot%}</option>\
-              {% } %}\
-            </select>\
-          </script>\
+          <div id=\"html-tmpl\"></div>\
           <h2 class=\"title\">" + productName + "</h2>\
           <div class=\"main\">\
             " + bodyHtml + "\

@@ -79,8 +79,11 @@ void onStateChange(const ServiceState& state) {
 }
 
 void setup(void) {
-  LittleFS.begin();
   console.begin(115200);
+  if (!LittleFS.begin()) {
+    console.error("LittleFS mount failed");
+  }
+
   pinMode(LED_BUILTIN, OUTPUT);
   ledOn();
 

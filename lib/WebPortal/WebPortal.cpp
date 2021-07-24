@@ -199,7 +199,7 @@ namespace Victoria::Components {
             </table>\
           </script>\
           <script>\
-          document.addEventListener('DOMContentLoaded', () => {\
+          Vic(() => {\
             var radioRules = document.querySelector('#radioRules');\
             if (radioRules) {\
               radioRules.innerHTML = tmpl('radio-rules', {\

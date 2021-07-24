@@ -11,3 +11,4 @@ td { border-bottom: 1px solid #d5e9e9; }
 .title { background: #008184; color: #ffffff; text-align: center; margin: 0; padding: 5px 0; }
 .btn { background-color: #005c5f; border: 1px solid #005c5f; color: #ffffff; border-radius: 5px; padding: 5px 10px; box-shadow: none; }
 .btnWeak { background: none; border: none; padding: 0; color: #00979d; }
+#html-tmpl { display: none; }
