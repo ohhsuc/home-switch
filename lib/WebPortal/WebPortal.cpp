@@ -153,14 +153,14 @@ namespace Victoria::Components {
           { "Protocol", hasReceived ? String(lastReceived.protocol) : "-" },
         },
       };
-      auto serviceOptionJson = String("{ov:'',ot:'None'},");
+      auto serviceOptionJson = String("['','None'],");
       auto serviceModel = serviceStorage.load();
       for (const auto& pair : serviceModel.services) {
-        serviceOptionJson += "{ov:'" + pair.first + "',ot:'" + pair.second.name + "'},";
+        serviceOptionJson += "['" + pair.first + "','" + pair.second.name + "'],";
       }
       auto radioRulesJson = String("");
       for (const auto& rule : model.rules) {
-        radioRulesJson += "{value:'" + String(rule.value) + "',protocol:'" + String(rule.protocol) + "',press:'" + String(rule.press) + "',action:'" + String(rule.action) + "',service:'" + rule.serviceId + "'},";
+        radioRulesJson += "{value:" + String(rule.value) + ",protocol:" + String(rule.protocol) + ",press:" + String(rule.press) + ",action:" + String(rule.action) + ",service:'" + rule.serviceId + "'},";
       }
       _send200("\
         <p><a href=\"/\">&lt; Home</a></p>\
@@ -198,14 +198,14 @@ namespace Victoria::Components {
             </table>\
           </script>\
           <script>\
-          Vic(() => {\
+          vic(() => {\
             var radioRules = document.querySelector('#radioRules');\
             if (radioRules) {\
               radioRules.innerHTML = tmpl('radio-rules', {\
                 radioRules: [" + radioRulesJson + "],\
-                serviceOptions: [" + serviceOptionJson + "],\
-                pressOptions: [{ov:'1',ot:'Click'},{ov:'2',ot:'Double Click'},{ov:'3',ot:'Long Press'}],\
-                actionOptions: [{ov:'0',ot:'None'},{ov:'1',ot:'True'},{ov:'2',ot:'False'},{ov:'3',ot:'Toggle'},{ov:'4',ot:'WiFi STA'},{ov:'5',ot:'WiFi STA+AP'},{ov:'6',ot:'WiFi Reset'},{ov:'7',ot:'ESP Restart'}],\
+                serviceOptions: vic.arr2opts([" + serviceOptionJson + "]),\
+                pressOptions: vic.arr2opts([[1,'Click'],[2,'Double Click'],[3,'Long Press']]),\
+                actionOptions: vic.arr2opts([[0,'None'],[1,'True'],[2,'False'],[3,'Toggle'],[4,'WiFi STA'],[5,'WiFi STA+AP'],[6,'WiFi Reset'],[7,'ESP Restart']]),\
               });\
             }\
           });\

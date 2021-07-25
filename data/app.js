@@ -1,6 +1,6 @@
-(function () {
+(function (win) {
   const _init = [];
-  window.Vic = (fn) => {
+  window.vic = (fn) => {
     _init.push(fn);
   };
   const run = () => {
@@ -11,10 +11,14 @@
         .catch((ex) => console.error(ex));
     }
   };
-  window.addEventListener("DOMContentLoaded", run);
-})();
+  win.addEventListener("DOMContentLoaded", run);
+})(window);
 
-Vic(() => {
+Object.assign(vic, {
+  arr2opts: (items) => items.map((x) => ({ value: x[0], text: x[1] })),
+});
+
+vic(() => {
   document.querySelectorAll(".confirm").forEach((element) => {
     element.addEventListener("click", (ev) => {
       if (!confirm("Are you sure you want to do it?")) {
@@ -24,7 +28,7 @@ Vic(() => {
   });
 });
 
-Vic(() => {
+vic(() => {
   return fetch("/tmpl/htm")
     .then((res) => res.text())
     .then((tmpl) => {
