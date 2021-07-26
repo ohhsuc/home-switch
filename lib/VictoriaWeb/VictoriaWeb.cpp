@@ -62,10 +62,10 @@ namespace Victoria::Components {
     _server->on("/reset", HTTP_OPTIONS, std::bind(&VictoriaWeb::_handleCrossOrigin, this));
     _server->on("/reset", HTTP_ANY, std::bind(&VictoriaWeb::_handleReset, this));
     _server->serveStatic("/fav", LittleFS, "/fav.ico", "max-age=43200");
-    _server->serveStatic("/css", LittleFS, "/style.css", "max-age=43200");
+    _server->serveStatic("/css", LittleFS, "/style.css");
     _server->serveStatic("/tmpl", LittleFS, "/tmpl.min.js", "max-age=43200");
-    _server->serveStatic("/tmpl/htm", LittleFS, "/tmpl.htm", "max-age=43200");
-    _server->serveStatic("/js", LittleFS, "/app.js", "max-age=43200");
+    _server->serveStatic("/tmpl/htm", LittleFS, "/tmpl.htm");
+    _server->serveStatic("/js", LittleFS, "/app.js");
   }
 
   String VictoriaWeb::getHostName(bool includeVersion = false) {

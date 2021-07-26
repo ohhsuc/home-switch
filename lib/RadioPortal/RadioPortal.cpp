@@ -15,28 +15,32 @@ namespace Victoria::Components {
     auto model = radioStorage.load();
     if (model.inputPin > -1) {
       pinMode(model.inputPin, INPUT);
-      _rf = new RCSwitch();
-      _rf->enableReceive(model.inputPin);
+      // ESP8266 or ESP32: do not use pin 11 or 2
+      _rf = new RH_ASK(2000, model.inputPin);
+      if (!_rf->init()) {
+        console.error("[RadioHead] init failed");
+      }
     }
   }
 
   void RadioPortal::loop() {
     auto now = millis();
-    if (
-      now - _lastAvailable > AVAILABLE_THROTTLE_TIMESPAN &&
-      _rf && _rf->available()
-    ) {
+    uint8_t buf[RH_ASK_MAX_MESSAGE_LEN];
+    uint8_t bufLength = sizeof(buf);
+    if (_rf->recv(buf, &bufLength)) {
       // payload
-      unsigned long value = _rf->getReceivedValue();
-      unsigned int bits = _rf->getReceivedBitlength();
-      unsigned int protocol = _rf->getReceivedProtocol();
+      auto value = String((char*)buf);
+      value = value.substring(0, bufLength);
       // message
       RadioMessage message = {
         .value = value,
-        .bits = bits,
-        .protocol = protocol,
+        .channel = 1,
         .timestamp = now,
       };
+      // log
+      auto received = String(message.channel) + "/" + message.value;
+      console.log("[RadioPortal] > received " + received);
+      // press
       if (now - _lastMessage.timestamp > RESET_PRESS_TIMESPAN) {
         RadioMessage empty {};
         _lastMessage = empty;
@@ -44,7 +48,7 @@ namespace Victoria::Components {
       }
       if (
         _lastPressState != PressStateClick &&
-        (_lastMessage.value != message.value || _lastMessage.protocol != message.protocol)
+        (_lastMessage.value != message.value || _lastMessage.channel != message.channel)
       ) {
         _handleMessage(message, PressStateClick);
       } else if (
@@ -59,26 +63,22 @@ namespace Victoria::Components {
       ) {
         _handleMessage(_lastMessage, PressStateLongPress);
       }
-      // reset state
-      _rf->resetAvailable();
-      _lastAvailable = now;
+      // broadcase state
       radioStorage.broadcast(message);
     }
   }
 
   void RadioPortal::_handleMessage(const RadioMessage& message, RadioPressState press) {
-    // logs
-    auto received = String(message.protocol) + "/" + String(message.value) + "/" + String(message.bits) + "bits press " + String(press);
-    console.log("[RadioPortal] received " + received);
     // log states
     _lastMessage = message;
     _lastPressState = press;
+    console.log("[RadioPortal] > press " + String(press));
     // check rules
     auto model = radioStorage.load();
     for (const auto& rule : model.rules) {
       if (
         rule.value == message.value &&
-        rule.protocol == message.protocol &&
+        rule.channel == message.channel &&
         rule.press == press
       ) {
         _proceedAction(rule);

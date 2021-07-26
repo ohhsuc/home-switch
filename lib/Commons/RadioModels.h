@@ -7,9 +7,8 @@
 namespace Victoria {
 
   struct RadioMessage {
-    unsigned long value = 0;
-    unsigned int bits = 0;
-    unsigned int protocol = 0;
+    String value;
+    unsigned int channel = 0;
     unsigned long timestamp = 0;
   };
 
@@ -32,8 +31,8 @@ namespace Victoria {
   };
 
   struct RadioRule {
-    unsigned long value = 0;
-    unsigned int protocol = 0;
+    String value;
+    unsigned int channel = 0;
     RadioPressState press = PressStateClick;
     RadioAction action = RadioActionNone;
     String serviceId;

@@ -21,7 +21,7 @@ namespace Victoria::Components {
     for (const auto& rule : model.rules) {
       JsonArray item = items.createNestedArray();
       item[0] = rule.value;
-      item[1] = rule.protocol;
+      item[1] = rule.channel;
       item[2] = rule.press;
       item[3] = rule.action;
       item[4] = rule.serviceId;
@@ -35,7 +35,7 @@ namespace Victoria::Components {
       auto item = items[i];
       RadioRule rule = {
         .value = item[0],
-        .protocol = item[1],
+        .channel = item[1],
         .press = item[2],
         .action = item[3],
         .serviceId = item[4],

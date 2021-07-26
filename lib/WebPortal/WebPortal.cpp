@@ -89,7 +89,7 @@ namespace Victoria::Components {
         auto lastReceived = radioStorage.getLastReceived();
         model.rules.push_back({
           .value = lastReceived.value,
-          .protocol = lastReceived.protocol,
+          .channel = lastReceived.channel,
           .press = PressStateClick,
           .action = RadioActionNone,
           .serviceId = "",
@@ -110,7 +110,7 @@ namespace Victoria::Components {
         model.inputPin = inputPin.toInt();
         // rules
         std::vector<String> values;
-        std::vector<String> protocols;
+        std::vector<String> channels;
         std::vector<String> pressIds;
         std::vector<String> actionIds;
         std::vector<String> serviceIds;
@@ -119,8 +119,8 @@ namespace Victoria::Components {
           auto argName = _server->argName(i);
           if (argName == "Value") {
             values.push_back(argValue);
-          } else if (argName == "Protocol") {
-            protocols.push_back(argValue);
+          } else if (argName == "Channel") {
+            channels.push_back(argValue);
           } else if(argName == "PressId") {
             pressIds.push_back(argValue);
           } else if (argName == "ActionId") {
@@ -132,8 +132,8 @@ namespace Victoria::Components {
         model.rules.clear();
         for (size_t i = 0; i < values.size(); i++) {
           model.rules.push_back({
-            .value = strtoul(values[i].c_str(), NULL, 10),
-            .protocol = strtoul(protocols[i].c_str(), NULL, 10),
+            .value = values[i],
+            .channel = strtoul(channels[i].c_str(), NULL, 10),
             .press = RadioPressState(pressIds[i].toInt()),
             .action = RadioAction(actionIds[i].toInt()),
             .serviceId = serviceIds[i],
@@ -144,13 +144,12 @@ namespace Victoria::Components {
       _redirectTo(_server->uri());
     } else {
       auto lastReceived = radioStorage.getLastReceived();
-      auto hasReceived = lastReceived.value > 0;
+      auto hasReceived = lastReceived.value.length() > 0;
       TableModel receivedTable = {
         .header = {},
         .rows = {
-          { "Value", hasReceived ? String(lastReceived.value) : "-" },
-          { "Bits", hasReceived ? String(lastReceived.bits) : "-" },
-          { "Protocol", hasReceived ? String(lastReceived.protocol) : "-" },
+          { "Value", hasReceived ? lastReceived.value : "-" },
+          { "Channel", hasReceived ? String(lastReceived.channel) : "-" },
         },
       };
       auto serviceOptionJson = String("['','None'],");
@@ -160,7 +159,7 @@ namespace Victoria::Components {
       }
       auto radioRulesJson = String("");
       for (const auto& rule : model.rules) {
-        radioRulesJson += "{value:" + String(rule.value) + ",protocol:" + String(rule.protocol) + ",press:" + String(rule.press) + ",action:" + String(rule.action) + ",service:'" + rule.serviceId + "'},";
+        radioRulesJson += "{value:'" + rule.value + "',channel:" + String(rule.channel) + ",press:" + String(rule.press) + ",action:" + String(rule.action) + ",service:'" + rule.serviceId + "'},";
       }
       _send200("\
         <p><a href=\"/\">&lt; Home</a></p>\
@@ -180,7 +179,7 @@ namespace Victoria::Components {
               <tr>\
                 <th class=\"lt\">Rule</th>\
                 <th class=\"lt\">Value</th>\
-                <th class=\"lt\">Protocol</th>\
+                <th class=\"lt\">Channel</th>\
                 <th class=\"lt\">Press</th>\
                 <th class=\"lt\">Action</th>\
                 <th class=\"lt\">Service</th>\
@@ -188,8 +187,8 @@ namespace Victoria::Components {
               {% for (var i=0; i<o.radioRules.length; i++) { var rule=o.radioRules[i]; %}\
               <tr>\
                 <td><button type=\"submit\" name=\"Submit\" value=\"Remove{%=i%}\" class=\"btn confirm\">Remove</button></td>\
-                <td><input type=\"number\" name=\"Value\" min=\"-1\" max=\"99999999\" value=\"{%=rule.value%}\" /></td>\
-                <td><input type=\"number\" name=\"Protocol\" min=\"-1\" max=\"100\" value=\"{%=rule.protocol%}\" /></td>\
+                <td><input type=\"text\" name=\"Value\" value=\"{%=rule.value%}\" maxlength=\"60\" /></td>\
+                <td><input type=\"number\" name=\"Channel\" min=\"-1\" max=\"100\" value=\"{%=rule.channel%}\" /></td>\
                 <td>{% include('html-select',{name:'PressId',value:rule.press,options:o.pressOptions}); %}</td>\
                 <td>{% include('html-select',{name:'ActionId',value:rule.action,options:o.actionOptions}); %}</td>\
                 <td>{% include('html-select',{name:'ServiceId',value:rule.service,options:o.serviceOptions}); %}</td>\
