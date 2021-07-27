@@ -77,7 +77,11 @@ namespace Victoria::Components {
     auto version = String(FirmwareVersion);
     version.replace(".", "");
 
-    auto productName = FirmwareName;
+    auto model = appStorage.load();
+    auto productName = model.name.length() > 0
+      ? model.name
+      : FirmwareName;
+
     auto hostName = includeVersion
       ? productName + "-" + id + "-" + version
       : productName + "-" + id;

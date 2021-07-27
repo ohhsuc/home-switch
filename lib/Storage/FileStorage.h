@@ -22,6 +22,7 @@ namespace Victoria::Components {
 
    protected:
     String _filePath;
+    size_t _maxSize = DEFAULT_FILE_SIZE;
     virtual void _serializeTo(const TModel& model, DynamicJsonDocument& doc);
     virtual void _deserializeFrom(TModel& model, const DynamicJsonDocument& doc);
   };
@@ -50,8 +51,8 @@ namespace Victoria::Components {
         // close
         file.close();
         // deserialize
-        if (size <= DEFAULT_FILE_SIZE) {
-          DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
+        if (size <= _maxSize) {
+          DynamicJsonDocument doc(_maxSize); // Store data in the heap - Dynamic Memory Allocation
           // StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
           auto error = deserializeJson(doc, buffer);
           if (!error) {
@@ -76,7 +77,7 @@ namespace Victoria::Components {
   template <class TModel>
   bool FileStorage<TModel>::save(const TModel& model) {
     // convert
-    DynamicJsonDocument doc(DEFAULT_FILE_SIZE); // Store data in the heap - Dynamic Memory Allocation
+    DynamicJsonDocument doc(_maxSize); // Store data in the heap - Dynamic Memory Allocation
     // StaticJsonDocument<DEFAULT_FILE_SIZE> doc; // Store data in the stack - Fixed Memory Allocation
     _serializeTo(model, doc);
     auto success = false;
