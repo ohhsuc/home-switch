@@ -11,6 +11,10 @@ namespace Victoria::Components {
     VictoriaWeb::_registerHandlers();
     _server->on("/radio", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
     _server->on("/radio", HTTP_ANY, std::bind(&WebPortal::_handleRadio, this));
+    _server->on("/radio/rule", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
+    _server->on("/radio/rule", HTTP_ANY, std::bind(&WebPortal::_handleRadioRule, this));
+    _server->on("/radio/command", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
+    _server->on("/radio/command", HTTP_ANY, std::bind(&WebPortal::_handleRadioCommand, this));
     _server->on("/service/new", HTTP_GET, std::bind(&WebPortal::_handleNewService, this));
     _server->on("/service", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
     _server->on("/service", HTTP_ANY, std::bind(&WebPortal::_handleService, this));
@@ -84,6 +88,49 @@ namespace Victoria::Components {
     _dispatchRequestStart();
     auto model = radioStorage.load();
     if (_server->method() == HTTP_POST) {
+      auto inputPin = _server->arg("InputPin");
+      model.inputPin = inputPin.toInt();
+      radioStorage.save(model);
+      _redirectTo(_server->uri());
+    } else {
+      auto lastReceived = radioStorage.getLastReceived();
+      auto hasReceived = lastReceived.value.length() > 0;
+      TableModel receivedTable = {
+        .header = {},
+        .rows = {
+          { "Value", hasReceived ? lastReceived.value : "-" },
+          { "Channel", hasReceived ? String(lastReceived.channel) : "-" },
+        },
+      };
+      _send200("\
+        <p>\
+          <a href=\"/\">&lt; Home</a> |\
+          <a href=\"/radio/rule\">Rules</a> |\
+          <a href=\"/radio/command\">Commands</a>\
+        </p>\
+        <h3>Radio</h3>\
+        <form method=\"post\">\
+          <p>\
+            <label>Last received " + (hasReceived ? GlobalHelpers::timeSince(lastReceived.timestamp) + " ago" : "-") + "</label>\
+            " + _renderTable(receivedTable) + "\
+          </p>\
+          <p>\
+            <label for=\"txtInputPin\">Input Pin</label>\
+            <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" min=\"-1\" max=\"100\" value=\"" + String(model.inputPin) + "\" />\
+          </p>\
+          <p>\
+            <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
+          </p>\
+        </form>\
+      ");
+    }
+    _dispatchRequestEnd();
+  }
+
+  void WebPortal::_handleRadioRule() {
+    _dispatchRequestStart();
+    auto model = radioStorage.load();
+    if (_server->method() == HTTP_POST) {
       auto submit = _server->arg("Submit");
       if (submit == "Add") {
         auto lastReceived = radioStorage.getLastReceived();
@@ -97,18 +144,14 @@ namespace Victoria::Components {
       } else if (submit.startsWith("Remove")) {
         submit.remove(0, 6);
         int removeIndex = submit.toInt();
-        int ruleIndex = -1;
+        int loopIndex = -1;
         for (auto it = model.rules.begin(); it != model.rules.end(); it++) {
-          if (++ruleIndex == removeIndex) {
+          if (++loopIndex == removeIndex) {
             model.rules.erase(it);
             break;
           }
         }
       } else {
-        // pin
-        auto inputPin = _server->arg("InputPin");
-        model.inputPin = inputPin.toInt();
-        // rules
         std::vector<String> values;
         std::vector<String> channels;
         std::vector<String> pressIds;
@@ -143,41 +186,24 @@ namespace Victoria::Components {
       radioStorage.save(model);
       _redirectTo(_server->uri());
     } else {
-      auto lastReceived = radioStorage.getLastReceived();
-      auto hasReceived = lastReceived.value.length() > 0;
-      TableModel receivedTable = {
-        .header = {},
-        .rows = {
-          { "Value", hasReceived ? lastReceived.value : "-" },
-          { "Channel", hasReceived ? String(lastReceived.channel) : "-" },
-        },
-      };
       auto serviceOptionJson = String("['','None'],");
       auto serviceModel = serviceStorage.load();
       for (const auto& pair : serviceModel.services) {
         serviceOptionJson += "['" + pair.first + "','" + pair.second.name + "'],";
       }
-      auto radioRulesJson = String("");
+      auto radioCommandsJson = String("");
       for (const auto& rule : model.rules) {
-        radioRulesJson += "{value:'" + rule.value + "',channel:" + String(rule.channel) + ",press:" + String(rule.press) + ",action:" + String(rule.action) + ",service:'" + rule.serviceId + "'},";
+        radioCommandsJson += "{value:'" + rule.value + "',channel:" + String(rule.channel) + ",press:" + String(rule.press) + ",action:" + String(rule.action) + ",service:'" + rule.serviceId + "'},";
       }
       _send200("\
-        <p><a href=\"/\">&lt; Home</a></p>\
-        <h3>Radio</h3>\
+        <p><a href=\"/radio\">&lt; Radio</a></p>\
+        <h3>Radio Rules</h3>\
         <form method=\"post\">\
-          <p>\
-            <label for=\"txtInputPin\">Input Pin</label>\
-            <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" min=\"-1\" max=\"100\" value=\"" + String(model.inputPin) + "\" />\
-          </p>\
-          <p>\
-            <label>Last received " + (hasReceived ? GlobalHelpers::timeSince(lastReceived.timestamp) + " ago" : "-") + "</label>\
-            " + _renderTable(receivedTable) + "\
-          </p>\
           <p id=\"radioRules\"></p>\
           <script type=\"text/x-tmpl\" id=\"radio-rules\">\
             <table>\
               <tr>\
-                <th class=\"lt\">Rule</th>\
+                <th class=\"lt\"></th>\
                 <th class=\"lt\">Value</th>\
                 <th class=\"lt\">Channel</th>\
                 <th class=\"lt\">Press</th>\
@@ -187,7 +213,7 @@ namespace Victoria::Components {
               {% for (var i=0; i<o.radioRules.length; i++) { var rule=o.radioRules[i]; %}\
               <tr>\
                 <td><button type=\"submit\" name=\"Submit\" value=\"Remove{%=i%}\" class=\"btn confirm\">Remove</button></td>\
-                <td><input type=\"text\" name=\"Value\" value=\"{%=rule.value%}\" maxlength=\"60\" /></td>\
+                <td><input type=\"text\" name=\"Value\" value=\"{%=rule.value%}\" maxlength=\"8\" /></td>\
                 <td><input type=\"number\" name=\"Channel\" min=\"-1\" max=\"100\" value=\"{%=rule.channel%}\" /></td>\
                 <td>{% include('html-select',{name:'PressId',value:rule.press,options:o.pressOptions}); %}</td>\
                 <td>{% include('html-select',{name:'ActionId',value:rule.action,options:o.actionOptions}); %}</td>\
@@ -201,10 +227,118 @@ namespace Victoria::Components {
             var radioRules = document.querySelector('#radioRules');\
             if (radioRules) {\
               radioRules.innerHTML = tmpl('radio-rules', {\
-                radioRules: [" + radioRulesJson + "],\
+                radioRules: [" + radioCommandsJson + "],\
                 serviceOptions: vic.arr2opts([" + serviceOptionJson + "]),\
                 pressOptions: vic.arr2opts([[1,'Click'],[2,'Double Click'],[3,'Long Press']]),\
                 actionOptions: vic.arr2opts([[0,'None'],[1,'True'],[2,'False'],[3,'Toggle'],[4,'WiFi STA'],[5,'WiFi STA+AP'],[6,'WiFi Reset'],[7,'ESP Restart']]),\
+              });\
+            }\
+          });\
+          </script>\
+          <p>\
+            <button type=\"submit\" name=\"Submit\" value=\"Add\" class=\"btn\">Add+</button>\
+            <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
+          </p>\
+        </form>\
+      ");
+    }
+    _dispatchRequestEnd();
+  }
+
+  void WebPortal::_handleRadioCommand() {
+    _dispatchRequestStart();
+    auto model = radioStorage.load();
+    if (_server->method() == HTTP_POST) {
+      auto submit = _server->arg("Submit");
+      if (submit == "Add") {
+        model.commands.push_back({
+          .entry = EntryNone,
+          .action = -1,
+          .press = PressStateClick,
+          .serviceId = "",
+        });
+      } else if (submit.startsWith("Remove")) {
+        submit.remove(0, 6);
+        int removeIndex = submit.toInt();
+        int loopIndex = -1;
+        for (auto it = model.commands.begin(); it != model.commands.end(); it++) {
+          if (++loopIndex == removeIndex) {
+            model.commands.erase(it);
+            break;
+          }
+        }
+      } else {
+        std::vector<String> entryIds;
+        std::vector<String> actionIds;
+        std::vector<String> pressIds;
+        std::vector<String> serviceIds;
+        for (uint8_t i = 0; i < _server->args(); i++) {
+          auto argValue = _server->arg(i);
+          auto argName = _server->argName(i);
+          if (argName == "EntryIdActionId") {
+            auto idParts = GlobalHelpers::splitString(argValue, "-");
+            entryIds.push_back(idParts[0]);
+            actionIds.push_back(idParts[1]);
+          } else if(argName == "PressId") {
+            pressIds.push_back(argValue);
+          } else if (argName == "ServiceId") {
+            serviceIds.push_back(argValue);
+          }
+        }
+        model.commands.clear();
+        for (size_t i = 0; i < entryIds.size(); i++) {
+          model.commands.push_back({
+            .entry = RadioCommandEntry(entryIds[i].toInt()),
+            .action = actionIds[i].toInt(),
+            .press = RadioPressState(pressIds[i].toInt()),
+            .serviceId = serviceIds[i],
+          });
+        }
+      }
+      radioStorage.save(model);
+      _redirectTo(_server->uri());
+    } else {
+      auto serviceOptionJson = String("['','None'],");
+      auto serviceModel = serviceStorage.load();
+      for (const auto& pair : serviceModel.services) {
+        serviceOptionJson += "['" + pair.first + "','" + pair.second.name + "'],";
+      }
+      auto radioCommandsJson = String("");
+      for (const auto& command : model.commands) {
+        radioCommandsJson += "{entry:" + String(command.entry) + ",action:" + String(command.action) + ",press:" + String(command.press) + ",service:'" + command.serviceId + "'},";
+      }
+      _send200("\
+        <p><a href=\"/radio\">&lt; Radio</a></p>\
+        <h3>Radio Commands</h3>\
+        <form method=\"post\">\
+          <p id=\"radioCommands\"></p>\
+          <script type=\"text/x-tmpl\" id=\"radio-commands\">\
+            <table>\
+              <tr>\
+                <th class=\"lt\"></th>\
+                <th class=\"lt\">Entry</th>\
+                <th class=\"lt\">Press</th>\
+                <th class=\"lt\">Service</th>\
+              </tr>\
+              {% for (var i=0; i<o.radioCommands.length; i++) { var command=o.radioCommands[i]; %}\
+              <tr>\
+                <td><button type=\"submit\" name=\"Submit\" value=\"Remove{%=i%}\" class=\"btn confirm\">Remove</button></td>\
+                <td>{% include('html-select',{name:'EntryIdActionId',value:command.entry+'-'+command.action,options:o.entryActionOptions}); %}</td>\
+                <td>{% include('html-select',{name:'PressId',value:command.press,options:o.pressOptions}); %}</td>\
+                <td>{% include('html-select',{name:'ServiceId',value:command.service,options:o.serviceOptions}); %}</td>\
+              </tr>\
+              {% } %}\
+            </table>\
+          </script>\
+          <script>\
+          vic(() => {\
+            var radioCommands = document.querySelector('#radioCommands');\
+            if (radioCommands) {\
+              radioCommands.innerHTML = tmpl('radio-commands', {\
+                radioCommands: [" + radioCommandsJson + "],\
+                serviceOptions: vic.arr2opts([" + serviceOptionJson + "]),\
+                entryActionOptions: vic.arr2opts([['0-0','None'],['1-1','wifi-join'],['1-2','wifi-mode'],['1-3','wifi-reset'],['2-1','app-name'],['3-1','esp-restart'],['4-1','boolean-set']]),\
+                pressOptions: vic.arr2opts([[1,'Click'],[2,'Double Click'],[3,'Long Press']]),\
               });\
             }\
           });\

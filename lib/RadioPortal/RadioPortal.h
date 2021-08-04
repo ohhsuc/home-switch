@@ -5,6 +5,7 @@
 #include <ESP8266WiFi.h>
 #include <RH_ASK.h>
 #include "Commons.h"
+#include "AppStorage.h"
 #include "RadioStorage.h"
 
 // timespan in millianseconds
@@ -15,14 +16,18 @@
 
 namespace Victoria::Components {
   class RadioPortal {
+    typedef std::function<void(const RadioMessage&)> TRadioMessage;
     typedef std::function<void(const RadioRule&)> TRadioAction;
+    typedef std::function<void(const RadioCommandParsed&)> TRadioCommand;
 
    public:
     RadioPortal();
     ~RadioPortal();
     void setup();
     void loop();
+    TRadioMessage onMessage;
     TRadioAction onAction;
+    TRadioCommand onCommand;
 
    private:
     RH_ASK* _rf = NULL;
@@ -30,6 +35,8 @@ namespace Victoria::Components {
     RadioPressState _lastPressState = PressStateAwait;
     void _handleMessage(const RadioMessage& message, RadioPressState press);
     void _proceedAction(const RadioRule& rule);
+    void _proceedCommand(const RadioCommandParsed& command);
+    static RadioCommandParsed _parseCommand(const RadioMessage& message);
   };
 } // namespace Victoria::Components
 

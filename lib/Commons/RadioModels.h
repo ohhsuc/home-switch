@@ -38,9 +38,51 @@ namespace Victoria {
     String serviceId;
   };
 
+  enum RadioCommandEntry {
+    EntryNone = 0,
+    EntryWifi = 1,
+    EntryApp = 2,
+    EntryEsp = 3,
+    EntryBoolean = 4,
+  };
+
+  enum EntryWifiAction {
+    EntryWifiNone = 0,
+    EntryWifiJoin = 1, // parameter: {ssid}/{password}
+    EntryWifiMode = 2, // parameter: {off},{sta},{a}p,{ap-sta}
+    EntryWifiReset = 3, // parameter: NONE
+  };
+
+  enum EntryAppAction {
+    EntryAppNone = 0,
+    EntryAppName = 1, // parameter: {name}
+  };
+
+  enum EntryEspAction {
+    EntryEspNone = 0,
+    EntryEspRestart = 1, // parameter: NONE
+  };
+
+  enum EntryBooleanAction {
+    EntryBooleanNone = 0,
+    EntryBooleanSet = 1, // parameter: {true},{false},{toggle}
+  };
+
+  struct RadioCommand {
+    RadioCommandEntry entry = EntryNone;
+    int action = -1;
+    RadioPressState press = PressStateClick;
+    String serviceId;
+  };
+
+  struct RadioCommandParsed :RadioCommand {
+    String parameters;
+  };
+
   struct RadioModel {
     int inputPin = -1;
     std::vector<RadioRule> rules;
+    std::vector<RadioCommand> commands;
   };
 
 } // namespace Victoria

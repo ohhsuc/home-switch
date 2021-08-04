@@ -43,19 +43,19 @@ void setServiceState(const String& serviceId, const ServiceSetting& setting, Ser
   }
 }
 
-void setSwitchAction(const String& serviceId, const RadioAction& radioAction) {
+void setSwitchAction(const String& serviceId, const int& action) {
   auto service = HomeKitMain::findServiceById(serviceId);
   if (service) {
     auto state = service->getState();
-    switch (radioAction) {
-      case RadioActionToggle:
-        state.boolValue = !state.boolValue;
+    switch (action) {
+      case 0:
+        state.boolValue = false;
         break;
-      case RadioActionTrue:
+      case 1:
         state.boolValue = true;
         break;
-      case RadioActionFalse:
-        state.boolValue = false;
+      case 2:
+        state.boolValue = !state.boolValue;
         break;
       default:
         break;
@@ -66,7 +66,19 @@ void setSwitchAction(const String& serviceId, const RadioAction& radioAction) {
 
 void setRadioAction(const RadioRule& rule) {
   if (rule.serviceId) {
-    setSwitchAction(rule.serviceId, rule.action);
+    int action = rule.action == RadioActionFalse ? 0
+      : rule.action == RadioActionTrue ? 1
+      : rule.action == RadioActionToggle ? 2 : -1;
+    setSwitchAction(rule.serviceId, action);
+  }
+}
+
+void setRadioCommand(const RadioCommandParsed& command) {
+  if (command.serviceId && command.entry == EntryBoolean && command.action == EntryBooleanSet) {
+    int action = command.parameters == "false" ? 0
+      : command.parameters == "true" ? 1
+      : command.parameters == "toggle" ? 2 : -1;
+    setSwitchAction(command.serviceId, action);
   }
 }
 
@@ -95,7 +107,12 @@ void setup(void) {
   webPortal.onResetAccessory = []() { HomeKitMain::reset(); };
   webPortal.setup();
 
+  radioPortal.onMessage = [](const RadioMessage& message) {
+    console.log("[Radio] > received [" + message.value + "] from channel [" + String(message.channel) + "]");
+    ledOn(); ledOff();
+  };
   radioPortal.onAction = setRadioAction;
+  radioPortal.onCommand = setRadioCommand;
   radioPortal.setup();
 
   timesTrigger.onTimesOut = []() { console.log("times out!"); };

@@ -1,6 +1,7 @@
 #ifndef SystemHelpers_h
 #define SystemHelpers_h
 
+#include <vector>
 #include <Arduino.h>
 
 namespace Victoria {
@@ -20,6 +21,22 @@ namespace Victoria {
         generated++;
       }
       return result;
+    }
+
+    static std::vector<String> splitString(const String& str, const String& delimiter) {
+      std::vector<String> parts;
+      auto delimiterLength = delimiter.length();
+      auto searchFrom = 0;
+      while (true) {
+        auto index = str.indexOf(delimiter, searchFrom);
+        if (index == -1) {
+          parts.push_back(str.substring(searchFrom));
+          break;
+        }
+        parts.push_back(str.substring(searchFrom, index));
+        searchFrom = index + delimiterLength;
+      }
+      return parts;
     }
 
     static String timeSince(unsigned long timestamp) {

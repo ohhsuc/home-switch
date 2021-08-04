@@ -32,6 +32,8 @@ namespace Victoria::Components {
     void _deleteService(const String& serviceId, const ServiceSetting& service);
     String _appendHomeBody() override;
     void _handleRadio();
+    void _handleRadioRule();
+    void _handleRadioCommand();
     void _handleNewService();
     void _handleService();
     void _handleServiceState();
