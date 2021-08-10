@@ -524,23 +524,29 @@ namespace Victoria::Components {
 
   void VictoriaWeb::_onWifiEvent(WiFiEvent_t event) {
     switch (event) {
-      case WiFiEvent::WIFI_EVENT_STAMODE_CONNECTED:
+      case WiFiEvent::WIFI_EVENT_STAMODE_CONNECTED: {
         console.log("[Wifi] event > STA connected");
         break;
-      case WiFiEvent::WIFI_EVENT_STAMODE_DISCONNECTED:
+      }
+      case WiFiEvent::WIFI_EVENT_STAMODE_DISCONNECTED: {
         console.log("[Wifi] event > STA disconnected");
         break;
-      case WiFiEvent::WIFI_EVENT_STAMODE_GOT_IP:
+      }
+      case WiFiEvent::WIFI_EVENT_STAMODE_GOT_IP: {
         console.log("[Wifi] event > STA got ip");
         break;
-      case WiFiEvent::WIFI_EVENT_SOFTAPMODE_STACONNECTED:
+      }
+      case WiFiEvent::WIFI_EVENT_SOFTAPMODE_STACONNECTED: {
         console.log("[Wifi] event > AP connected");
         break;
-      case WiFiEvent::WIFI_EVENT_SOFTAPMODE_STADISCONNECTED:
+      }
+      case WiFiEvent::WIFI_EVENT_SOFTAPMODE_STADISCONNECTED: {
         console.log("[Wifi] event > AP disconnected");
         break;
-      default:
+      }
+      default: {
         break;
+      }
     }
   }
 

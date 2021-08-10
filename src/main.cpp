@@ -48,17 +48,21 @@ void setSwitchAction(const String& serviceId, const int& action) {
   if (service) {
     auto state = service->getState();
     switch (action) {
-      case 0:
+      case 0: {
         state.boolValue = false;
         break;
-      case 1:
+      }
+      case 1: {
         state.boolValue = true;
         break;
-      case 2:
+      }
+      case 2: {
         state.boolValue = !state.boolValue;
         break;
-      default:
+      }
+      default: {
         break;
+      }
     }
     service->setState(state);
   }
@@ -108,7 +112,7 @@ void setup(void) {
   webPortal.setup();
 
   radioPortal.onMessage = [](const RadioMessage& message) {
-    console.log("[Radio] > received [" + message.value + "] from channel [" + String(message.channel) + "]");
+    console.log("[Radio] > received [" + message.id + "!" + message.value + "] from channel [" + String(message.channel) + "]");
     ledOn(); ledOff();
   };
   radioPortal.onAction = setRadioAction;

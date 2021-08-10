@@ -24,21 +24,31 @@ namespace Victoria::Components {
   }
 
   void RadioPortal::loop() {
-    auto now = millis();
     uint8_t buf[RH_ASK_MAX_MESSAGE_LEN];
     uint8_t bufLength = sizeof(buf);
     if (_rf->recv(buf, &bufLength)) {
       // payload
       auto value = String((char*)buf);
       value = value.substring(0, bufLength);
+      // read id
+      auto id = String("none");
+      if (value.indexOf("!") == 4) {
+        id = value.substring(0, 4);
+        value = value.substring(5);
+      }
       // message
       RadioMessage message = {
+        .id = id,
         .value = value,
         .channel = 1,
-        .timestamp = now,
+        .timestamp = millis(),
       };
       // press
-      if (now - _lastMessage.timestamp > RESET_PRESS_TIMESPAN) {
+      auto timespan = message.timestamp - _lastMessage.timestamp;
+      if (
+        _lastMessage.id != message.id  ||
+        timespan > RESET_PRESS_TIMESPAN
+      ) {
         RadioMessage empty {};
         _lastMessage = empty;
         _lastPressState = PressStateAwait;
@@ -50,13 +60,13 @@ namespace Victoria::Components {
         _handleMessage(message, PressStateClick);
       } else if (
         _lastPressState != PressStateDoubleClick &&
-        now - _lastMessage.timestamp >= DOUBLE_CLICK_TIMESPAN_FROM &&
-        now - _lastMessage.timestamp < DOUBLE_CLICK_TIMESPAN_TO
+        timespan >= DOUBLE_CLICK_TIMESPAN_FROM &&
+        timespan < DOUBLE_CLICK_TIMESPAN_TO
       ) {
         _handleMessage(_lastMessage, PressStateDoubleClick);
       } else if (
         _lastPressState != PressStateLongPress &&
-        (now - _lastMessage.timestamp >= LONG_PRESS_TIMESPAN)
+        (timespan >= LONG_PRESS_TIMESPAN)
       ) {
         _handleMessage(_lastMessage, PressStateLongPress);
       }
@@ -100,20 +110,25 @@ namespace Victoria::Components {
 
   void RadioPortal::_proceedAction(const RadioRule& rule) {
     switch (rule.action) {
-      case RadioActionWiFiSta:
+      case RadioActionWiFiSta: {
         WiFi.mode(WIFI_STA);
         break;
-      case RadioActionWiFiStaAp:
+      }
+      case RadioActionWiFiStaAp: {
         WiFi.mode(WIFI_AP_STA);
         break;
-      case RadioActionWiFiReset:
+      }
+      case RadioActionWiFiReset: {
         WiFi.disconnect(true);
         break;
-      case RadioActionEspRestart:
+      }
+      case RadioActionEspRestart: {
         ESP.restart();
         break;
-      default:
+      }
+      default: {
         break;
+      }
     }
     if (onAction) {
       onAction(rule);
@@ -148,8 +163,9 @@ namespace Victoria::Components {
             break;
           }
           case EntryWifiNone:
-          default:
+          default: {
             break;
+          }
         }
         break;
       }
@@ -163,8 +179,9 @@ namespace Victoria::Components {
             break;
           }
           case EntryAppNone:
-          default:
+          default: {
             break;
+          }
         }
         break;
       }
@@ -176,15 +193,17 @@ namespace Victoria::Components {
             break;
           }
           case EntryEspNone:
-          default:
+          default: {
             break;
+          }
         }
         break;
       }
 
       case EntryNone:
-      default:
+      default: {
         break;
+      }
     }
     if (onCommand) {
       onCommand(command);

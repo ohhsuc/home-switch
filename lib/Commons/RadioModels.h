@@ -7,6 +7,7 @@
 namespace Victoria {
 
   struct RadioMessage {
+    String id;
     String value;
     unsigned int channel = 0;
     unsigned long timestamp = 0;

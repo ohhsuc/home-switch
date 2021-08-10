@@ -9,8 +9,8 @@
 #include "RadioStorage.h"
 
 // timespan in millianseconds
-#define DOUBLE_CLICK_TIMESPAN_FROM 300
-#define DOUBLE_CLICK_TIMESPAN_TO 500
+#define DOUBLE_CLICK_TIMESPAN_FROM 500
+#define DOUBLE_CLICK_TIMESPAN_TO 800
 #define LONG_PRESS_TIMESPAN 2000
 #define RESET_PRESS_TIMESPAN 2500
 
