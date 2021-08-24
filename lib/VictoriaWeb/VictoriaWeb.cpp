@@ -59,6 +59,8 @@ namespace Victoria::Components {
     _server->on("/system/file", HTTP_ANY, std::bind(&VictoriaWeb::_handleSystemFile, this));
     _server->on("/wifi/list", HTTP_GET, std::bind(&VictoriaWeb::_handleWifiList, this));
     _server->on("/wifi/join", HTTP_POST, std::bind(&VictoriaWeb::_handleWifiJoin, this));
+    _server->on("/ota", HTTP_OPTIONS, std::bind(&VictoriaWeb::_handleCrossOrigin, this));
+    _server->on("/ota", HTTP_ANY, std::bind(&VictoriaWeb::_handleOTA, this));
     _server->on("/reset", HTTP_OPTIONS, std::bind(&VictoriaWeb::_handleCrossOrigin, this));
     _server->on("/reset", HTTP_ANY, std::bind(&VictoriaWeb::_handleReset, this));
     _server->serveStatic("/fav", LittleFS, "/fav.ico", "max-age=43200");
@@ -137,6 +139,7 @@ namespace Victoria::Components {
   }
 
   void VictoriaWeb::_dispatchRequestStart() {
+    _server->sendHeader("Connection", "close"); // close / keep-alive
     // set cross origin
     _server->sendHeader("Access-Control-Allow-Origin", "*");
     _server->sendHeader("Access-Control-Max-Age", "600"); // 10 minutes
@@ -221,6 +224,7 @@ namespace Victoria::Components {
       <p>\
         <a href=\"/wifi/list\">Wifi</a> |\
         <a href=\"/system\">System</a> |\
+        <a href=\"/ota\">OTA</a>\
         <a href=\"/reset\">Reset</a>\
       </p>\
       <h3>Home</h3>\
@@ -417,6 +421,42 @@ namespace Victoria::Components {
     } else {
       _sendHints("Failed", "\
         <p>Joining to <b>" + ssid + "</b> failed</p>\
+      ");
+    }
+    _dispatchRequestEnd();
+  }
+
+  void VictoriaWeb::_handleOTA() {
+    _dispatchRequestStart();
+    if (_server->method() == HTTP_POST) {
+      auto version = _server->arg("Version");
+      auto otaType = _server->arg("OtaType");
+      auto type =
+        otaType == "all" ? VOta_All :
+        otaType == "fs" ? VOta_FileSystem :
+        otaType == "sketch" ? VOta_Sketch : VOta_Sketch;
+      VictoriaOTA::update(version, type);
+      _redirectTo("/");
+    } else {
+      auto currentVersion = VictoriaOTA::getCurrentVersion();
+      auto version = VictoriaOTA::checkNewVersion();
+      if (!version || version == "") {
+        version = "-";
+      }
+      _send200("\
+        <p><a href=\"/\">&lt; Home</a></p>\
+        <h3>OTA</h3>\
+        <form method=\"post\">\
+          <p>Remote Latest: " + version + "</p>\
+          <p>Local Firmware: " + currentVersion + "</p>\
+          " + _renderSelectionList({
+            { .inputType = "radio", .inputName = "OtaType", .inputValue = "all", .isChecked = false, .labelText = "All" },
+            { .inputType = "radio", .inputName = "OtaType", .inputValue = "fs", .isChecked = false, .labelText = "FileSystem" },
+            { .inputType = "radio", .inputName = "OtaType", .inputValue = "sketch", .isChecked = true, .labelText = "Sketch" },
+          }) + "\
+          <input type=\"hidden\" name=\"Version\" value=\"" + version + "\" />\
+          <p><button type=\"submit\" class=\"btn\">Load + Burn " + version + "</button></p>\
+        </form>\
       ");
     }
     _dispatchRequestEnd();

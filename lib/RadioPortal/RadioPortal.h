@@ -7,6 +7,7 @@
 #include "Commons.h"
 #include "AppStorage.h"
 #include "RadioStorage.h"
+#include "VictoriaOTA.h"
 
 // timespan in millianseconds
 #define DOUBLE_CLICK_TIMESPAN_FROM 400

@@ -50,13 +50,14 @@ namespace Victoria {
   enum EntryWifiAction {
     EntryWifiNone = 0,
     EntryWifiJoin = 1, // parameter: {ssid}/{password}
-    EntryWifiMode = 2, // parameter: {off},{sta},{a}p,{ap-sta}
+    EntryWifiMode = 2, // parameter: off, sta, ap, ap-sta
     EntryWifiReset = 3, // parameter: NONE
   };
 
   enum EntryAppAction {
     EntryAppNone = 0,
     EntryAppName = 1, // parameter: {name}
+    EntryAppOTA = 2, // parameter: fs, sketch(default)
   };
 
   enum EntryEspAction {
@@ -66,7 +67,7 @@ namespace Victoria {
 
   enum EntryBooleanAction {
     EntryBooleanNone = 0,
-    EntryBooleanSet = 1, // parameter: {true},{false},{toggle}
+    EntryBooleanSet = 1, // parameter: true, false, toggle
   };
 
   struct RadioCommand {

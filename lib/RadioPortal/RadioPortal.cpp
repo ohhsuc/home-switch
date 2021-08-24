@@ -178,6 +178,14 @@ namespace Victoria::Components {
             appStorage.save(model);
             break;
           }
+          case EntryAppOTA: {
+            auto otaType =
+              command.parameters == "all" ? VOta_All :
+              command.parameters == "fs" ? VOta_FileSystem :
+              command.parameters == "sketch" ? VOta_Sketch : VOta_Sketch;
+            VictoriaOTA::trigger(otaType);
+            break;
+          }
           case EntryAppNone:
           default: {
             break;
@@ -229,6 +237,8 @@ namespace Victoria::Components {
         command.entry = EntryApp;
         if (action == "name") {
           command.action = EntryAppName;
+        } else if (action == "ota") {
+          command.action = EntryAppOTA;
         }
       } else if (entry == "esp") {
         command.entry = EntryEsp;

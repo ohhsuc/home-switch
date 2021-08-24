@@ -8,6 +8,7 @@
 #include <ESP8266WebServer.h>
 #include "Commons.h"
 #include "AppStorage.h"
+#include "VictoriaOTA.h"
 
 namespace Victoria::Components {
   class VictoriaWeb {
@@ -41,6 +42,7 @@ namespace Victoria::Components {
     void _handleSystemFile();
     void _handleWifiList();
     void _handleWifiJoin();
+    void _handleOTA();
     void _handleReset();
     virtual std::vector<SelectionOptions> _getResetList();
     virtual void _handleResetPost();

@@ -15,6 +15,12 @@ namespace Victoria {
     VProd,
   };
 
+  enum VOtaType {
+    VOta_All = 0,
+    VOta_Sketch = 1,
+    VOta_FileSystem = 2,
+  };
+
   enum ButtonState {
     AWAIT_PRESS,
     DEBOUNCE_PRESS,
