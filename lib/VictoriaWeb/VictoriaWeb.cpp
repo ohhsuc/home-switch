@@ -224,7 +224,7 @@ namespace Victoria::Components {
       <p>\
         <a href=\"/wifi/list\">Wifi</a> |\
         <a href=\"/system\">System</a> |\
-        <a href=\"/ota\">OTA</a>\
+        <a href=\"/ota\">OTA</a> |\
         <a href=\"/reset\">Reset</a>\
       </p>\
       <h3>Home</h3>\

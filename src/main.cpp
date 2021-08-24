@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266mDNS.h>
+#include "VictoriaOTA.h"
 #include "WebPortal.h"
 #include "RadioPortal.h"
 #include "Timer.h"
@@ -145,6 +146,8 @@ void setup(void) {
     auto hostName = webPortal.getHostName(false);
     HomeKitMain::setup(hostName);
   }
+
+  VictoriaOTA::setup();
 
   console.log("setup complete");
   ledOff();
