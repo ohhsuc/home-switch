@@ -16,8 +16,8 @@ namespace Victoria::Components {
       item[2] = service.type;
       item[3] = service.outputPin;
       item[4] = service.inputPin;
-      item[5] = service.outputLevel;
-      item[6] = service.inputLevel;
+      item[5] = service.outputTrueValue;
+      item[6] = service.inputTrueValue;
     }
   }
 
@@ -30,8 +30,8 @@ namespace Victoria::Components {
         .type = item[2],
         .outputPin = item[3],
         .inputPin = item[4],
-        .outputLevel = item[5],
-        .inputLevel = item[6],
+        .outputTrueValue = item[5],
+        .inputTrueValue = item[6],
       };
       auto id = String(item[0]);
       model.services[id] = service;

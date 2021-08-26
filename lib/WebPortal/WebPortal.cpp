@@ -384,8 +384,8 @@ namespace Victoria::Components {
       auto serviceType = _server->arg("ServiceType");
       auto outputPin = _server->arg("OutputPin");
       auto inputPin = _server->arg("InputPin");
-      auto outputLevel = _server->arg("OutputLevel");
-      auto inputLevel = _server->arg("InputLevel");
+      auto outputTrueValue = _server->arg("OutputTrueValue");
+      auto inputTrueValue = _server->arg("InputTrueValue");
       auto submit = _server->arg("Submit");
       if (submit == "Delete") {
         _deleteService(serviceId, service);
@@ -397,8 +397,8 @@ namespace Victoria::Components {
           serviceType == "integer" ? IntegerServiceType : EmptyServiceType;
         service.outputPin = outputPin.toInt();
         service.inputPin = inputPin.toInt();
-        service.outputLevel = outputLevel.toInt();
-        service.inputLevel = inputLevel.toInt();
+        service.outputTrueValue = outputTrueValue.toInt();
+        service.inputTrueValue = inputTrueValue.toInt();
         _saveService(serviceId, service);
         _redirectTo(currentUrl);
       }
@@ -495,28 +495,32 @@ namespace Victoria::Components {
       <fieldset>\
         <legend>IO Pins</legend>\
         <p>\
-          <label for=\"txtOutputPin\">Output</label>\
-          <input type=\"number\" id=\"txtOutputPin\" name=\"OutputPin\" min=\"-1\" max=\"100\" value=\"" + String(service.outputPin) + "\" />\
-          " + _getLevelHtml("OutputLevel", service.outputLevel) + "\
-        </p>\
-        <p>\
           <label for=\"txtInputPin\">Input</label>\
           <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" min=\"-1\" max=\"100\" value=\"" + String(service.inputPin) + "\" />\
-          " + _getLevelHtml("InputLevel", service.inputLevel) + "\
+          " + _getTrueValueHtml("InputTrueValue", service.inputTrueValue) + "\
+        </p>\
+        <p>\
+          <label for=\"txtOutputPin\">Output</label>\
+          <input type=\"number\" id=\"txtOutputPin\" name=\"OutputPin\" min=\"-1\" max=\"100\" value=\"" + String(service.outputPin) + "\" />\
+          " + _getTrueValueHtml("OutputTrueValue", service.outputTrueValue) + "\
         </p>\
       </fieldset>\
     ");
     return html;
   }
 
-  String WebPortal::_getLevelHtml(const String& name, const int& level) {
+  String WebPortal::_getTrueValueHtml(const String& name, const int& trueValue) {
     return String("\
-      <label for=\"txt" + name + "High\">High</label>\
-      <input type=\"radio\" id=\"txt" + name + "High\" name=\"" + name + "\" value=\"1\"" + _getCheckedAttr(level == 1) + " />\
-      <label for=\"txt" + name + "Low\">Low</label>\
-      <input type=\"radio\" id=\"txt" + name + "Low\" name=\"" + name + "\" value=\"0\"" + _getCheckedAttr(level == 0) + " />\
-      <label for=\"txt" + name + "No\">No</label>\
-      <input type=\"radio\" id=\"txt" + name + "No\" name=\"" + name + "\" value=\"-1\"" + _getCheckedAttr(level == -1) + " />\
+      <span>Use</span>\
+      <label for=\"txt" + name + "High\">\
+        <span>HIGH</span>\
+        <input type=\"radio\" id=\"txt" + name + "High\" name=\"" + name + "\" value=\"1\"" + _getCheckedAttr(trueValue == 1) + " />\
+      </label>\
+      <label for=\"txt" + name + "Low\">\
+        <span>LOW</span>\
+        <input type=\"radio\" id=\"txt" + name + "Low\" name=\"" + name + "\" value=\"0\"" + _getCheckedAttr(trueValue == 0) + " />\
+      </label>\
+      <span>as true value</span>\
     ");
   }
 

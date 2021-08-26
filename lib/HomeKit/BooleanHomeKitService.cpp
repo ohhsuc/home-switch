@@ -15,6 +15,14 @@ namespace Victoria::HomeKit {
     if (homekit_characteristic_has_notify_callback(serviceCharacteristic, BooleanHomeKitService::_notifyCallback, this)) {
       homekit_characteristic_remove_notify_callback(serviceCharacteristic, BooleanHomeKitService::_notifyCallback, this);
     }
+    if (_inputPin) {
+      delete _inputPin;
+      _inputPin = NULL;
+    }
+    if (_outputPin) {
+      delete _outputPin;
+      _outputPin = NULL;
+    }
   }
 
   void BooleanHomeKitService::setup() {
@@ -53,10 +61,22 @@ namespace Victoria::HomeKit {
     // solution 3
     homekit_characteristic_add_notify_callback(serviceCharacteristic, BooleanHomeKitService::_notifyCallback, this);
 
-    // setup inputs
+    // setup output
+    if (serviceSetting.outputPin > -1) {
+      auto trueValue = serviceSetting.outputTrueValue == 0 ? LOW : HIGH;
+      _outputPin = new DigitalOutput(serviceSetting.outputPin, trueValue);
+      _outputPin->setValue(false); // off by default
+    }
+
+    // setup input
     if (serviceSetting.inputPin > -1) {
+      auto trueValue = serviceSetting.inputTrueValue == 0 ? LOW : HIGH;
+      _inputPin = new DigitalInput(serviceSetting.inputPin, trueValue);
+    }
+
+    if (_inputPin) {
       _buttonEvents = new ButtonEvents([&]()->bool {
-        auto isPressed = digitalRead(serviceSetting.inputPin) == LOW;
+        auto isPressed = _inputPin->getValue() == true;
         return isPressed;
       });
       _buttonEvents->onClick = [this](int times)->void {
@@ -92,14 +112,8 @@ namespace Victoria::HomeKit {
   void BooleanHomeKitService::_notifyCallback(homekit_characteristic_t *ch, homekit_value_t value, void *context) {
     auto service = (BooleanHomeKitService*)context;
     auto state = service->getState();
-    // update pin
-    auto outputPin = service->serviceSetting.outputPin;
-    if (outputPin > -1) {
-      if (state.boolValue) {
-        digitalWrite(outputPin, LOW);
-      } else {
-        digitalWrite(outputPin, HIGH);
-      }
+    if (service->_outputPin) {
+      service->_outputPin->setValue(state.boolValue);
     }
     // fire event
     service->_fireStateChange(state);

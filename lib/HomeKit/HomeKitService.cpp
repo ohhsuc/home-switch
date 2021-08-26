@@ -18,24 +18,7 @@ namespace Victoria::HomeKit {
     console.log("service disposed " + serviceId);
   }
 
-  void HomeKitService::setup() {
-    // outputs
-    if (serviceSetting.outputPin > -1) {
-      pinMode(serviceSetting.outputPin, OUTPUT);
-      if (serviceSetting.outputLevel > -1) {
-        auto outputLevel = serviceSetting.outputLevel == 0 ? LOW : HIGH;
-        digitalWrite(serviceSetting.outputPin, outputLevel);
-      }
-    }
-    // inputs
-    if (serviceSetting.inputPin > -1) {
-      pinMode(serviceSetting.inputPin, INPUT_PULLUP);
-      if (serviceSetting.inputLevel > -1) {
-        auto inputLevel = serviceSetting.inputLevel == 0 ? LOW : HIGH;
-        digitalWrite(serviceSetting.inputPin, inputLevel);
-      }
-    }
-  }
+  void HomeKitService::setup() {}
 
   void HomeKitService::loop() {}
 

@@ -3,9 +3,12 @@
 
 #include <Arduino.h>
 #include "HomeKitService.h"
+#include "DigitalInput.h"
+#include "DigitalOutput.h"
 #include "ButtonEvents.h"
 
 using namespace Victoria::Events;
+using namespace Victoria::Components;
 
 namespace Victoria::HomeKit {
   class BooleanHomeKitService : public HomeKitService {
@@ -18,6 +21,8 @@ namespace Victoria::HomeKit {
     void setState(const ServiceState& state) override;
 
    private:
+    DigitalInput* _inputPin;
+    DigitalOutput* _outputPin;
     ButtonEvents* _buttonEvents = NULL;
     static void _notifyCallback(homekit_characteristic_t *ch, homekit_value_t value, void *context);
   };

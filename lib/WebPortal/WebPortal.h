@@ -41,7 +41,7 @@ namespace Victoria::Components {
     void _handleResetPost() override;
     static String _getTypeHtml(const ServiceSetting& service);
     static String _getIOHtml(const ServiceSetting& service);
-    static String _getLevelHtml(const String& name, const int& level);
+    static String _getTrueValueHtml(const String& name, const int& trueValue);
     static String _getBooleanHtml(const ServiceState& state);
     static String _getIntegerHtml(const ServiceState& state);
   };

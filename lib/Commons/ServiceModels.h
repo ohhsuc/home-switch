@@ -17,8 +17,8 @@ namespace Victoria {
     ServiceType type;
     int outputPin = -1;
     int inputPin = -1;
-    int outputLevel = -1;
-    int inputLevel = -1;
+    int outputTrueValue = 0; // LOW
+    int inputTrueValue = 0; // LOW
   };
 
   struct ServiceState {
