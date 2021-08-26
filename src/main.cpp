@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266mDNS.h>
+#include "BuiltinLed.h"
 #include "VictoriaOTA.h"
 #include "WebPortal.h"
 #include "RadioPortal.h"
@@ -13,17 +14,10 @@ using namespace Victoria::Events;
 using namespace Victoria::Components;
 using namespace Victoria::HomeKit;
 
+BuiltinLed* builtinLed;
 WebPortal webPortal(80);
 RadioPortal radioPortal;
 TimesTrigger timesTrigger(10, 5 * 1000);
-
-void ledOn() {
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(100); // at least light for some time
-}
-void ledOff() {
-  digitalWrite(LED_BUILTIN, HIGH);
-}
 
 void deleteService(const String& serviceId, const ServiceSetting& setting) {
   HomeKitMain::removeService(serviceId);
@@ -88,11 +82,10 @@ void setRadioCommand(const RadioCommandParsed& command) {
 }
 
 void onStateChange(const ServiceState& state) {
-  ledOn();
+  builtinLed->flash();
   timesTrigger.count();
   console.log("boolean value " + String(state.boolValue));
   console.log("integer value " + String(state.intValue));
-  ledOff();
 }
 
 void setup(void) {
@@ -101,20 +94,20 @@ void setup(void) {
     console.error("LittleFS mount failed");
   }
 
-  pinMode(LED_BUILTIN, OUTPUT);
-  ledOn();
+  builtinLed = new BuiltinLed();
+  builtinLed->turnOn();
 
   webPortal.onDeleteService = deleteService;
   webPortal.onGetServiceState = getServiceState;
   webPortal.onSetServiceState = setServiceState;
-  webPortal.onRequestStart = ledOn;
-  webPortal.onRequestEnd = ledOff;
+  webPortal.onRequestStart = []() { builtinLed->turnOn(); };
+  webPortal.onRequestEnd = []() { builtinLed->turnOff(); };
   webPortal.onResetAccessory = []() { HomeKitMain::reset(); };
   webPortal.setup();
 
   radioPortal.onMessage = [](const RadioMessage& message) {
     console.log("[Radio] > received [" + message.id + "!" + message.value + "] from channel [" + String(message.channel) + "]");
-    ledOn(); ledOff();
+    builtinLed->flash();
   };
   radioPortal.onAction = setRadioAction;
   radioPortal.onCommand = setRadioCommand;
@@ -150,7 +143,7 @@ void setup(void) {
   VictoriaOTA::setup();
 
   console.log("setup complete");
-  ledOff();
+  builtinLed->turnOff();
 }
 
 void loop(void) {

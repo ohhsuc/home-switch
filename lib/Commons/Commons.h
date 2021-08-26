@@ -32,6 +32,8 @@ namespace Victoria {
 
   struct AppModel {
     String name;
+    int ledPin = 2;
+    uint8_t ledOnValue = 0; // LOW
   };
 
   // const int led = LED_BUILTIN;
