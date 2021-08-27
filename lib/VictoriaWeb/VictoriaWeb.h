@@ -9,6 +9,7 @@
 #include "Commons.h"
 #include "AppStorage.h"
 #include "VictoriaOTA.h"
+#include "VictoriaWifi.h"
 
 namespace Victoria::Components {
   class VictoriaWeb {
@@ -21,8 +22,6 @@ namespace Victoria::Components {
     typedef std::function<void()> TServerEventHandler;
     TServerEventHandler onRequestStart;
     TServerEventHandler onRequestEnd;
-    // static
-    static String getHostName(bool includeVersion);
 
    protected:
     ESP8266WebServer* _server = NULL;
@@ -51,7 +50,6 @@ namespace Victoria::Components {
     static String _renderTable(const TableModel& model);
     static String _renderSelect(const SelectModel& model);
     static String _renderSelectionList(const std::vector<SelectionOptions>& list);
-    static void _onWifiEvent(WiFiEvent_t event);
   };
 } // namespace Victoria::Components
 

@@ -2,6 +2,7 @@
 #include <ESP8266mDNS.h>
 #include "BuiltinLed.h"
 #include "VictoriaOTA.h"
+#include "VictoriaWifi.h"
 #include "WebPortal.h"
 #include "RadioPortal.h"
 #include "Timer.h"
@@ -97,6 +98,9 @@ void setup(void) {
   builtinLed = new BuiltinLed();
   builtinLed->turnOn();
 
+  VictoriaOTA::setup();
+  VictoriaWifi::setup();
+
   webPortal.onDeleteService = deleteService;
   webPortal.onGetServiceState = getServiceState;
   webPortal.onSetServiceState = setServiceState;
@@ -136,11 +140,9 @@ void setup(void) {
         service->onStateChange = onStateChange;
       }
     }
-    auto hostName = webPortal.getHostName(false);
+    auto hostName = VictoriaWifi::getHostName(false);
     HomeKitMain::setup(hostName);
   }
-
-  VictoriaOTA::setup();
 
   console.log("setup complete");
   builtinLed->turnOff();
