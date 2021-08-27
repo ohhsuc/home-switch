@@ -5,6 +5,7 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 #include "Commons.h"
+#include "Models/ServiceModels.h"
 
 namespace Victoria::HomeKit {
   class HomeKitService {

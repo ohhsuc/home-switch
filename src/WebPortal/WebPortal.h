@@ -5,8 +5,9 @@
 #include <Arduino.h>
 #include "Commons.h"
 #include "VictoriaWeb.h"
-#include "RadioStorage.h"
-#include "ServiceStorage.h"
+#include "Models/ServiceModels.h"
+#include "RadioStorage/RadioStorage.h"
+#include "ServiceStorage/ServiceStorage.h"
 
 namespace Victoria::Components {
   class WebPortal : public VictoriaWeb {

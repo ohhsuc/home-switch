@@ -1,14 +1,16 @@
 #include <Arduino.h>
 #include <ESP8266mDNS.h>
+
 #include "BuiltinLed.h"
 #include "VictoriaOTA.h"
 #include "VictoriaWifi.h"
-#include "WebPortal.h"
-#include "RadioPortal.h"
 #include "Timer.h"
 #include "TimesTrigger.h"
 #include "Mesher.h"
-#include "HomeKitMain.h"
+
+#include "WebPortal/WebPortal.h"
+#include "RadioPortal/RadioPortal.h"
+#include "HomeKit/HomeKitMain.h"
 
 using namespace Victoria;
 using namespace Victoria::Events;

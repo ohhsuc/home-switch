@@ -7,6 +7,7 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 #include "Commons.h"
+#include "HomeKitBuildFlags.h"
 #include "HomeKitService.h"
 #include "BooleanHomeKitService.h"
 

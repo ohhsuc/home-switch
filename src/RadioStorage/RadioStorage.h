@@ -2,6 +2,7 @@
 #define RadioStorage_h
 
 #include <FileStorage.h>
+#include "Models/RadioModels.h"
 
 namespace Victoria::Components {
   class RadioStorage : public FileStorage<RadioModel> {

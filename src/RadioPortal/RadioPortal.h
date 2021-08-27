@@ -5,9 +5,10 @@
 #include <ESP8266WiFi.h>
 #include <RH_ASK.h>
 #include "Commons.h"
-#include "AppStorage.h"
-#include "RadioStorage.h"
 #include "VictoriaOTA.h"
+#include "AppStorage.h"
+#include "Models/RadioModels.h"
+#include "RadioStorage/RadioStorage.h"
 
 // timespan in millianseconds
 #define DOUBLE_CLICK_TIMESPAN_FROM 400
