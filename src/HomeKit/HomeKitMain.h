@@ -18,7 +18,8 @@ namespace Victoria::HomeKit {
     static HomeKitService* findServiceById(const String& serviceId);
     static void removeService(const String& serviceId);
     static void heartbeat();
-    static void setup(const String& hostName);
+    static void clear();
+    static void setup(String hostName);
     static void loop();
     static void reset();
   };

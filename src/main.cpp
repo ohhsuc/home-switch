@@ -132,6 +132,7 @@ void setup(void) {
   auto loader = RadioFrequencyMeshLoader(10);
   mesher.setLoader(&loader);
 
+  HomeKitMain::clear();
   auto model = serviceStorage.load();
   if (model.services.size() > 0) {
     for (const auto& pair : model.services) {
