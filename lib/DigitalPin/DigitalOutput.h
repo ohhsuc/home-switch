@@ -10,8 +10,8 @@ namespace Victoria::Components {
     void setValue(bool value);
 
    private:
-    int _pin;
-    bool _trueValue;
+    uint8_t _pin;
+    uint8_t _trueValue;
   };
 
 } // namespace Victoria::Components
