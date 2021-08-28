@@ -14,10 +14,10 @@ namespace Victoria::Components {
       item[0] = pair.first; // id
       item[1] = service.name;
       item[2] = service.type;
-      item[3] = service.outputPin;
-      item[4] = service.inputPin;
-      item[5] = service.outputTrueValue;
-      item[6] = service.inputTrueValue;
+      item[3] = service.inputPin;
+      item[4] = service.outputPin;
+      item[5] = service.inputTrueValue;
+      item[6] = service.outputTrueValue;
     }
   }
 
@@ -28,10 +28,10 @@ namespace Victoria::Components {
       ServiceSetting service = {
         .name = item[1],
         .type = item[2],
-        .outputPin = item[3],
-        .inputPin = item[4],
-        .outputTrueValue = item[5],
-        .inputTrueValue = item[6],
+        .inputPin = item[3],
+        .outputPin = item[4],
+        .inputTrueValue = item[5],
+        .outputTrueValue = item[6],
       };
       auto id = String(item[0]);
       model.services[id] = service;

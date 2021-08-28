@@ -382,10 +382,10 @@ namespace Victoria::Components {
     if (_server->method() == HTTP_POST) {
       auto serviceName = _server->arg("ServiceName");
       auto serviceType = _server->arg("ServiceType");
-      auto outputPin = _server->arg("OutputPin");
       auto inputPin = _server->arg("InputPin");
-      auto outputTrueValue = _server->arg("OutputTrueValue");
+      auto outputPin = _server->arg("OutputPin");
       auto inputTrueValue = _server->arg("InputTrueValue");
+      auto outputTrueValue = _server->arg("OutputTrueValue");
       auto submit = _server->arg("Submit");
       if (submit == "Delete") {
         _deleteService(serviceId, service);
@@ -395,10 +395,10 @@ namespace Victoria::Components {
         service.type =
           serviceType == "boolean" ? BooleanServiceType :
           serviceType == "integer" ? IntegerServiceType : EmptyServiceType;
-        service.outputPin = outputPin.toInt();
         service.inputPin = inputPin.toInt();
-        service.outputTrueValue = outputTrueValue.toInt();
+        service.outputPin = outputPin.toInt();
         service.inputTrueValue = inputTrueValue.toInt();
+        service.outputTrueValue = outputTrueValue.toInt();
         _saveService(serviceId, service);
         _redirectTo(currentUrl);
       }
