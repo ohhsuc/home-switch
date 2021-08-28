@@ -15,7 +15,6 @@ namespace Victoria::Components {
 
   void BuiltinLed::turnOn() {
     _outputPin->setValue(true);
-    delay(100); // at least light for some time
   }
 
   void BuiltinLed::turnOff() {
@@ -24,6 +23,7 @@ namespace Victoria::Components {
 
   void BuiltinLed::flash() {
     turnOn();
+    delay(100); // at least light for some time
     turnOff();
   }
 

@@ -147,7 +147,7 @@ void setup(void) {
   }
 
   console.log("setup complete");
-  builtinLed->turnOff();
+  builtinLed->flash();
 }
 
 void loop(void) {
