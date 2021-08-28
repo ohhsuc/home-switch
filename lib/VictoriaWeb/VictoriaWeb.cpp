@@ -162,6 +162,7 @@ namespace Victoria::Components {
     TableModel table = {
       .header = {},
       .rows = {
+        { "Running", GlobalHelpers::timeSince(0) },
         { "Wifi Mode", strWifiMode },
         { "Joined", ssidJoined != "" ? ssidJoined : "-" },
         { "IP Address", strLocalIP != "" ? "<a href=\"http://" + strLocalIP + "\">" + strLocalIP + "</a>" : "-" },
