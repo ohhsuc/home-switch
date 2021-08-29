@@ -17,8 +17,8 @@ namespace Victoria::Components {
 
   void RadioStorage::_serializeTo(const RadioModel& model, DynamicJsonDocument& doc) {
     doc["i"] = model.inputPin;
-    JsonArray ruleItems = doc.createNestedArray("r");
-    JsonArray commandItems = doc.createNestedArray("c");
+    JsonArray ruleItems = doc.createNestedArray("rules");
+    JsonArray commandItems = doc.createNestedArray("commands");
     for (const auto& rule : model.rules) {
       JsonArray item = ruleItems.createNestedArray();
       item[0] = rule.value;
@@ -38,8 +38,8 @@ namespace Victoria::Components {
 
   void RadioStorage::_deserializeFrom(RadioModel& model, const DynamicJsonDocument& doc) {
     model.inputPin = doc["i"];
-    auto ruleItems = doc["r"];
-    auto commandItems = doc["c"];
+    auto ruleItems = doc["rules"];
+    auto commandItems = doc["commands"];
     for (size_t i = 0; i < ruleItems.size(); i++) {
       auto item = ruleItems[i];
       RadioRule rule = {

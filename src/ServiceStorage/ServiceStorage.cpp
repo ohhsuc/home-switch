@@ -7,10 +7,10 @@ namespace Victoria::Components {
   }
 
   void ServiceStorage::_serializeTo(const ServicesModel& model, DynamicJsonDocument& doc) {
-    JsonArray items = doc.createNestedArray("s");
+    JsonArray serviceItems = doc.createNestedArray("services");
     for (const auto& pair : model.services) {
       ServiceSetting service = pair.second;
-      JsonArray item = items.createNestedArray();
+      JsonArray item = serviceItems.createNestedArray();
       item[0] = pair.first; // id
       item[1] = service.name;
       item[2] = service.type;
@@ -22,9 +22,9 @@ namespace Victoria::Components {
   }
 
   void ServiceStorage::_deserializeFrom(ServicesModel& model, const DynamicJsonDocument& doc) {
-    auto items = doc["s"];
-    for (size_t i = 0; i < items.size(); i++) {
-      auto item = items[i];
+    auto serviceItems = doc["services"];
+    for (size_t i = 0; i < serviceItems.size(); i++) {
+      auto item = serviceItems[i];
       ServiceSetting service = {
         .name = item[1],
         .type = item[2],
