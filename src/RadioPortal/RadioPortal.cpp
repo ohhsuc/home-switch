@@ -119,7 +119,7 @@ namespace Victoria::Components {
         break;
       }
       case RadioActionWiFiReset: {
-        WiFi.disconnect(true);
+        VictoriaWifi::reset();
         break;
       }
       case RadioActionEspRestart: {
@@ -144,7 +144,7 @@ namespace Victoria::Components {
             if (credential.size() == 2) {
               auto ssid = credential[0];
               auto password = credential[1];
-              WiFi.begin(ssid, password);
+              VictoriaWifi::join(ssid, password, false);
             }
             break;
           }
@@ -159,7 +159,7 @@ namespace Victoria::Components {
             break;
           }
           case EntryWifiReset: {
-            WiFi.disconnect(true);
+            VictoriaWifi::reset();
             break;
           }
           case EntryWifiNone:
@@ -220,7 +220,9 @@ namespace Victoria::Components {
 
   RadioCommandParsed RadioPortal::_parseCommand(const RadioMessage& message) {
     RadioCommandParsed command;
-    auto parts = GlobalHelpers::splitString(message.value, "-");
+    auto value = String(message.value); // clone
+    value.replace(":", "-");
+    auto parts = GlobalHelpers::splitString(value, "-");
     if (parts.size() >= 2) {
       auto entry = parts[0];
       auto action = parts[1];
@@ -249,6 +251,8 @@ namespace Victoria::Components {
         command.entry = EntryBoolean;
         if (action == "set") {
           command.action = EntryBooleanSet;
+        } else if (action == "toggle") {
+          command.action = EntryBooleanToggle;
         }
       }
       if (parts.size() >= 3) {

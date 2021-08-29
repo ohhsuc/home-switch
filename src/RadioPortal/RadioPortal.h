@@ -6,6 +6,7 @@
 #include <RH_ASK.h>
 #include "Commons.h"
 #include "VictoriaOTA.h"
+#include "VictoriaWifi.h"
 #include "AppStorage.h"
 #include "Models/RadioModels.h"
 #include "RadioStorage/RadioStorage.h"

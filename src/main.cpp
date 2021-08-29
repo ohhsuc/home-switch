@@ -76,10 +76,10 @@ void setRadioAction(const RadioRule& rule) {
 }
 
 void setRadioCommand(const RadioCommandParsed& command) {
-  if (command.serviceId && command.entry == EntryBoolean && command.action == EntryBooleanSet) {
-    int action = command.parameters == "false" ? 0
-      : command.parameters == "true" ? 1
-      : command.parameters == "toggle" ? 2 : -1;
+  if (command.serviceId && command.entry == EntryBoolean) {
+    int action = command.action == EntryBooleanToggle ? 2
+      : (command.action == EntryBooleanSet && command.parameters == "true") ? 1
+      : (command.action == EntryBooleanSet && command.parameters == "false") ? 0 : -1;
     setSwitchAction(command.serviceId, action);
   }
 }

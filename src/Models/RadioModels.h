@@ -67,7 +67,8 @@ namespace Victoria {
 
   enum EntryBooleanAction {
     EntryBooleanNone = 0,
-    EntryBooleanSet = 1, // parameter: true, false, toggle
+    EntryBooleanSet = 1, // parameter: true, false
+    EntryBooleanToggle = 2,
   };
 
   struct RadioCommand {

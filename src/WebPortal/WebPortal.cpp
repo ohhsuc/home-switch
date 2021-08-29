@@ -337,7 +337,7 @@ namespace Victoria::Components {
               radioCommands.innerHTML = tmpl('radio-commands', {\
                 radioCommands: [" + radioCommandsJson + "],\
                 serviceOptions: vic.arr2opts([" + serviceOptionJson + "]),\
-                entryActionOptions: vic.arr2opts([['0-0','None'],['1-1','wifi-join'],['1-2','wifi-mode'],['1-3','wifi-reset'],['2-1','app-name'],['2-2','app-ota'],['3-1','esp-restart'],['4-1','boolean-set']]),\
+                entryActionOptions: vic.arr2opts([['0-0','None'],['1-1','wifi-join'],['1-2','wifi-mode'],['1-3','wifi-reset'],['2-1','app-name'],['2-2','app-ota'],['3-1','esp-restart'],['4-1','boolean-set'],['4-2','boolean-toggle']]),\
                 pressOptions: vic.arr2opts([[1,'Click'],[2,'Double Click'],[3,'Long Press']]),\
               });\
             }\
