@@ -15,10 +15,10 @@ namespace Victoria {
   struct ServiceSetting {
     String name;
     ServiceType type;
-    int inputPin = -1;
-    int outputPin = -1;
-    int inputTrueValue = 0;  // LOW
-    int outputTrueValue = 0; // LOW
+    int8_t inputPin = -1;
+    int8_t outputPin = -1;
+    uint8_t inputTrueValue = 0;  // LOW
+    uint8_t outputTrueValue = 0; // LOW
   };
 
   struct ServiceState {

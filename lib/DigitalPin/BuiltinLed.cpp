@@ -4,21 +4,29 @@ namespace Victoria::Components {
 
   BuiltinLed::BuiltinLed() {
     auto model = appStorage.load();
-    auto trueValue = model.ledOnValue == 0 ? LOW : HIGH;
-    _outputPin = new DigitalOutput(model.ledPin, trueValue);
+    if (model.ledPin > -1) {
+      auto trueValue = model.ledOnValue == 0 ? LOW : HIGH;
+      _outputPin = new DigitalOutput(model.ledPin, trueValue);
+    }
   }
 
   BuiltinLed::~BuiltinLed() {
-    delete _outputPin;
-    _outputPin = NULL;
+    if (_outputPin) {
+      delete _outputPin;
+      _outputPin = NULL;
+    }
   }
 
   void BuiltinLed::turnOn() {
-    _outputPin->setValue(true);
+    if (_outputPin) {
+      _outputPin->setValue(true);
+    }
   }
 
   void BuiltinLed::turnOff() {
-    _outputPin->setValue(false);
+    if (_outputPin) {
+      _outputPin->setValue(false);
+    }
   }
 
   void BuiltinLed::flash() {

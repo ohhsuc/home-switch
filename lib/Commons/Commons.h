@@ -30,11 +30,11 @@ namespace Victoria {
 
   struct AppModel {
     String name;
-    uint8_t ledPin = 2;
-    uint8_t ledOnValue = 0; // LOW
+    int8_t ledPin = 2;      // -128 ~ 127
+    uint8_t ledOnValue = 0; // 0 ~ 256 LOW
   };
 
-  // const int led = LED_BUILTIN;
+  // const uint8_t led = LED_BUILTIN;
   const uint8_t V_GPIO0 = 0; // GPIO-0
   const uint8_t V_GPIO2 = 2; // GPIO-2 (Led Builtin)
   const uint8_t V_TXD = 1;   // TXD (Transmitter)
