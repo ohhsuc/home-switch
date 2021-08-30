@@ -59,11 +59,16 @@ namespace Victoria::Components {
     }
   }
 
-  String VictoriaWifi::getHostName(bool includeVersion = false) {
+  String VictoriaWifi::getHostId() {
     auto id = WiFi.macAddress();
     id.replace(":", "");
     id.toUpperCase();
     id = id.substring(id.length() - 6);
+    return id;
+  }
+
+  String VictoriaWifi::getHostName(bool includeVersion = false) {
+    auto id = getHostId();
 
     auto version = String(FirmwareVersion);
     version.replace(".", "");

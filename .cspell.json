@@ -1,7 +1,10 @@
 {
   "version": "0.1",
   "words": [
+    "rulee",
+    "chen",
     "platformio",
+    "littlefs",
     "gpio",
     "println",
     "wifi",

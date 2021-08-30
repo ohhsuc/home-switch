@@ -60,13 +60,13 @@ namespace Victoria::Components {
   void VictoriaOTA::_updateSketch() {
     WiFiClient client;
     auto currentVersion = getCurrentVersion();
-    ESPhttpUpdate.update(client, "http://wwww.rulee.cn/esp8266/file.bin", currentVersion);
+    ESPhttpUpdate.update(client, "http://wwww.rulee.cn/esp8266/firmware.bin", currentVersion);
   }
 
   void VictoriaOTA::_updateFileSystem() {
     WiFiClient client;
     auto currentVersion = getCurrentVersion();
-    ESPhttpUpdate.updateFS(client, "http://wwww.rulee.cn/esp8266/file.bin", currentVersion);
+    ESPhttpUpdate.updateFS(client, "http://wwww.rulee.cn/esp8266/littlefs.bin", currentVersion);
   }
 
   void VictoriaOTA::_onStart() {

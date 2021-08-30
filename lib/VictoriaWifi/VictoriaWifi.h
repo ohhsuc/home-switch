@@ -12,6 +12,7 @@ namespace Victoria::Components {
     static void setup();
     static void reset();
     static void join(String ssid, String password, bool waitForConnecting);
+    static String getHostId();
     static String getHostName(bool includeVersion);
 
    private:
