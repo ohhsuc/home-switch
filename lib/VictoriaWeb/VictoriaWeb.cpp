@@ -90,7 +90,7 @@ namespace Victoria::Components {
   }
 
   void VictoriaWeb::_dispatchRequestStart() {
-    _server->sendHeader("Connection", "close"); // close / keep-alive
+    _server->sendHeader("Connection", "keep-alive"); // close / keep-alive
     // set cross origin
     _server->sendHeader("Access-Control-Allow-Origin", "*");
     _server->sendHeader("Access-Control-Max-Age", "600"); // 10 minutes
@@ -196,8 +196,10 @@ namespace Victoria::Components {
   void VictoriaWeb::_handleSystem() {
     _dispatchRequestStart();
     FSInfo fsInfo;
+    TableModel infoTable;
+    TableModel filesTable;
     if (LittleFS.info(fsInfo)) {
-      TableModel infoTable = {
+      infoTable = {
         .header = {},
         .rows = {
           { "Total Bytes", String(fsInfo.totalBytes) },
@@ -208,7 +210,7 @@ namespace Victoria::Components {
           { "Page Size", String(fsInfo.pageSize) },
         },
       };
-      TableModel filesTable = {
+      filesTable = {
         .header = { "File", "Bytes" },
       };
       // loop file method 1
@@ -244,19 +246,19 @@ namespace Victoria::Components {
           });
         }
       }
-      _send200("\
-        <p><a href=\"/\">&lt; Home</a></p>\
-        <h3>System</h3>\
-        <p>\
-          " + _renderTable(infoTable) + "\
-        </p>\
-        <p>\
-          " + _renderTable(filesTable) + "\
-        </p>\
-      ");
     } else {
       console.error("read fs info failed");
     }
+    _send200("\
+      <p><a href=\"/\">&lt; Home</a></p>\
+      <h3>System</h3>\
+      <p>\
+        " + _renderTable(infoTable) + "\
+      </p>\
+      <p>\
+        " + _renderTable(filesTable) + "\
+      </p>\
+    ");
     _dispatchRequestEnd();
   }
 
@@ -375,6 +377,17 @@ namespace Victoria::Components {
       VictoriaOTA::update(version, type);
       _redirectTo("/");
     } else {
+      TableModel infoTable = {
+        .header = { "ESP", ""},
+        .rows = {
+          { "Chip ID", String(ESP.getChipId()) },
+          { "Chip Size", String(ESP.getFlashChipRealSize()) },
+          { "Sketch Size", String(ESP.getSketchSize()) },
+          { "Sketch Free Space", String(ESP.getFreeSketchSpace()) },
+          { "Sketch MD5", String(ESP.getSketchMD5()) },
+          { "SDK Version", String(ESP.getSdkVersion()) },
+        },
+      };
       auto currentVersion = VictoriaOTA::getCurrentVersion();
       auto version = VictoriaOTA::checkNewVersion();
       if (!version || version == "") {
@@ -384,12 +397,15 @@ namespace Victoria::Components {
         <p><a href=\"/\">&lt; Home</a></p>\
         <h3>OTA</h3>\
         <form method=\"post\">\
+          <p>\
+            " + _renderTable(infoTable) + "\
+          </p>\
           <p>Remote Latest: " + version + "</p>\
           <p>Local Firmware: " + currentVersion + "</p>\
           " + _renderSelectionList({
             { .inputType = "radio", .inputName = "OtaType", .inputValue = "all", .isChecked = false, .labelText = "All" },
-            { .inputType = "radio", .inputName = "OtaType", .inputValue = "fs", .isChecked = false, .labelText = "FileSystem" },
             { .inputType = "radio", .inputName = "OtaType", .inputValue = "sketch", .isChecked = true, .labelText = "Sketch" },
+            { .inputType = "radio", .inputName = "OtaType", .inputValue = "fs", .isChecked = false, .labelText = "File System" },
           }) + "\
           <input type=\"hidden\" name=\"Version\" value=\"" + version + "\" />\
           <p><button type=\"submit\" class=\"btn\">Load + Burn " + version + "</button></p>\
