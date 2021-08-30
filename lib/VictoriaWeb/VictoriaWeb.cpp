@@ -126,7 +126,8 @@ namespace Victoria::Components {
 
   void VictoriaWeb::_handleHome() {
     _dispatchRequestStart();
-    // mode
+    // wifi
+    auto ssidJoined = WiFi.SSID();
     auto wifiMode = WiFi.getMode();
     auto strWifiMode = String("WIFI_OFF");
     if (wifiMode == WIFI_STA) {
@@ -136,28 +137,26 @@ namespace Victoria::Components {
     } else if (wifiMode == WIFI_AP_STA) {
       strWifiMode = "WIFI_AP_STA";
     }
-    // ip
-    auto strLocalIP = String("");
+    // station
+    auto staAddress = String("");
+    auto staMacAddress = WiFi.macAddress();
     auto isStaEnabled = ((wifiMode & WIFI_STA) != 0);
     if (isStaEnabled) {
       IPAddress localIP = WiFi.localIP();
       if (localIP) {
-        strLocalIP = localIP.toString();
+        staAddress = localIP.toString();
       }
     }
-    // ap
-    auto strApIP = String("");
+    // access point
+    auto apAddress = String("");
+    auto apMacAddress = WiFi.softAPmacAddress();
     auto isApEnabled = ((wifiMode & WIFI_AP) != 0);
     if (isApEnabled) {
       IPAddress apIP = WiFi.softAPIP();
       if (apIP) {
-        strApIP = apIP.toString();
+        apAddress = apIP.toString();
       }
     }
-    // ssid
-    auto ssidJoined = WiFi.SSID();
-    // mac
-    auto macAddr = WiFi.macAddress();
     // table
     TableModel table = {
       .header = {},
@@ -165,9 +164,10 @@ namespace Victoria::Components {
         { "Running", GlobalHelpers::timeSince(0) },
         { "Wifi Mode", strWifiMode },
         { "Joined", ssidJoined != "" ? ssidJoined : "-" },
-        { "IP Address", strLocalIP != "" ? "<a href=\"http://" + strLocalIP + "\">" + strLocalIP + "</a>" : "-" },
-        { "MAC Address", macAddr },
-        { "AP Address", strApIP != "" ? "<a href=\"http://" + strApIP + "\">" + strApIP + "</a>" : "-" },
+        { "STA Address", staAddress != "" ? "<a href=\"http://" + staAddress + "\">" + staAddress + "</a>" : "-" },
+        { "STA MAC Address", staMacAddress },
+        { "AP Address", apAddress != "" ? "<a href=\"http://" + apAddress + "\">" + apAddress + "</a>" : "-" },
+        { "AP MAC Address", apMacAddress },
         { "Firmware Version", FirmwareVersion },
       },
     };
