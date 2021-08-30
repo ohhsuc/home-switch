@@ -39,7 +39,7 @@ namespace Victoria::Components {
     console.log("[Wifi] mode > WIFI_AP_STA");
   }
 
-  void VictoriaWifi::join(String ssid, String password, bool waitForConnecting = true) {
+  void VictoriaWifi::join(String ssid, String password, bool waitForConnecting) {
     console.log("[Wifi] ssid > " + ssid);
     console.log("[Wifi] password > " + password);
     WiFi.persistent(true);
@@ -67,7 +67,7 @@ namespace Victoria::Components {
     return id;
   }
 
-  String VictoriaWifi::getHostName(bool includeVersion = false) {
+  String VictoriaWifi::getHostName(bool includeVersion) {
     auto id = getHostId();
 
     auto version = String(FirmwareVersion);

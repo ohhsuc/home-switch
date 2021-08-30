@@ -2,7 +2,7 @@
 
 namespace Victoria::Components {
 
-  WebPortal::WebPortal(int port = 80)
+  WebPortal::WebPortal(int port)
   : VictoriaWeb(port) {}
 
   WebPortal::~WebPortal() {}

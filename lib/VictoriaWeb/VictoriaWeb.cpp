@@ -2,7 +2,7 @@
 
 namespace Victoria::Components {
 
-  VictoriaWeb::VictoriaWeb(int port = 80) {
+  VictoriaWeb::VictoriaWeb(int port) {
     _server = new ESP8266WebServer(port);
   }
 

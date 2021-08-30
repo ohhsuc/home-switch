@@ -14,7 +14,7 @@
 namespace Victoria::Components {
   class VictoriaWeb {
    public:
-    VictoriaWeb(int port);
+    VictoriaWeb(int port = 80);
     virtual ~VictoriaWeb();
     void setup();
     void loop();

@@ -11,9 +11,9 @@ namespace Victoria::Components {
    public:
     static void setup();
     static void reset();
-    static void join(String ssid, String password, bool waitForConnecting);
+    static void join(String ssid, String password, bool waitForConnecting = true);
     static String getHostId();
-    static String getHostName(bool includeVersion);
+    static String getHostName(bool includeVersion = false);
 
    private:
     static void _onWifiEvent(WiFiEvent_t event);

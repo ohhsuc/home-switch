@@ -16,7 +16,7 @@ namespace Victoria::Components {
     typedef std::function<void(const String&, const ServiceSetting&, ServiceState&)> TSetServiceStateHandler;
 
    public:
-    WebPortal(int port);
+    WebPortal(int port = 80);
     ~WebPortal();
     // service events
     TServiceSettingHandler onSaveService;
