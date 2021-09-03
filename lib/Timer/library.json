@@ -2,7 +2,11 @@
   "name": "Timer",
   "version": "1.0.0",
   "description": "Arduino timer helpers",
-  "keywords": "timer, setTimeout, setInterval",
+  "keywords": [
+    "timer",
+    "setTimeout",
+    "setInterval"
+  ],
   "authors": [
     {
       "name": "Rulee Chen",
@@ -15,14 +19,18 @@
   "platforms": "*",
   "examples": [
     {
-        "name": "setTimeout",
-        "base": "examples/setTimeout",
-        "files": ["main.cpp"]
+      "name": "setTimeout",
+      "base": "examples/setTimeout",
+      "files": [
+        "main.cpp"
+      ]
     },
     {
       "name": "setInterval",
       "base": "examples/setInterval",
-      "files": ["main.cpp"]
+      "files": [
+        "main.cpp"
+      ]
     }
   ]
 }

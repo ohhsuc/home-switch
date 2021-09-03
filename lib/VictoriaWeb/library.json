@@ -1,0 +1,21 @@
+{
+  "name": "VictoriaWeb",
+  "version": "1.0.0",
+  "description": "Arduino esp8266 web server",
+  "keywords": [
+    "esp8266",
+    "web",
+    "server"
+  ],
+  "authors": [
+    {
+      "name": "Rulee Chen",
+      "email": "rulee@live.cn",
+      "url": "https://github.com/ruleechen"
+    }
+  ],
+  "license": "MIT",
+  "frameworks": "*",
+  "platforms": "*",
+  "examples": []
+}

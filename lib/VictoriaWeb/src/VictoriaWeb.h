@@ -4,6 +4,7 @@
 #include <functional>
 #include <Arduino.h>
 #include <LittleFS.h>
+#include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include "Commons.h"
@@ -26,30 +27,23 @@ namespace Victoria::Components {
    protected:
     ESP8266WebServer* _server = NULL;
     virtual void _registerHandlers();
-    void _redirectTo(const String& url);
-    void _send200(const String& bodyHtml);
-    void _send404(const String& bodyHtml);
-    void _sendHints(const String& title, const String& message);
-    String _formatPage(const String& bodyHtml);
+    virtual void _solvePageTokens(String& html);
+    void _sendHtml(const String& html);
+    void _sendJson(DynamicJsonDocument doc);
     void _dispatchRequestStart();
     void _dispatchRequestEnd();
-    void _handleNotFound();
-    void _handleCrossOrigin();
+    void _handleIndex();
     void _handleHome();
-    virtual String _appendHomeBody();
-    void _handleSystem();
-    void _handleSystemFile();
-    void _handleWifiList();
+    void _handleFileSystem();
+    void _handleFileGet();
+    void _handleFileSave();
+    void _handleFileDelete();
+    void _handleWifi();
     void _handleWifiJoin();
-    void _handleOTA();
+    void _handleOta();
+    void _handleOtaFire();
     void _handleReset();
-    virtual std::vector<SelectionOptions> _getResetList();
-    virtual void _handleResetPost();
-    // static helpers
-    static String _getCheckedAttr(bool checked);
-    static String _renderTable(const TableModel& model);
-    static String _renderSelect(const SelectModel& model);
-    static String _renderSelectionList(const std::vector<SelectionOptions>& list);
+    void _handleNotFound();
   };
 } // namespace Victoria::Components
 

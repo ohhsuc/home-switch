@@ -1,7 +1,0 @@
-<script type="text/x-tmpl" id="html-select">
-  <select name="{%=o.name%}">
-    {% for (var i=0; i<o.options.length; i++) { var opt=o.options[i]; %}
-    <option value="{%=opt.value%}"{% if(o.value===opt.value)print(' selected'); %}>{%=opt.text%}</option>
-    {% } %}
-  </select>
-</script>

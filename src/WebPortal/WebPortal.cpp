@@ -9,17 +9,26 @@ namespace Victoria::Components {
 
   void WebPortal::_registerHandlers() {
     VictoriaWeb::_registerHandlers();
-    _server->on("/radio", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
-    _server->on("/radio", HTTP_ANY, std::bind(&WebPortal::_handleRadio, this));
-    _server->on("/radio/rule", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
-    _server->on("/radio/rule", HTTP_ANY, std::bind(&WebPortal::_handleRadioRule, this));
-    _server->on("/radio/command", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
-    _server->on("/radio/command", HTTP_ANY, std::bind(&WebPortal::_handleRadioCommand, this));
-    _server->on("/service/new", HTTP_GET, std::bind(&WebPortal::_handleNewService, this));
-    _server->on("/service", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
-    _server->on("/service", HTTP_ANY, std::bind(&WebPortal::_handleService, this));
-    _server->on("/service/state", HTTP_OPTIONS, std::bind(&WebPortal::_handleCrossOrigin, this));
-    _server->on("/service/state", HTTP_ANY, std::bind(&WebPortal::_handleServiceState, this));
+    _server->serveStatic("/victoria.min.js", LittleFS, "/web/victoria.min.js");
+    _server->on(F("/service/list"), HTTP_GET, std::bind(&WebPortal::_handleServiceList, this));
+    _server->on(F("/service/add"), HTTP_POST, std::bind(&WebPortal::_handleServiceAdd, this));
+    _server->on(F("/service/reset"), HTTP_POST, std::bind(&WebPortal::_handleServiceReset, this));
+    _server->on(F("/service"), HTTP_GET, std::bind(&WebPortal::_handleServiceGet, this));
+    _server->on(F("/service"), HTTP_POST, std::bind(&WebPortal::_handleServiceSave, this));
+    _server->on(F("/service"), HTTP_DELETE, std::bind(&WebPortal::_handleServiceDelete, this));
+    _server->on(F("/service/state"), HTTP_GET, std::bind(&WebPortal::_handleServiceStateGet, this));
+    _server->on(F("/service/state"), HTTP_POST, std::bind(&WebPortal::_handleServiceStateSave, this));
+    _server->on(F("/radio"), HTTP_GET, std::bind(&WebPortal::_handleRadioGet, this));
+    _server->on(F("/radio"), HTTP_POST, std::bind(&WebPortal::_handleRadioSave, this));
+    _server->on(F("/radio/rule"), HTTP_GET, std::bind(&WebPortal::_handleRadioRuleGet, this));
+    _server->on(F("/radio/rule"), HTTP_POST, std::bind(&WebPortal::_handleRadioRuleSave, this));
+    _server->on(F("/radio/command"), HTTP_GET, std::bind(&WebPortal::_handleRadioCommandGet, this));
+    _server->on(F("/radio/command"), HTTP_POST, std::bind(&WebPortal::_handleRadioCommandSave, this));
+  }
+
+  void WebPortal::_solvePageTokens(String& html) {
+    VictoriaWeb::_solvePageTokens(html);
+    html.replace(F("{appendHead}"), F("<script src=\"victoria.min.js\"></script>"));
   }
 
   std::pair<bool, ServiceSetting> WebPortal::_getService(const String& serviceId) {
@@ -29,11 +38,6 @@ namespace Victoria::Components {
     if (model.services.count(serviceId) > 0) {
       service = model.services[serviceId];
       found = true;
-    }
-    if (!found) {
-      _sendHints("Service Not Found", "\
-        <p>Service ID: " + serviceId + "</p>\
-      ");
     }
     return std::make_pair(found, service);
   }
@@ -56,517 +60,324 @@ namespace Victoria::Components {
     }
   }
 
-  String WebPortal::_appendHomeBody() {
-    auto body = VictoriaWeb::_appendHomeBody();
-    // services
+  void WebPortal::_handleServiceList() {
+    _dispatchRequestStart();
+    DynamicJsonDocument res(512);
+    JsonArray serviceArr = res.createNestedArray(F("services"));
     auto model = serviceStorage.load();
-    auto randomId = GlobalHelpers::randomString(4);
-    auto newServiceUrl = "/service/new?id=" + randomId + "&index=" + String(model.services.size() + 1);
-    auto serviceLinks = String("\
-      <a href=\"" + newServiceUrl + "\">Add+</a>\
-    ");
     for (const auto& pair : model.services) {
-      auto url = String("/service?id=" + pair.first);
-      serviceLinks += "\
-        | <a href=\"" + url + "\">" + pair.second.name + "</a>\
-      ";
+      JsonObject serviceObj = serviceArr.createNestedObject();
+      serviceObj[F("id")] = pair.first;
+      serviceObj[F("name")] = pair.second.name;
     }
-    body += "\
-      <h3>Services</h3>\
-      <p>\
-        " + serviceLinks + "\
-      </p>\
-      <h3>Radio</h3>\
-      <p>\
-        <a href=\"/radio\">Setup</a>\
-      </p>\
-    ";
-    return body;
-  }
-
-  void WebPortal::_handleRadio() {
-    _dispatchRequestStart();
-    auto model = radioStorage.load();
-    if (_server->method() == HTTP_POST) {
-      auto inputPin = _server->arg("InputPin");
-      model.inputPin = inputPin.toInt();
-      radioStorage.save(model);
-      _redirectTo(_server->uri());
-    } else {
-      auto lastReceived = radioStorage.getLastReceived();
-      auto hasReceived = lastReceived.value.length() > 0;
-      TableModel receivedTable = {
-        .header = {},
-        .rows = {
-          { "Value", hasReceived ? lastReceived.value : "-" },
-          { "Channel", hasReceived ? String(lastReceived.channel) : "-" },
-        },
-      };
-      _send200("\
-        <p>\
-          <a href=\"/\">&lt; Home</a> |\
-          <a href=\"/radio/rule\">Rules</a> |\
-          <a href=\"/radio/command\">Commands</a>\
-        </p>\
-        <h3>Radio</h3>\
-        <form method=\"post\">\
-          <p>\
-            <label>Last received " + (hasReceived ? GlobalHelpers::timeSince(lastReceived.timestamp) + " ago" : "-") + "</label>\
-            " + _renderTable(receivedTable) + "\
-          </p>\
-          <p>\
-            <label for=\"txtInputPin\">Input Pin</label>\
-            <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" min=\"-1\" max=\"100\" value=\"" + String(model.inputPin) + "\" />\
-          </p>\
-          <p>\
-            <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
-          </p>\
-        </form>\
-      ");
-    }
+    _sendJson(res);
     _dispatchRequestEnd();
   }
 
-  void WebPortal::_handleRadioRule() {
+  void WebPortal::_handleServiceAdd() {
     _dispatchRequestStart();
-    auto model = radioStorage.load();
-    if (_server->method() == HTTP_POST) {
-      auto submit = _server->arg("Submit");
-      if (submit == "Add") {
-        auto lastReceived = radioStorage.getLastReceived();
-        model.rules.push_back({
-          .value = lastReceived.value,
-          .channel = lastReceived.channel,
-          .press = PressStateClick,
-          .action = RadioActionNone,
-          .serviceId = "",
-        });
-      } else if (submit.startsWith("Remove")) {
-        submit.remove(0, 6);
-        int removeIndex = submit.toInt();
-        int loopIndex = -1;
-        for (auto it = model.rules.begin(); it != model.rules.end(); it++) {
-          if (++loopIndex == removeIndex) {
-            model.rules.erase(it);
-            break;
-          }
-        }
-      } else {
-        std::vector<String> values;
-        std::vector<String> channels;
-        std::vector<String> pressIds;
-        std::vector<String> actionIds;
-        std::vector<String> serviceIds;
-        for (uint8_t i = 0; i < _server->args(); i++) {
-          auto argValue = _server->arg(i);
-          auto argName = _server->argName(i);
-          if (argName == "Value") {
-            values.push_back(argValue);
-          } else if (argName == "Channel") {
-            channels.push_back(argValue);
-          } else if(argName == "PressId") {
-            pressIds.push_back(argValue);
-          } else if (argName == "ActionId") {
-            actionIds.push_back(argValue);
-          } else if (argName == "ServiceId") {
-            serviceIds.push_back(argValue);
-          }
-        }
-        model.rules.clear();
-        for (size_t i = 0; i < values.size(); i++) {
-          model.rules.push_back({
-            .value = values[i],
-            .channel = strtoul(channels[i].c_str(), NULL, 10),
-            .press = RadioPressState(pressIds[i].toInt()),
-            .action = RadioAction(actionIds[i].toInt()),
-            .serviceId = serviceIds[i],
-          });
-        }
-      }
-      radioStorage.save(model);
-      _redirectTo(_server->uri());
-    } else {
-      auto serviceOptionJson = String("['','None'],");
-      auto serviceModel = serviceStorage.load();
-      for (const auto& pair : serviceModel.services) {
-        serviceOptionJson += "['" + pair.first + "','" + pair.second.name + "'],";
-      }
-      auto radioCommandsJson = String("");
-      for (const auto& rule : model.rules) {
-        radioCommandsJson += "{value:'" + rule.value + "',channel:" + String(rule.channel) + ",press:" + String(rule.press) + ",action:" + String(rule.action) + ",service:'" + rule.serviceId + "'},";
-      }
-      _send200("\
-        <p><a href=\"/radio\">&lt; Radio</a></p>\
-        <h3>Radio Rules</h3>\
-        <form method=\"post\">\
-          <p id=\"radioRules\"></p>\
-          <script type=\"text/x-tmpl\" id=\"radio-rules\">\
-            <table>\
-              <tr>\
-                <th class=\"lt\"></th>\
-                <th class=\"lt\">Value</th>\
-                <th class=\"lt\">Channel</th>\
-                <th class=\"lt\">Press</th>\
-                <th class=\"lt\">Action</th>\
-                <th class=\"lt\">Service</th>\
-              </tr>\
-              {% for (var i=0; i<o.radioRules.length; i++) { var rule=o.radioRules[i]; %}\
-              <tr>\
-                <td><button type=\"submit\" name=\"Submit\" value=\"Remove{%=i%}\" class=\"btn confirm\">Remove</button></td>\
-                <td><input type=\"text\" name=\"Value\" value=\"{%=rule.value%}\" maxlength=\"8\" /></td>\
-                <td><input type=\"number\" name=\"Channel\" min=\"-1\" max=\"100\" value=\"{%=rule.channel%}\" /></td>\
-                <td>{% include('html-select',{name:'PressId',value:rule.press,options:o.pressOptions}); %}</td>\
-                <td>{% include('html-select',{name:'ActionId',value:rule.action,options:o.actionOptions}); %}</td>\
-                <td>{% include('html-select',{name:'ServiceId',value:rule.service,options:o.serviceOptions}); %}</td>\
-              </tr>\
-              {% } %}\
-            </table>\
-          </script>\
-          <script>\
-          vic(() => {\
-            var radioRules = document.querySelector('#radioRules');\
-            if (radioRules) {\
-              radioRules.innerHTML = tmpl('radio-rules', {\
-                radioRules: [" + radioCommandsJson + "],\
-                serviceOptions: vic.arr2opts([" + serviceOptionJson + "]),\
-                pressOptions: vic.arr2opts([[1,'Click'],[2,'Double Click'],[3,'Long Press']]),\
-                actionOptions: vic.arr2opts([[0,'None'],[1,'True'],[2,'False'],[3,'Toggle'],[4,'WiFi STA'],[5,'WiFi STA+AP'],[6,'WiFi Reset'],[7,'ESP Restart']]),\
-              });\
-            }\
-          });\
-          </script>\
-          <p>\
-            <button type=\"submit\" name=\"Submit\" value=\"Add\" class=\"btn\">Add+</button>\
-            <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
-          </p>\
-        </form>\
-      ");
-    }
-    _dispatchRequestEnd();
-  }
-
-  void WebPortal::_handleRadioCommand() {
-    _dispatchRequestStart();
-    auto model = radioStorage.load();
-    if (_server->method() == HTTP_POST) {
-      auto submit = _server->arg("Submit");
-      if (submit == "Add") {
-        model.commands.push_back({
-          .entry = EntryNone,
-          .action = -1,
-          .press = PressStateClick,
-          .serviceId = "",
-        });
-      } else if (submit.startsWith("Remove")) {
-        submit.remove(0, 6);
-        int removeIndex = submit.toInt();
-        int loopIndex = -1;
-        for (auto it = model.commands.begin(); it != model.commands.end(); it++) {
-          if (++loopIndex == removeIndex) {
-            model.commands.erase(it);
-            break;
-          }
-        }
-      } else {
-        std::vector<String> entryIds;
-        std::vector<String> actionIds;
-        std::vector<String> pressIds;
-        std::vector<String> serviceIds;
-        for (uint8_t i = 0; i < _server->args(); i++) {
-          auto argValue = _server->arg(i);
-          auto argName = _server->argName(i);
-          if (argName == "EntryIdActionId") {
-            auto idParts = GlobalHelpers::splitString(argValue, "-");
-            entryIds.push_back(idParts[0]);
-            actionIds.push_back(idParts[1]);
-          } else if(argName == "PressId") {
-            pressIds.push_back(argValue);
-          } else if (argName == "ServiceId") {
-            serviceIds.push_back(argValue);
-          }
-        }
-        model.commands.clear();
-        for (size_t i = 0; i < entryIds.size(); i++) {
-          model.commands.push_back({
-            .entry = RadioCommandEntry(entryIds[i].toInt()),
-            .action = actionIds[i].toInt(),
-            .press = RadioPressState(pressIds[i].toInt()),
-            .serviceId = serviceIds[i],
-          });
-        }
-      }
-      radioStorage.save(model);
-      _redirectTo(_server->uri());
-    } else {
-      auto serviceOptionJson = String("['','None'],");
-      auto serviceModel = serviceStorage.load();
-      for (const auto& pair : serviceModel.services) {
-        serviceOptionJson += "['" + pair.first + "','" + pair.second.name + "'],";
-      }
-      auto radioCommandsJson = String("");
-      for (const auto& command : model.commands) {
-        radioCommandsJson += "{entry:" + String(command.entry) + ",action:" + String(command.action) + ",press:" + String(command.press) + ",service:'" + command.serviceId + "'},";
-      }
-      _send200("\
-        <p><a href=\"/radio\">&lt; Radio</a></p>\
-        <h3>Radio Commands</h3>\
-        <form method=\"post\">\
-          <p id=\"radioCommands\"></p>\
-          <script type=\"text/x-tmpl\" id=\"radio-commands\">\
-            <table>\
-              <tr>\
-                <th class=\"lt\"></th>\
-                <th class=\"lt\">Entry</th>\
-                <th class=\"lt\">Press</th>\
-                <th class=\"lt\">Service</th>\
-              </tr>\
-              {% for (var i=0; i<o.radioCommands.length; i++) { var command=o.radioCommands[i]; %}\
-              <tr>\
-                <td><button type=\"submit\" name=\"Submit\" value=\"Remove{%=i%}\" class=\"btn confirm\">Remove</button></td>\
-                <td>{% include('html-select',{name:'EntryIdActionId',value:command.entry+'-'+command.action,options:o.entryActionOptions}); %}</td>\
-                <td>{% include('html-select',{name:'PressId',value:command.press,options:o.pressOptions}); %}</td>\
-                <td>{% include('html-select',{name:'ServiceId',value:command.service,options:o.serviceOptions}); %}</td>\
-              </tr>\
-              {% } %}\
-            </table>\
-          </script>\
-          <script>\
-          vic(() => {\
-            var radioCommands = document.querySelector('#radioCommands');\
-            if (radioCommands) {\
-              radioCommands.innerHTML = tmpl('radio-commands', {\
-                radioCommands: [" + radioCommandsJson + "],\
-                serviceOptions: vic.arr2opts([" + serviceOptionJson + "]),\
-                entryActionOptions: vic.arr2opts([['0-0','None'],['1-1','wifi-join'],['1-2','wifi-mode'],['1-3','wifi-reset'],['2-1','app-name'],['2-2','app-ota'],['3-1','esp-restart'],['4-1','boolean-set'],['4-2','boolean-toggle']]),\
-                pressOptions: vic.arr2opts([[1,'Click'],[2,'Double Click'],[3,'Long Press']]),\
-              });\
-            }\
-          });\
-          </script>\
-          <p>\
-            <button type=\"submit\" name=\"Submit\" value=\"Add\" class=\"btn\">Add+</button>\
-            <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
-          </p>\
-        </form>\
-      ");
-    }
-    _dispatchRequestEnd();
-  }
-
-  void WebPortal::_handleNewService() {
-    _dispatchRequestStart();
-    auto serviceId = _server->arg("id");
-    auto serviceIndex = _server->arg("index");
-    // new
+    auto serviceId = GlobalHelpers::randomString(4);
     ServiceSetting newSetting = {
-      .name = "New" + serviceIndex,
+      .name = F("New-") + serviceId,
       .type = BooleanServiceType,
     };
     _saveService(serviceId, newSetting);
-    // redirect
-    auto url = String("/service?id=" + serviceId);
-    _redirectTo(url);
+    DynamicJsonDocument res(64);
+    res[F("id")] = serviceId;
+    _sendJson(res);
     _dispatchRequestEnd();
   }
 
-  void WebPortal::_handleService() {
+  void WebPortal::_handleServiceReset() {
     _dispatchRequestStart();
-    auto serviceId = _server->arg("id");
-    auto currentUrl = String("/service?id=" + serviceId);
-    auto found = _getService(serviceId);
-    if (!found.first) {
-      _dispatchRequestEnd();
-      return;
+    DynamicJsonDocument res(512);
+    if (onResetAccessory) {
+      onResetAccessory();
+      res[F("message")] = String(F("success"));
     }
-    ServiceSetting service = found.second;
-    if (_server->method() == HTTP_POST) {
-      auto serviceName = _server->arg("ServiceName");
-      auto serviceType = _server->arg("ServiceType");
-      auto inputPin = _server->arg("InputPin");
-      auto outputPin = _server->arg("OutputPin");
-      auto inputTrueValue = _server->arg("InputTrueValue");
-      auto outputTrueValue = _server->arg("OutputTrueValue");
-      auto submit = _server->arg("Submit");
-      if (submit == "Delete") {
-        _deleteService(serviceId, service);
-        _redirectTo("/");
-      } else {
-        service.name = serviceName;
-        service.type =
-          serviceType == "boolean" ? BooleanServiceType :
-          serviceType == "integer" ? IntegerServiceType : EmptyServiceType;
-        service.inputPin = inputPin.toInt();
-        service.outputPin = outputPin.toInt();
-        service.inputTrueValue = inputTrueValue.toInt();
-        service.outputTrueValue = outputTrueValue.toInt();
-        _saveService(serviceId, service);
-        _redirectTo(currentUrl);
-      }
+    _sendJson(res);
+    _dispatchRequestEnd();
+  }
+
+  void WebPortal::_handleServiceGet() {
+    _dispatchRequestStart();
+    auto id = _server->arg(F("id"));
+    auto found = _getService(id);
+    DynamicJsonDocument res(512);
+    JsonObject serviceObj = res.createNestedObject(F("service"));
+    if (found.first) {
+      serviceObj[F("id")] = id;
+      serviceObj[F("name")] = found.second.name;
+      serviceObj[F("type")] = found.second.type;
+      serviceObj[F("inputPin")] = found.second.inputPin;
+      serviceObj[F("outputPin")] = found.second.outputPin;
+      serviceObj[F("inputTrueValue")] = found.second.inputTrueValue;
+      serviceObj[F("outputTrueValue")] = found.second.outputTrueValue;
     } else {
-      _send200("\
-        <p>\
-          <a href=\"/\">&lt; Home</a> |\
-          <a href=\"/service/state?id=" + serviceId + "\">State</a>\
-        </p>\
-        <h3>Setting (" + service.name + ")</h3>\
-        <form method=\"post\">\
-          <p>\
-            <label for=\"txtServiceName\">Name</label>\
-            <input type=\"text\" id=\"txtServiceName\" name=\"ServiceName\" maxlength=\"20\" value=\"" + service.name + "\" />\
-          </p>\
-          " + _getTypeHtml(service) + "\
-          " + _getIOHtml(service) + "\
-          <p>\
-            <button type=\"submit\" name=\"Submit\" value=\"Save\" class=\"btn\">Save</button>\
-            <button type=\"submit\" name=\"Submit\" value=\"Delete\" class=\"btnWeak confirm\">Delete</button>\
-          </p>\
-        </form>\
-      ");
+      res[F("error")] = String(F("Can't find the service"));
     }
+    _sendJson(res);
     _dispatchRequestEnd();
   }
 
-  void WebPortal::_handleServiceState() {
+  void WebPortal::_handleServiceSave() {
     _dispatchRequestStart();
-    auto serviceId = _server->arg("id");
-    auto backUrl = String("/service?id=" + serviceId);
-    auto currentUrl = String("/service/state?id=" + serviceId);
-    auto found = _getService(serviceId);
-    if (!found.first) {
-      _dispatchRequestEnd();
-      return;
+    DynamicJsonDocument res(64);
+    auto id = _server->arg(F("id"));
+    auto found = _getService(id);
+    if (found.first) {
+      // payload
+      auto payloadJson = _server->arg(F("plain"));
+      DynamicJsonDocument payload(512);
+      deserializeJson(payload, payloadJson);
+      // read
+      auto name = String(payload[F("name")]);
+      auto type = String(payload[F("type")]);
+      auto inputPin = String(payload[F("inputPin")]);
+      auto outputPin = String(payload[F("outputPin")]);
+      auto inputTrueValue = String(payload[F("inputTrueValue")]);
+      auto outputTrueValue = String(payload[F("outputTrueValue")]);
+      // save
+      ServiceSetting service = found.second;
+      service.name = name;
+      service.type = ServiceType(type.toInt());
+      service.inputPin = inputPin.toInt();
+      service.outputPin = outputPin.toInt();
+      service.inputTrueValue = inputTrueValue.toInt();
+      service.outputTrueValue = outputTrueValue.toInt();
+      _saveService(id, service);
+      res[F("message")] = String(F("success"));
+    } else {
+      res[F("error")] = String(F("Can't find the service"));
     }
-    ServiceSetting service = found.second;
-    ServiceState state = {
-      .boolValue = false,
-      .intValue = 0,
-    };
-    if (_server->method() == HTTP_POST) {
-      if (_server->hasArg("BooleanValue")) {
-        auto booleanValue = _server->arg("BooleanValue");
-        state.boolValue = (booleanValue == "1");
+    _sendJson(res);
+    _dispatchRequestEnd();
+  }
+
+  void WebPortal::_handleServiceDelete() {
+    _dispatchRequestStart();
+    DynamicJsonDocument res(64);
+    auto id = _server->arg(F("id"));
+    auto found = _getService(id);
+    if (found.first) {
+      _deleteService(id, found.second);
+      res[F("message")] = String(F("success"));
+    } else {
+      res[F("error")] = String(F("Can't find the service"));
+    }
+    _sendJson(res);
+    _dispatchRequestEnd();
+  }
+
+  void WebPortal::_handleServiceStateGet() {
+    _dispatchRequestStart();
+    DynamicJsonDocument res(512);
+    auto id = _server->arg(F("id"));
+    auto found = _getService(id);
+    if (found.first) {
+      ServiceSetting service = found.second;
+      ServiceState state = {
+        .boolValue = false,
+        .intValue = 0,
+      };
+      if (onGetServiceState) {
+        state = onGetServiceState(id, service);
       }
-      if (_server->hasArg("IntegerValue")) {
-        auto integerValue = _server->arg("IntegerValue");
-        state.intValue = integerValue.toInt();
+      JsonObject serviceObj = res.createNestedObject(F("service"));
+      serviceObj[F("id")] = id;
+      serviceObj[F("name")] = service.name;
+      serviceObj[F("type")] = service.type;
+      JsonObject valueObj = res.createNestedObject(F("value"));
+      valueObj[F("boolValue")] = state.boolValue;
+      valueObj[F("intValue")] = state.intValue;
+      res[F("message")] = String(F("success"));
+    } else {
+      res[F("error")] = String(F("Can't find the service"));
+    }
+    _sendJson(res);
+    _dispatchRequestEnd();
+  }
+
+  void WebPortal::_handleServiceStateSave() {
+    _dispatchRequestStart();
+    DynamicJsonDocument res(512);
+    auto id = _server->arg(F("id"));
+    auto found = _getService(id);
+    if (found.first) {
+      ServiceSetting service = found.second;
+      ServiceState state = {
+        .boolValue = false,
+        .intValue = 0,
+      };
+      // payload
+      auto payloadJson = _server->arg(F("plain"));
+      DynamicJsonDocument payload(64);
+      deserializeJson(payload, payloadJson);
+      // action
+      if (service.type == BooleanServiceType) {
+        auto boolValue = String(payload[F("boolValue")]);
+        state.boolValue = (boolValue == F("true"));
+      }
+      if (service.type == IntegerServiceType) {
+        auto intValue = String(payload[F("intValue")]);
+        state.intValue = intValue.toInt();
       }
       if (onSetServiceState) {
-        onSetServiceState(serviceId, service, state);
+        onSetServiceState(id, service, state);
       }
-      _redirectTo(currentUrl);
+      res[F("message")] = String(F("success"));
     } else {
-      if (onGetServiceState) {
-        state = onGetServiceState(serviceId, service);
-      }
-      auto stateHtml =
-        service.type == BooleanServiceType ? _getBooleanHtml(state) :
-        service.type == IntegerServiceType ? _getIntegerHtml(state) : String("");
-      _send200("\
-        <p>\
-          <a href=\"" + backUrl + "\">&lt; Setting (" + service.name + ")</a>\
-        </p>\
-        <h3>State (" + service.name + ")</h3>\
-        <form method=\"post\">\
-          " + stateHtml + "\
-          <p>\
-            <button type=\"submit\" class=\"btn\">Save</button>\
-          </p>\
-        </form>\
-      ");
+      res[F("error")] = String(F("Can't find the service"));
     }
+    _sendJson(res);
     _dispatchRequestEnd();
   }
 
-  String WebPortal::_getTypeHtml(const ServiceSetting& service) {
-    auto html = String("\
-      <fieldset>\
-        <legend>Service Type</legend>\
-        " + _renderSelectionList({
-          { .inputType = "radio", .inputName = "ServiceType", .inputValue = "boolean", .isChecked = (service.type == BooleanServiceType), .labelText = "Boolean - Service with boolean value such as switcher(on/off), shake sensor(yes/no)" },
-          { .inputType = "radio", .inputName = "ServiceType", .inputValue = "integer", .isChecked = (service.type == IntegerServiceType), .labelText = "Integer - Service with integer value such as temperature, humidness" },
-        }) + "\
-      </fieldset>\
-    ");
-    return html;
+  void WebPortal::_handleRadioGet() {
+    _dispatchRequestStart();
+    DynamicJsonDocument res(512);
+    auto model = radioStorage.load();
+    auto lastReceived = radioStorage.getLastReceived();
+    res[F("inputPin")] = model.inputPin;
+    JsonObject lastReceivedObj = res.createNestedObject(F("lastReceived"));
+    lastReceivedObj[F("value")] = lastReceived.value;
+    lastReceivedObj[F("channel")] = lastReceived.channel;
+    lastReceivedObj[F("timestamp")] = lastReceived.timestamp;
+    lastReceivedObj[F("timeSince")] = GlobalHelpers::timeSince(lastReceived.timestamp);
+    _sendJson(res);
+    _dispatchRequestEnd();
   }
 
-  String WebPortal::_getIOHtml(const ServiceSetting& service) {
-    auto html = String("\
-      <fieldset>\
-        <legend>IO Pins</legend>\
-        <p>\
-          <label for=\"txtInputPin\">Input</label>\
-          <input type=\"number\" id=\"txtInputPin\" name=\"InputPin\" min=\"-1\" max=\"100\" value=\"" + String(service.inputPin) + "\" />\
-          " + _getTrueValueHtml("InputTrueValue", service.inputTrueValue) + "\
-        </p>\
-        <p>\
-          <label for=\"txtOutputPin\">Output</label>\
-          <input type=\"number\" id=\"txtOutputPin\" name=\"OutputPin\" min=\"-1\" max=\"100\" value=\"" + String(service.outputPin) + "\" />\
-          " + _getTrueValueHtml("OutputTrueValue", service.outputTrueValue) + "\
-        </p>\
-      </fieldset>\
-    ");
-    return html;
+  void WebPortal::_handleRadioSave() {
+    _dispatchRequestStart();
+    // payload
+    auto payloadJson = _server->arg(F("plain"));
+    DynamicJsonDocument payload(64);
+    deserializeJson(payload, payloadJson);
+    // read
+    auto inputPin = String(payload[F("inputPin")]);
+    // action
+    auto model = radioStorage.load();
+    model.inputPin = inputPin.toInt();
+    radioStorage.save(model);
+    DynamicJsonDocument res(64);
+    res[F("message")] = String(F("success"));
+    _sendJson(res);
+    _dispatchRequestEnd();
   }
 
-  String WebPortal::_getTrueValueHtml(const String& name, const int& trueValue) {
-    return String("\
-      <span>Use</span>\
-      <label for=\"txt" + name + "High\">\
-        <span>HIGH</span>\
-        <input type=\"radio\" id=\"txt" + name + "High\" name=\"" + name + "\" value=\"1\"" + _getCheckedAttr(trueValue == 1) + " />\
-      </label>\
-      <label for=\"txt" + name + "Low\">\
-        <span>LOW</span>\
-        <input type=\"radio\" id=\"txt" + name + "Low\" name=\"" + name + "\" value=\"0\"" + _getCheckedAttr(trueValue == 0) + " />\
-      </label>\
-      <span>as true value</span>\
-    ");
-  }
-
-  String WebPortal::_getBooleanHtml(const ServiceState& state) {
-    auto html = String("\
-      <fieldset>\
-        <legend>Boolean Value</legend>\
-        " + _renderSelectionList({
-          { .inputType = "radio", .inputName = "BooleanValue", .inputValue = "1", .isChecked = state.boolValue, .labelText = "On/Yes/True" },
-          { .inputType = "radio", .inputName = "BooleanValue", .inputValue = "0", .isChecked = !state.boolValue, .labelText = "Off/No/False" },
-        }) + "\
-      </fieldset>\
-    ");
-    return html;
-  }
-
-  String WebPortal::_getIntegerHtml(const ServiceState& state) {
-    auto html = String("\
-      <fieldset>\
-        <legend>Integer Value</legend>\
-        <p>\
-          <label for=\"txtIntegerValue\">Value</label>\
-          <input type=\"number\" id=\"txtIntegerValue\" name=\"IntegerValue\" value=\"" + String(state.intValue) + "\"/>\
-        </p>\
-      </fieldset>\
-    ");
-    return html;
-  }
-
-  std::vector<SelectionOptions> WebPortal::_getResetList() {
-    auto list = VictoriaWeb::_getResetList();
-    list.push_back({
-      .inputType = "checkbox",
-      .inputName = "AccessoryReset",
-      .inputValue = "1",
-      .isChecked = false,
-      .labelText = "Reset Accessory",
-    });
-    return list;
-  }
-
-  void WebPortal::_handleResetPost() {
-    VictoriaWeb::_handleResetPost();
-    if (_server->arg("AccessoryReset") == "1" && onResetAccessory) {
-      onResetAccessory();
+  void WebPortal::_handleRadioRuleGet() {
+    _dispatchRequestStart();
+    DynamicJsonDocument res(1024);
+    // rules
+    auto model = radioStorage.load();
+    JsonArray ruleArr = res.createNestedArray(F("rules"));
+    for (const auto& rule : model.rules) {
+      JsonObject ruleObj = ruleArr.createNestedObject();
+      ruleObj[F("value")] = rule.value;
+      ruleObj[F("channel")] = rule.channel;
+      ruleObj[F("press")] = rule.press;
+      ruleObj[F("action")] = rule.action;
+      ruleObj[F("serviceId")] = rule.serviceId;
     }
+    // service
+    auto serviceModel = serviceStorage.load();
+    JsonArray serviceArr = res.createNestedArray(F("services"));
+    for (const auto& pair : serviceModel.services) {
+      JsonObject serviceObj = serviceArr.createNestedObject();
+      serviceObj[F("id")] = pair.first;
+      serviceObj[F("name")] = pair.second.name;
+    }
+    // last received
+    auto lastReceived = radioStorage.getLastReceived();
+    JsonObject lastReceivedObj = res.createNestedObject(F("lastReceived"));
+    lastReceivedObj[F("value")] = lastReceived.value;
+    lastReceivedObj[F("channel")] = lastReceived.channel;
+    // end
+    _sendJson(res);
+    _dispatchRequestEnd();
+  }
+
+  void WebPortal::_handleRadioRuleSave() {
+    _dispatchRequestStart();
+    // payload
+    auto payloadJson = _server->arg(F("plain"));
+    DynamicJsonDocument payload(1024);
+    deserializeJson(payload, payloadJson);
+    // read
+    auto ruleItems = payload["rules"];
+    // save
+    auto model = radioStorage.load();
+    model.rules.clear();
+    for (size_t i = 0; i < ruleItems.size(); i++) {
+      auto item = ruleItems[i];
+      model.rules.push_back({
+        .value = String(item[F("value")]),
+        .channel = strtoul(item[F("channel")], NULL, 10),
+        .press = RadioPressState(String(item[F("press")]).toInt()),
+        .action = RadioAction(String(item[F("action")]).toInt()),
+        .serviceId = String(item[F("serviceId")]),
+      });
+    }
+    radioStorage.save(model);
+    // res
+    DynamicJsonDocument res(64);
+    res[F("message")] = String(F("success"));
+    _sendJson(res);
+    _dispatchRequestEnd();
+  }
+
+  void WebPortal::_handleRadioCommandGet() {
+    _dispatchRequestStart();
+    DynamicJsonDocument res(1024);
+    // commands
+    auto model = radioStorage.load();
+    JsonArray commandArr = res.createNestedArray(F("commands"));
+    for (const auto& command : model.commands) {
+      JsonObject commandObj = commandArr.createNestedObject();
+      commandObj[F("entry")] = command.entry;
+      commandObj[F("action")] = command.action;
+      commandObj[F("press")] = command.press;
+      commandObj[F("serviceId")] = command.serviceId;
+    }
+    // service
+    auto serviceModel = serviceStorage.load();
+    JsonArray serviceArr = res.createNestedArray(F("services"));
+    for (const auto& pair : serviceModel.services) {
+      JsonObject serviceObj = serviceArr.createNestedObject();
+      serviceObj[F("id")] = pair.first;
+      serviceObj[F("name")] = pair.second.name;
+    }
+    // end
+    _sendJson(res);
+    _dispatchRequestEnd();
+  }
+
+  void WebPortal::_handleRadioCommandSave() {
+    _dispatchRequestStart();
+    // payload
+    auto payloadJson = _server->arg(F("plain"));
+    DynamicJsonDocument payload(1024);
+    deserializeJson(payload, payloadJson);
+    // read
+    auto commandItems = payload["commands"];
+    // save
+    auto model = radioStorage.load();
+    model.commands.clear();
+    for (size_t i = 0; i < commandItems.size(); i++) {
+      auto item = commandItems[i];
+      model.commands.push_back({
+        .entry = RadioCommandEntry(String(item[F("entry")]).toInt()),
+        .action = String(item[F("action")]).toInt(),
+        .press = RadioPressState(String(item[F("press")]).toInt()),
+        .serviceId = String(item[F("serviceId")]),
+      });
+    }
+    radioStorage.save(model);
+    DynamicJsonDocument res(64);
+    res[F("message")] = String(F("success"));
+    _sendJson(res);
+    _dispatchRequestEnd();
   }
 
 } // namespace Victoria::Components

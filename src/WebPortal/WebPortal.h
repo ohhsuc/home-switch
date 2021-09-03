@@ -28,23 +28,24 @@ namespace Victoria::Components {
 
    private:
     void _registerHandlers() override;
+    void _solvePageTokens(String& html) override;
     std::pair<bool, ServiceSetting> _getService(const String& serviceId);
     void _saveService(const String& serviceId, const ServiceSetting& service);
     void _deleteService(const String& serviceId, const ServiceSetting& service);
-    String _appendHomeBody() override;
-    void _handleRadio();
-    void _handleRadioRule();
-    void _handleRadioCommand();
-    void _handleNewService();
-    void _handleService();
-    void _handleServiceState();
-    std::vector<SelectionOptions> _getResetList() override;
-    void _handleResetPost() override;
-    static String _getTypeHtml(const ServiceSetting& service);
-    static String _getIOHtml(const ServiceSetting& service);
-    static String _getTrueValueHtml(const String& name, const int& trueValue);
-    static String _getBooleanHtml(const ServiceState& state);
-    static String _getIntegerHtml(const ServiceState& state);
+    void _handleServiceList();
+    void _handleServiceAdd();
+    void _handleServiceReset();
+    void _handleServiceGet();
+    void _handleServiceSave();
+    void _handleServiceDelete();
+    void _handleServiceStateGet();
+    void _handleServiceStateSave();
+    void _handleRadioGet();
+    void _handleRadioSave();
+    void _handleRadioRuleGet();
+    void _handleRadioRuleSave();
+    void _handleRadioCommandGet();
+    void _handleRadioCommandSave();
   };
 } // namespace Victoria::Components
 

@@ -1,5 +1,5 @@
 {
-  "version": "0.1",
+  "version": "0.2",
   "words": [
     "rulee",
     "chen",
@@ -9,7 +9,9 @@
     "println",
     "wifi",
     "ssid",
+    "rssi",
     "mDNS",
-    "tmpl"
+    "mithril",
+    "oninit"
   ]
 }
