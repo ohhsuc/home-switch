@@ -10,21 +10,21 @@ namespace Victoria::Components {
     _messageHandler = handler;
   }
   void IMeshLoader::send(const MeshMessage& message) {
-    console.log("[IMeshLoader] send()");
+    console.log(F("[IMeshLoader] send()"));
   }
 
   // RadioFrequencyMeshLoader
   RadioFrequencyMeshLoader::RadioFrequencyMeshLoader(uint8_t inputPin) : IMeshLoader(inputPin) {
   }
   void RadioFrequencyMeshLoader::send(const MeshMessage& message) {
-    console.log("[RadioFrequencyMeshLoader] send()");
+    console.log(F("[RadioFrequencyMeshLoader] send()"));
   }
 
   // BluetoothMeshLoader
   BluetoothMeshLoader::BluetoothMeshLoader(uint8_t inputPin) : IMeshLoader(inputPin) {
   }
   void BluetoothMeshLoader::send(const MeshMessage& message) {
-    console.log("[BluetoothMeshLoader] send()");
+    console.log(F("[BluetoothMeshLoader] send()"));
   }
 
   // Mesher
@@ -41,7 +41,7 @@ namespace Victoria::Components {
         // ignore (launched by ourself)
       } else {
         message.replyId = _id;
-        message.content = "pong";
+        message.content = F("pong");
         _loader->send(message);
       }
     } else if (message.type == MESH_WIFI_REQUEST) {
@@ -62,13 +62,13 @@ namespace Victoria::Components {
     }
   }
   void Mesher::send(MeshMessageType type) {
-    send(type, "");
+    send(type, F(""));
   }
   void Mesher::send(MeshMessageType type, const String& content) {
     MeshMessage message = {
       .type = type,
       .sourceId = _id,
-      .replyId = "",
+      .replyId = F(""),
       .content = content,
     };
     _loader->send(message);

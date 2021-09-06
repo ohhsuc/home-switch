@@ -58,17 +58,16 @@ namespace Victoria::Components {
             // convert
             _deserializeFrom(model, doc);
           } else {
-            console.error("failed to parse config file");
-            console.error(error.f_str());
+            console.error().write(F("failed to parse config file ")).write(error.f_str()).newline();
           }
         } else {
-          console.error("config file size is too large");
+          console.error(F("config file size is too large"));
         }
       } else {
-        console.error("failed to open config file");
+        console.error(F("failed to open config file"));
       }
     } else {
-      console.error("file notfound " + _filePath);
+      console.error().write(F("file notfound ")).write(_filePath).newline();
     }
     return model;
   }
@@ -89,7 +88,7 @@ namespace Victoria::Components {
       file.close();
       success = true;
     } else {
-      console.error("failed to open config file for writing");
+      console.error(F("failed to open config file for writing"));
     }
     return success;
   }

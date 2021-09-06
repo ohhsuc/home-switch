@@ -3,7 +3,7 @@
 namespace Victoria::Components {
 
   RadioStorage::RadioStorage() {
-    _filePath = "/radio.json";
+    _filePath = F("/radio.json");
     _lastReceived = {}; // empty value
   }
 
@@ -16,9 +16,9 @@ namespace Victoria::Components {
   }
 
   void RadioStorage::_serializeTo(const RadioModel& model, DynamicJsonDocument& doc) {
-    doc["i"] = model.inputPin;
-    JsonArray ruleItems = doc.createNestedArray("rules");
-    JsonArray commandItems = doc.createNestedArray("commands");
+    doc[F("i")] = model.inputPin;
+    JsonArray ruleItems = doc.createNestedArray(F("rules"));
+    JsonArray commandItems = doc.createNestedArray(F("commands"));
     for (const auto& rule : model.rules) {
       JsonArray item = ruleItems.createNestedArray();
       item[0] = rule.value;
@@ -37,9 +37,9 @@ namespace Victoria::Components {
   }
 
   void RadioStorage::_deserializeFrom(RadioModel& model, const DynamicJsonDocument& doc) {
-    model.inputPin = doc["i"];
-    auto ruleItems = doc["rules"];
-    auto commandItems = doc["commands"];
+    model.inputPin = doc[F("i")];
+    auto ruleItems = doc[F("rules")];
+    auto commandItems = doc[F("commands")];
     for (size_t i = 0; i < ruleItems.size(); i++) {
       auto item = ruleItems[i];
       RadioRule rule = {

@@ -20,7 +20,7 @@ namespace Victoria::Components {
       WiFi.softAP(hostName); // name which is displayed on AP list
       auto currentApIp = WiFi.softAPIP();
       if (currentApIp) {
-        console.log("[Wifi] AP Address > " + currentApIp.toString());
+        console.log().write(F("[Wifi] AP Address > ")).write(currentApIp.toString()).newline();
       }
     }
 
@@ -36,19 +36,19 @@ namespace Victoria::Components {
     // wifi_config_reset();
     WiFi.disconnect(true);
     WiFi.mode(WIFI_AP_STA);
-    console.log("[Wifi] mode > WIFI_AP_STA");
+    console.log(F("[Wifi] mode > WIFI_AP_STA"));
   }
 
   void VictoriaWifi::join(String ssid, String password, bool waitForConnecting) {
-    console.log("[Wifi] ssid > " + ssid);
-    console.log("[Wifi] password > " + password);
+    console.log().write(F("[Wifi] ssid > ")).write(ssid).newline();
+    console.log().write(F("[Wifi] password > ")).write(password).newline();
     WiFi.persistent(true);
     WiFi.begin(ssid, password);
     if (waitForConnecting) {
       auto checkTimes = 60;
       while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        console.write(".");
+        console.write(F("."));
         if (checkTimes == 0) {
           break;
         } else {
@@ -61,7 +61,7 @@ namespace Victoria::Components {
 
   String VictoriaWifi::getHostId() {
     auto id = WiFi.macAddress();
-    id.replace(":", "");
+    id.replace(F(":"), F(""));
     id.toUpperCase();
     id = id.substring(id.length() - 6);
     return id;
@@ -71,7 +71,7 @@ namespace Victoria::Components {
     auto id = getHostId();
 
     auto version = String(FirmwareVersion);
-    version.replace(".", "");
+    version.replace(F("."), F(""));
 
     auto model = appStorage.load();
     auto productName = model.name.length() > 0
@@ -79,8 +79,8 @@ namespace Victoria::Components {
       : FirmwareName;
 
     auto hostName = includeVersion
-      ? productName + "-" + id + "-" + version
-      : productName + "-" + id;
+      ? productName + F("-") + id + F("-") + version
+      : productName + F("-") + id;
 
     return hostName;
   }
@@ -88,23 +88,23 @@ namespace Victoria::Components {
   void VictoriaWifi::_onWifiEvent(WiFiEvent_t event) {
     switch (event) {
       case WiFiEvent::WIFI_EVENT_STAMODE_CONNECTED: {
-        console.log("[Wifi] event > STA connected");
+        console.log(F("[Wifi] event > STA connected"));
         break;
       }
       case WiFiEvent::WIFI_EVENT_STAMODE_DISCONNECTED: {
-        console.log("[Wifi] event > STA disconnected");
+        console.log(F("[Wifi] event > STA disconnected"));
         break;
       }
       case WiFiEvent::WIFI_EVENT_STAMODE_GOT_IP: {
-        console.log("[Wifi] event > STA got ip");
+        console.log(F("[Wifi] event > STA got ip"));
         break;
       }
       case WiFiEvent::WIFI_EVENT_SOFTAPMODE_STACONNECTED: {
-        console.log("[Wifi] event > AP connected");
+        console.log(F("[Wifi] event > AP connected"));
         break;
       }
       case WiFiEvent::WIFI_EVENT_SOFTAPMODE_STADISCONNECTED: {
-        console.log("[Wifi] event > AP disconnected");
+        console.log(F("[Wifi] event > AP disconnected"));
         break;
       }
       default: {

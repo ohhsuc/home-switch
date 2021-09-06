@@ -17,7 +17,7 @@ namespace Victoria::Components {
   }
 
   String VictoriaOTA::checkNewVersion() {
-    return "999999";
+    return F("999999");
   }
 
   void VictoriaOTA::update(String version, VOtaType type) {
@@ -49,8 +49,8 @@ namespace Victoria::Components {
     auto currentVersion = getCurrentVersion();
     auto newVersion = checkNewVersion();
     // 21.3.10 --> 21310
-    currentVersion.replace(".", "");
-    newVersion.replace(".", "");
+    currentVersion.replace(F("."), F(""));
+    newVersion.replace(F("."), F(""));
     // compare
     if (newVersion.toInt() > currentVersion.toInt()) {
       update(newVersion, type);
@@ -60,30 +60,30 @@ namespace Victoria::Components {
   void VictoriaOTA::_updateSketch() {
     WiFiClient client;
     auto currentVersion = getCurrentVersion();
-    ESPhttpUpdate.update(client, "http://wwww.rulee.cn/esp8266/firmware.bin", currentVersion);
+    ESPhttpUpdate.update(client, F("http://wwww.rulee.cn/esp8266/firmware.bin"), currentVersion);
   }
 
   void VictoriaOTA::_updateFileSystem() {
     WiFiClient client;
     auto currentVersion = getCurrentVersion();
-    ESPhttpUpdate.updateFS(client, "http://wwww.rulee.cn/esp8266/littlefs.bin", currentVersion);
+    ESPhttpUpdate.updateFS(client, F("http://wwww.rulee.cn/esp8266/littlefs.bin"), currentVersion);
   }
 
   void VictoriaOTA::_onStart() {
-    console.log("[VictoriaOTA] start updating");
+    console.log(F("[VictoriaOTA] start updating"));
   }
 
   void VictoriaOTA::_onEnd() {
-    console.log("[VictoriaOTA] update finished");
+    console.log(F("[VictoriaOTA] update finished"));
   }
 
   void VictoriaOTA::_onProgress(int progress, int total) {
-    console.log("[VictoriaOTA] progress " + String(progress / (total / 100)) + "%");
+    console.log().write(F("[VictoriaOTA] progress ")).write(String(progress / (total / 100))).write(F("%")).newline();
   }
 
   void VictoriaOTA::_onError(int error) {
     auto message = ESPhttpUpdate.getLastErrorString();
-    console.error("[VictoriaOTA] error " + String(error) + ", message " + message);
+    console.error().write(F("[VictoriaOTA] error ")).write(String(error)).write(F(", message ")).write(message).newline();
   }
 
 } // namespace Victoria::Components

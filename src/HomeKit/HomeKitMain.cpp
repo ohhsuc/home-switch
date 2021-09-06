@@ -46,7 +46,7 @@ namespace Victoria::HomeKit {
 
   void HomeKitMain::clear() {
     _idServiceMap.clear();
-    _forKeepingHostName = "";
+    _forKeepingHostName = F("");
   }
 
   void HomeKitMain::setup(String hostName) {

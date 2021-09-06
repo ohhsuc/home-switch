@@ -8,38 +8,59 @@ namespace Victoria {
     Serial.begin(baud);
   }
 
-  void Console::log(const String& log) {
-    write(_format("log", log), true);
+  Console Console::log() {
+    ts().writeType(F("log"));
+    return console;
   }
 
-  void Console::error(const String& error) {
-    write(_format("error", error), true);
+  Console Console::log(const String& message) {
+    log().write(message).newline();
+    return console;
   }
 
-  void Console::debug(const String& debug) {
-    write(_format("debug", debug), true);
+  Console Console::error() {
+    ts().writeType(F("error"));
+    return console;
   }
 
-  void Console::write(const String& message) {
-    write(message, false);
+  Console Console::error(const String& message) {
+    error().write(message).newline();
+    return console;
   }
 
-  void Console::newline() {
-    write("", true);
+  Console Console::debug() {
+    ts().writeType(F("debug"));
+    return console;
   }
 
-  void Console::write(const String& message, bool newline) {
-    if (newline) {
-      Serial.println(message);
-    } else {
-      Serial.print(message);
-    }
+  Console Console::debug(const String& message) {
+    debug().write(message).newline();
+    return console;
   }
 
-  String Console::_format(const String& type, const String& message) {
+  Console Console::ts() {
     auto now = millis();
-    auto content = "[" + String(now) + "][" + type + "] " + message;
-    return content;
+    write(F("["));
+    write(String(now));
+    write(F("]"));
+    return console;
+  }
+
+  Console Console::newline() {
+    Serial.println(F(""));
+    return console;
+  }
+
+  Console Console::writeType(const String& type) {
+    write(F("["));
+    write(type);
+    write(F("]"));
+    return console;
+  }
+
+  Console Console::write(const String& message) {
+    Serial.print(message);
+    return console;
   }
 
   // global

@@ -87,14 +87,14 @@ void setRadioCommand(const RadioCommandParsed& command) {
 void onStateChange(const ServiceState& state) {
   builtinLed->flash();
   timesTrigger.count();
-  console.log("boolean value " + String(state.boolValue));
-  console.log("integer value " + String(state.intValue));
+  console.log().write(F("boolean value ")).write(String(state.boolValue)).newline();
+  console.log().write(F("integer value ")).write(String(state.intValue)).newline();
 }
 
 void setup(void) {
   console.begin(115200);
   if (!LittleFS.begin()) {
-    console.error("LittleFS mount failed");
+    console.error(F("LittleFS mount failed"));
   }
 
   builtinLed = new BuiltinLed();
@@ -112,19 +112,21 @@ void setup(void) {
   webPortal.setup();
 
   radioPortal.onMessage = [](const RadioMessage& message) {
-    console.log("[Radio] > received [" + message.id + "!" + message.value + "] from channel [" + String(message.channel) + "]");
+    console.log()
+      .write(F("[Radio] > received [")).write(message.id).write(F("!")).write(message.value).write(F("]"))
+      .write(F(" from channel [")).write(String(message.channel)).write(F("]")).newline();
     builtinLed->flash();
   };
   radioPortal.onAction = setRadioAction;
   radioPortal.onCommand = setRadioCommand;
   radioPortal.setup();
 
-  timesTrigger.onTimesOut = []() { console.log("times out!"); };
+  timesTrigger.onTimesOut = []() { console.log(F("times out!")); };
   timer.setInterval(30 * 60 * 1000, []() { HomeKitMain::heartbeat(); });
   timer.setInterval(1 * 60 * 1000, []() {
     if (MDNS.isRunning()) {
       MDNS.announce();
-      console.log("MDNS announced");
+      console.log(F("MDNS announced"));
     }
   });
 
@@ -147,7 +149,7 @@ void setup(void) {
     HomeKitMain::setup(hostName);
   }
 
-  console.log("setup complete");
+  console.log(F("setup complete"));
   builtinLed->flash();
 }
 

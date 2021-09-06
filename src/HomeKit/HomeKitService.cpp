@@ -15,7 +15,7 @@ namespace Victoria::HomeKit {
       delete serviceCharacteristic;
       serviceCharacteristic = NULL;
     }
-    console.log("service disposed " + serviceId);
+    console.log().write(F("service disposed ")).write(serviceId).newline();
   }
 
   void HomeKitService::setup() {}

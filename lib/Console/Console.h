@@ -8,15 +8,16 @@ namespace Victoria {
    public:
     Console();
     void begin(unsigned long baud);
-    void log(const String& log);
-    void error(const String& error);
-    void debug(const String& debug);
-    void newline();
-    void write(const String& message);
-    void write(const String& message, bool newline);
-
-   private:
-    static String _format(const String& type, const String& message);
+    Console log();
+    Console log(const String& message);
+    Console error();
+    Console error(const String& message);
+    Console debug();
+    Console debug(const String& message);
+    Console ts();
+    Console newline();
+    Console writeType(const String& type);
+    Console write(const String& message);
   };
 
   // global

@@ -18,7 +18,7 @@ namespace Victoria::Components {
       // ESP8266 or ESP32: do not use pin 11 or 2
       _rf = new RH_ASK(2000, model.inputPin);
       if (!_rf->init()) {
-        console.error("[RadioHead] init failed");
+        console.error(F("[RadioHead] init failed"));
       }
     }
   }
@@ -31,8 +31,8 @@ namespace Victoria::Components {
       auto value = String((char*)buf);
       value = value.substring(0, bufLength);
       // read id
-      auto id = String("none");
-      if (value.indexOf("!") == 4) {
+      auto id = String(F("none"));
+      if (value.indexOf(F("!")) == 4) {
         id = value.substring(0, 4);
         value = value.substring(5);
       }
@@ -82,7 +82,7 @@ namespace Victoria::Components {
     // log states
     _lastMessage = message;
     _lastPressState = press;
-    console.log("[RadioPortal] > detected pressed " + String(press));
+    console.log().write(F("[RadioPortal] > detected pressed ")).write(String(press)).newline();
     // check rules
     auto model = radioStorage.load();
     for (const auto& rule : model.rules) {
@@ -140,7 +140,7 @@ namespace Victoria::Components {
       case EntryWifi: {
         switch (command.action) {
           case EntryWifiJoin: {
-            auto credential = GlobalHelpers::splitString(command.parameters, "/");
+            auto credential = GlobalHelpers::splitString(command.parameters, F("/"));
             if (credential.size() == 2) {
               auto ssid = credential[0];
               auto password = credential[1];
@@ -149,9 +149,9 @@ namespace Victoria::Components {
             break;
           }
           case EntryWifiMode: {
-            auto hasAP = command.parameters.indexOf("ap") > -1;
-            auto hasSTA = command.parameters.indexOf("sta") > -1;
-            auto isOff = command.parameters == "off";
+            auto hasAP = command.parameters.indexOf(F("ap")) > -1;
+            auto hasSTA = command.parameters.indexOf(F("sta")) > -1;
+            auto isOff = command.parameters == F("off");
             if (hasAP && hasSTA) { WiFi.mode(WIFI_AP_STA); }
             else if (hasAP) { WiFi.mode(WIFI_AP); }
             else if (hasSTA) { WiFi.mode(WIFI_STA); }
@@ -180,9 +180,9 @@ namespace Victoria::Components {
           }
           case EntryAppOTA: {
             auto otaType =
-              command.parameters == "all" ? VOta_All :
-              command.parameters == "fs" ? VOta_FileSystem :
-              command.parameters == "sketch" ? VOta_Sketch : VOta_Sketch;
+              command.parameters == F("all") ? VOta_All :
+              command.parameters == F("fs") ? VOta_FileSystem :
+              command.parameters == F("sketch") ? VOta_Sketch : VOta_Sketch;
             VictoriaOTA::trigger(otaType);
             break;
           }
@@ -221,37 +221,37 @@ namespace Victoria::Components {
   RadioCommandParsed RadioPortal::_parseCommand(const RadioMessage& message) {
     RadioCommandParsed command;
     auto value = String(message.value); // clone
-    value.replace(":", "-");
-    auto parts = GlobalHelpers::splitString(value, "-");
+    value.replace(F(":"), F("-"));
+    auto parts = GlobalHelpers::splitString(value, F("-"));
     if (parts.size() >= 2) {
       auto entry = parts[0];
       auto action = parts[1];
-      if (entry == "wifi") {
+      if (entry == F("wifi")) {
         command.entry = EntryWifi;
-        if (action == "join") {
+        if (action == F("join")) {
           command.action = EntryWifiJoin;
-        } else if (action == "mode") {
+        } else if (action == F("mode")) {
           command.action = EntryWifiMode;
-        } else if (action == "reset") {
+        } else if (action == F("reset")) {
           command.action = EntryWifiReset;
         }
-      } else if (entry == "app") {
+      } else if (entry == F("app")) {
         command.entry = EntryApp;
-        if (action == "name") {
+        if (action == F("name")) {
           command.action = EntryAppName;
-        } else if (action == "ota") {
+        } else if (action == F("ota")) {
           command.action = EntryAppOTA;
         }
-      } else if (entry == "esp") {
+      } else if (entry == F("esp")) {
         command.entry = EntryEsp;
-        if (action == "restart") {
+        if (action == F("restart")) {
           command.action = EntryEspRestart;
         }
-      } else if (entry == "boolean") {
+      } else if (entry == F("boolean")) {
         command.entry = EntryBoolean;
-        if (action == "set") {
+        if (action == F("set")) {
           command.action = EntryBooleanSet;
-        } else if (action == "toggle") {
+        } else if (action == F("toggle")) {
           command.action = EntryBooleanToggle;
         }
       }
