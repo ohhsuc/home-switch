@@ -123,10 +123,10 @@ void setup(void) {
 
   timesTrigger.onTimesOut = []() { console.log(F("times out!")); };
   timer.setInterval(30 * 60 * 1000, []() { HomeKitMain::heartbeat(); });
-  timer.setInterval(1 * 60 * 1000, []() {
+  timer.setInterval(10 * 1000, []() {
+    // https://github.com/Mixiaoxiao/Arduino-HomeKit-ESP8266/issues/9
     if (MDNS.isRunning()) {
       MDNS.announce();
-      console.log(F("MDNS announced"));
     }
   });
 

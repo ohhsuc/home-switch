@@ -69,10 +69,10 @@ namespace Victoria::HomeKit {
   }
 
   void HomeKitMain::loop() {
+    arduino_homekit_loop();
     for (const auto& pair : _idServiceMap) {
       pair.second->loop();
     }
-    arduino_homekit_loop();
   }
 
   void HomeKitMain::reset() {
