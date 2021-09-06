@@ -31,6 +31,7 @@ namespace Victoria {
     String name;
     int8_t ledPin = 2;      // -128 ~ 127
     uint8_t ledOnValue = 0; // 0 ~ 256 LOW
+    bool overTheWeb = false;
   };
 
   // const uint8_t led = LED_BUILTIN;

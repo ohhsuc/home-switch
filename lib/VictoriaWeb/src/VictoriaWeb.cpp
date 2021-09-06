@@ -4,7 +4,6 @@ namespace Victoria::Components {
 
   VictoriaWeb::VictoriaWeb(int port) {
     _server = new ESP8266WebServer(port);
-    _httpUpdater = new ESP8266HTTPUpdateServer();
   }
 
   VictoriaWeb::~VictoriaWeb() {
@@ -21,7 +20,11 @@ namespace Victoria::Components {
 
   void VictoriaWeb::setup() {
     _registerHandlers();
-    _httpUpdater->setup(_server);
+    auto model = appStorage.load();
+    if (model.overTheWeb) {
+      _httpUpdater = new ESP8266HTTPUpdateServer();
+      _httpUpdater->setup(_server);
+    }
     _server->begin();
   }
 
@@ -282,6 +285,7 @@ namespace Victoria::Components {
     res[F("sdkVersion")] = ESP.getSdkVersion();
     res[F("otaVersion")] = VictoriaOTA::getCurrentVersion();
     res[F("otaNewVersion")] = VictoriaOTA::checkNewVersion();
+    res[F("overTheWeb")] = _httpUpdater != NULL;
     _sendJson(res);
     _dispatchRequestEnd();
   }
