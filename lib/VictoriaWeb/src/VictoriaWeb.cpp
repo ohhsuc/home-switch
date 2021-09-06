@@ -4,6 +4,7 @@ namespace Victoria::Components {
 
   VictoriaWeb::VictoriaWeb(int port) {
     _server = new ESP8266WebServer(port);
+    _httpUpdater = new ESP8266HTTPUpdateServer();
   }
 
   VictoriaWeb::~VictoriaWeb() {
@@ -12,10 +13,15 @@ namespace Victoria::Components {
       delete _server;
       _server = NULL;
     }
+    if (_httpUpdater) {
+      delete _httpUpdater;
+      _httpUpdater = NULL;
+    }
   }
 
   void VictoriaWeb::setup() {
     _registerHandlers();
+    _httpUpdater->setup(_server);
     _server->begin();
   }
 

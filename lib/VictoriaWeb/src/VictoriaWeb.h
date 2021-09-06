@@ -7,6 +7,7 @@
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
+#include <ESP8266HTTPUpdateServer.h>
 #include "Commons.h"
 #include "AppStorage.h"
 #include "VictoriaOTA.h"
@@ -26,6 +27,7 @@ namespace Victoria::Components {
 
    protected:
     ESP8266WebServer* _server = NULL;
+    ESP8266HTTPUpdateServer* _httpUpdater = NULL;
     virtual void _registerHandlers();
     virtual void _solvePageTokens(String& html);
     void _sendHtml(const String& html);
