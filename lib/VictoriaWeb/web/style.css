@@ -70,6 +70,12 @@ td {
   display: flex;
   justify-content: space-around;
 }
+.nav a {
+  border-bottom: 1px solid transparent;
+}
+.nav a.match {
+  border-bottom: 1px solid #008184;
+}
 
 .title {
   background: #008184;
@@ -87,10 +93,8 @@ td {
   padding: 5px 10px;
   box-shadow: none;
 }
-
-.btnWeak {
-  background: none;
-  border: none;
-  padding: 0;
+.btn.weak {
+  background-color: transparent;
+  border: 1px solid #008184;
   color: #00979d;
 }

@@ -23,7 +23,7 @@ namespace Victoria::Components {
     auto model = appStorage.load();
     if (model.overTheWeb) {
       _httpUpdater = new ESP8266HTTPUpdateServer();
-      _httpUpdater->setup(_server);
+      _httpUpdater->setup(_server, F("/update"));
     }
     _server->begin();
   }
