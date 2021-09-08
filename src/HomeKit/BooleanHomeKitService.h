@@ -7,10 +7,10 @@
 #include "DigitalOutput.h"
 #include "ButtonEvents.h"
 
-using namespace Victoria::Events;
-using namespace Victoria::Components;
+using namespace Victor::Events;
+using namespace Victor::Components;
 
-namespace Victoria::HomeKit {
+namespace Victor::HomeKit {
   class BooleanHomeKitService : public HomeKitService {
    public:
     BooleanHomeKitService(const String& id, const ServiceSetting& setting);
@@ -26,6 +26,6 @@ namespace Victoria::HomeKit {
     ButtonEvents* _buttonEvents = NULL;
     static void _notifyCallback(homekit_characteristic_t *ch, homekit_value_t value, void *context);
   };
-} // namespace Victoria::HomeKit
+} // namespace Victor::HomeKit
 
 #endif // BooleanHomeKitService_h

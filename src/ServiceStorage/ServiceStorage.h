@@ -4,7 +4,7 @@
 #include "FileStorage.h"
 #include "Models/ServiceModels.h"
 
-namespace Victoria::Components {
+namespace Victor::Components {
   class ServiceStorage : public FileStorage<ServicesModel> {
    public:
     ServiceStorage();
@@ -17,6 +17,6 @@ namespace Victoria::Components {
   // global
   extern ServiceStorage serviceStorage;
 
-} // namespace Victoria::Components
+} // namespace Victor::Components
 
 #endif // ServiceStorage_h

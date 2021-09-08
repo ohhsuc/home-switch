@@ -1,6 +1,6 @@
 #include "RadioPortal.h"
 
-namespace Victoria::Components {
+namespace Victor::Components {
 
   RadioPortal::RadioPortal() {}
 
@@ -119,7 +119,7 @@ namespace Victoria::Components {
         break;
       }
       case RadioActionWiFiReset: {
-        VictoriaWifi::reset();
+        VictorWifi::reset();
         break;
       }
       case RadioActionEspRestart: {
@@ -144,7 +144,7 @@ namespace Victoria::Components {
             if (credential.size() == 2) {
               auto ssid = credential[0];
               auto password = credential[1];
-              VictoriaWifi::join(ssid, password, false);
+              VictorWifi::join(ssid, password, false);
             }
             break;
           }
@@ -159,7 +159,7 @@ namespace Victoria::Components {
             break;
           }
           case EntryWifiReset: {
-            VictoriaWifi::reset();
+            VictorWifi::reset();
             break;
           }
           case EntryWifiNone:
@@ -183,7 +183,7 @@ namespace Victoria::Components {
               command.parameters == F("all") ? VOta_All :
               command.parameters == F("fs") ? VOta_FileSystem :
               command.parameters == F("sketch") ? VOta_Sketch : VOta_Sketch;
-            VictoriaOTA::trigger(otaType);
+            VictorOTA::trigger(otaType);
             break;
           }
           case EntryAppNone:
@@ -263,4 +263,4 @@ namespace Victoria::Components {
     return command;
   }
 
-} // namespace Victoria::Components
+} // namespace Victor::Components

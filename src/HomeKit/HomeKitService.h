@@ -7,7 +7,7 @@
 #include "Commons.h"
 #include "Models/ServiceModels.h"
 
-namespace Victoria::HomeKit {
+namespace Victor::HomeKit {
   class HomeKitService {
     typedef std::function<void(const ServiceState&)> TStateChangeHandler;
 
@@ -27,6 +27,6 @@ namespace Victoria::HomeKit {
    protected:
     void _fireStateChange(const ServiceState& state);
   };
-} // namespace Victoria::HomeKit
+} // namespace Victor::HomeKit
 
 #endif // HomeKitService_h

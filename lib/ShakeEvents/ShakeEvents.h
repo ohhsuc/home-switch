@@ -4,7 +4,7 @@
 #include <functional>
 #include <Arduino.h>
 
-namespace Victoria::Events {
+namespace Victor::Events {
   class ShakeEvents {
     typedef std::function<void()> TShakeHandler;
 
@@ -19,6 +19,6 @@ namespace Victoria::Events {
     bool _shaked = false;
     unsigned long _lastFire;
   };
-} // namespace Victoria::Events
+} // namespace Victor::Events
 
 #endif // ShakeEvents_h

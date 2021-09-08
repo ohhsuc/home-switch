@@ -2,7 +2,7 @@
 
 #define DEFAULT_DEBOUNCE_MILLIS 2000
 
-namespace Victoria::Events {
+namespace Victor::Events {
 
   ShakeEvents::ShakeEvents(uint8_t inputPin) {
     _inputPin = inputPin;
@@ -28,4 +28,4 @@ namespace Victoria::Events {
     }
   }
 
-} // namespace Victoria::Events
+} // namespace Victor::Events

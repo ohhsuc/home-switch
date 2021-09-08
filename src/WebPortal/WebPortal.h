@@ -4,13 +4,13 @@
 #include <functional>
 #include <Arduino.h>
 #include "Commons.h"
-#include "VictoriaWeb.h"
+#include "VictorWeb.h"
 #include "Models/ServiceModels.h"
 #include "RadioStorage/RadioStorage.h"
 #include "ServiceStorage/ServiceStorage.h"
 
-namespace Victoria::Components {
-  class WebPortal : public VictoriaWeb {
+namespace Victor::Components {
+  class WebPortal : public VictorWeb {
     typedef std::function<void(const String&, const ServiceSetting&)> TServiceSettingHandler;
     typedef std::function<ServiceState(const String&, const ServiceSetting&)> TGetServiceStateHandler;
     typedef std::function<void(const String&, const ServiceSetting&, ServiceState&)> TSetServiceStateHandler;
@@ -47,6 +47,6 @@ namespace Victoria::Components {
     void _handleRadioCommandGet();
     void _handleRadioCommandSave();
   };
-} // namespace Victoria::Components
+} // namespace Victor::Components
 
 #endif // WebPortal_h

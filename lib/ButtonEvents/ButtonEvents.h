@@ -13,7 +13,7 @@
 #define MULTI_CLICK_TIME     400
 #define HOLD_TIME           2000
 
-namespace Victoria::Events {
+namespace Victor::Events {
   class ButtonEvents {
     typedef std::function<bool()> TInputHandler;
     typedef std::function<void(int)> TClickHandler;
@@ -35,6 +35,6 @@ namespace Victoria::Events {
     int _loadState();
     int _lastState = 0;
   };
-} // namespace Victoria::Events
+} // namespace Victor::Events
 
 #endif // ButtonEvents_h

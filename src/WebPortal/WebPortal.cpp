@@ -1,14 +1,14 @@
 #include "WebPortal.h"
 
-namespace Victoria::Components {
+namespace Victor::Components {
 
   WebPortal::WebPortal(int port)
-  : VictoriaWeb(port) {}
+  : VictorWeb(port) {}
 
   WebPortal::~WebPortal() {}
 
   void WebPortal::_registerHandlers() {
-    VictoriaWeb::_registerHandlers();
+    VictorWeb::_registerHandlers();
     _server->serveStatic("/victoria.min.js", LittleFS, "/web/victoria.min.js");
     _server->on(F("/service/list"), HTTP_GET, std::bind(&WebPortal::_handleServiceList, this));
     _server->on(F("/service/add"), HTTP_POST, std::bind(&WebPortal::_handleServiceAdd, this));
@@ -27,7 +27,7 @@ namespace Victoria::Components {
   }
 
   void WebPortal::_solvePageTokens(String& html) {
-    VictoriaWeb::_solvePageTokens(html);
+    VictorWeb::_solvePageTokens(html);
     html.replace(F("{appendHead}"), F("<script src=\"victoria.min.js\"></script>"));
   }
 
@@ -380,4 +380,4 @@ namespace Victoria::Components {
     _dispatchRequestEnd();
   }
 
-} // namespace Victoria::Components
+} // namespace Victor::Components

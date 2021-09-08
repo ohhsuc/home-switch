@@ -2,7 +2,7 @@
 
 #define DEBOUNCE_TIMESPAN 500
 
-namespace Victoria::Events {
+namespace Victor::Events {
 
   OnOffEvents::OnOffEvents(uint8_t inputPin) {
     _inputPin = inputPin;
@@ -22,4 +22,4 @@ namespace Victoria::Events {
     }
   }
 
-} // namespace Victoria::Events
+} // namespace Victor::Events

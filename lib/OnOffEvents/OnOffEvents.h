@@ -4,7 +4,7 @@
 #include <functional>
 #include <Arduino.h>
 
-namespace Victoria::Events {
+namespace Victor::Events {
   class OnOffEvents {
     typedef std::function<void(bool)> TChangeHandler;
 
@@ -18,6 +18,6 @@ namespace Victoria::Events {
     bool _lastState = false;
     unsigned long _lastTime = 0;
   };
-} // namespace Victoria::Events
+} // namespace Victor::Events
 
 #endif // OnOffEvents_h

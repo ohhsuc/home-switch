@@ -19,11 +19,11 @@
 
 #include <Arduino.h>
 
-namespace Victoria {
+namespace Victor {
   const String AccessoryInformationManufacturer = ACCESSORY_INFORMATION_MANUFACTURER;
   const String AccessoryInformationModel = ACCESSORY_INFORMATION_MODEL;
   const String AccessoryInformationSerialNumber = ACCESSORY_INFORMATION_SERIAL_NUMBER;
   const String HomekitServerPassword = HOMEKIT_SERVER_PASSWORD;
-} // namespace Victoria
+} // namespace Victor
 
 #endif // HomeKitBuildFlags_h

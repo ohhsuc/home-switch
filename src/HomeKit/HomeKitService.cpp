@@ -1,6 +1,6 @@
 #include "HomeKitService.h"
 
-namespace Victoria::HomeKit {
+namespace Victor::HomeKit {
 
   HomeKitService::HomeKitService(const String& id, const ServiceSetting& setting, homekit_characteristic_t* characteristic) {
     serviceId = id;
@@ -38,4 +38,4 @@ namespace Victoria::HomeKit {
     }
   }
 
-} // namespace Victoria::HomeKit
+} // namespace Victor::HomeKit

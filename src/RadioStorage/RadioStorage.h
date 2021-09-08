@@ -4,7 +4,7 @@
 #include "FileStorage.h"
 #include "Models/RadioModels.h"
 
-namespace Victoria::Components {
+namespace Victor::Components {
   class RadioStorage : public FileStorage<RadioModel> {
    public:
     RadioStorage();
@@ -20,6 +20,6 @@ namespace Victoria::Components {
   // global
   extern RadioStorage radioStorage;
 
-} // namespace Victoria::Components
+} // namespace Victor::Components
 
 #endif // RadioStorage_h

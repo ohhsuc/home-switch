@@ -1,6 +1,6 @@
 #include "ServiceStorage.h"
 
-namespace Victoria::Components {
+namespace Victor::Components {
 
   ServiceStorage::ServiceStorage() {
     _filePath = F("/service.json");
@@ -41,4 +41,4 @@ namespace Victoria::Components {
   // global
   ServiceStorage serviceStorage;
 
-} // namespace Victoria::Components
+} // namespace Victor::Components

@@ -1,6 +1,6 @@
 #include "Mesher.h"
 
-namespace Victoria::Components {
+namespace Victor::Components {
 
   // IMeshLoader
   IMeshLoader::IMeshLoader(uint8_t inputPin) {
@@ -74,4 +74,4 @@ namespace Victoria::Components {
     _loader->send(message);
   }
 
-} // namespace Victoria::Components
+} // namespace Victor::Components

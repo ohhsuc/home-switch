@@ -4,7 +4,7 @@
 #include <functional>
 #include <Arduino.h>
 
-namespace Victoria::Events {
+namespace Victor::Events {
   class TimesTrigger {
     typedef std::function<void()> TTimesOutHandler;
 
@@ -20,6 +20,6 @@ namespace Victoria::Events {
     int _count = 0;
     unsigned long _lastTime = 0;
   };
-} // namespace Victoria::Events
+} // namespace Victor::Events
 
 #endif // TimesTrigger_h

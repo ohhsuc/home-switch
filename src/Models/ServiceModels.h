@@ -4,7 +4,7 @@
 #include <map>
 #include <Arduino.h>
 
-namespace Victoria {
+namespace Victor {
 
   enum ServiceType {
     EmptyServiceType = 0,
@@ -30,6 +30,6 @@ namespace Victoria {
     std::map<String, ServiceSetting> services;
   };
 
-} // namespace Victoria
+} // namespace Victor
 
 #endif // ServiceModels_h

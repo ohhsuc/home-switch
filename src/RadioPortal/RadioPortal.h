@@ -5,8 +5,8 @@
 #include <ESP8266WiFi.h>
 #include <RH_ASK.h>
 #include "Commons.h"
-#include "VictoriaOTA.h"
-#include "VictoriaWifi.h"
+#include "VictorOTA.h"
+#include "VictorWifi.h"
 #include "AppStorage.h"
 #include "Models/RadioModels.h"
 #include "RadioStorage/RadioStorage.h"
@@ -17,7 +17,7 @@
 #define LONG_PRESS_TIMESPAN 2000
 #define RESET_PRESS_TIMESPAN 2500
 
-namespace Victoria::Components {
+namespace Victor::Components {
   class RadioPortal {
     typedef std::function<void(const RadioMessage&)> TRadioMessage;
     typedef std::function<void(const RadioRule&)> TRadioAction;
@@ -41,6 +41,6 @@ namespace Victoria::Components {
     void _proceedCommand(const RadioCommandParsed& command);
     static RadioCommandParsed _parseCommand(const RadioMessage& message);
   };
-} // namespace Victoria::Components
+} // namespace Victor::Components
 
 #endif // RadioPortal_h

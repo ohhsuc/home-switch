@@ -1,6 +1,6 @@
 #include "BooleanHomeKitService.h"
 
-namespace Victoria::HomeKit {
+namespace Victor::HomeKit {
 
   extern "C" homekit_characteristic_t boolCharacteristic;
 
@@ -119,4 +119,4 @@ namespace Victoria::HomeKit {
     service->_fireStateChange(state);
   }
 
-} // namespace Victoria::HomeKit
+} // namespace Victor::HomeKit

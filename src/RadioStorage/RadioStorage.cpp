@@ -1,6 +1,6 @@
 #include "RadioStorage.h"
 
-namespace Victoria::Components {
+namespace Victor::Components {
 
   RadioStorage::RadioStorage() {
     _filePath = F("/radio.json");
@@ -66,4 +66,4 @@ namespace Victoria::Components {
   // global
   RadioStorage radioStorage;
 
-} // namespace Victoria::Components
+} // namespace Victor::Components

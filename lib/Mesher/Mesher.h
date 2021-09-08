@@ -5,7 +5,7 @@
 #include <Arduino.h>
 #include "Commons.h"
 
-namespace Victoria::Components {
+namespace Victor::Components {
 
   enum MeshMessageType {
     MESH_HEARTBEAT = 0,
@@ -57,6 +57,6 @@ namespace Victoria::Components {
     IMeshLoader* _loader;
     void _handleMessage(MeshMessage& message);
   };
-} // namespace Victoria::Components
+} // namespace Victor::Components
 
 #endif // Mesher_h

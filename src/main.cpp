@@ -2,8 +2,8 @@
 #include <ESP8266mDNS.h>
 
 #include "BuiltinLed.h"
-#include "VictoriaOTA.h"
-#include "VictoriaWifi.h"
+#include "VictorOTA.h"
+#include "VictorWifi.h"
 #include "Timer.h"
 #include "TimesTrigger.h"
 #include "Mesher.h"
@@ -12,10 +12,10 @@
 #include "RadioPortal/RadioPortal.h"
 #include "HomeKit/HomeKitMain.h"
 
-using namespace Victoria;
-using namespace Victoria::Events;
-using namespace Victoria::Components;
-using namespace Victoria::HomeKit;
+using namespace Victor;
+using namespace Victor::Events;
+using namespace Victor::Components;
+using namespace Victor::HomeKit;
 
 BuiltinLed* builtinLed;
 WebPortal webPortal(80);
@@ -100,8 +100,8 @@ void setup(void) {
   builtinLed = new BuiltinLed();
   builtinLed->turnOn();
 
-  VictoriaOTA::setup();
-  VictoriaWifi::setup();
+  VictorOTA::setup();
+  VictorWifi::setup();
 
   webPortal.onDeleteService = deleteService;
   webPortal.onGetServiceState = getServiceState;
@@ -145,7 +145,7 @@ void setup(void) {
         service->onStateChange = onStateChange;
       }
     }
-    auto hostName = VictoriaWifi::getHostName(false);
+    auto hostName = VictorWifi::getHostName(false);
     HomeKitMain::setup(hostName);
   }
 

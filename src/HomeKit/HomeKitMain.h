@@ -11,7 +11,7 @@
 #include "HomeKitService.h"
 #include "BooleanHomeKitService.h"
 
-namespace Victoria::HomeKit {
+namespace Victor::HomeKit {
   class HomeKitMain {
    public:
     static HomeKitService* createService(const String& serviceId, const ServiceSetting& serviceSetting);
@@ -24,6 +24,6 @@ namespace Victoria::HomeKit {
     static void reset();
   };
 
-} // namespace Victoria::HomeKit
+} // namespace Victor::HomeKit
 
 #endif // HomeKitAccessory_h

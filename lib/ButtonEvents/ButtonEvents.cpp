@@ -1,6 +1,6 @@
 #include "ButtonEvents.h"
 
-namespace Victoria::Events {
+namespace Victor::Events {
 
   ButtonEvents::ButtonEvents(TInputHandler getPressed) {
     _getPressed = getPressed;
@@ -71,4 +71,4 @@ namespace Victoria::Events {
     return 0;
   }
 
-} // namespace Victoria::Events
+} // namespace Victor::Events

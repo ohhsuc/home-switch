@@ -1,6 +1,6 @@
 #include "TimesTrigger.h"
 
-namespace Victoria::Events {
+namespace Victor::Events {
 
   TimesTrigger::TimesTrigger(int times, unsigned long resetMillis) {
     _times = times;
@@ -25,4 +25,4 @@ namespace Victoria::Events {
     }
   }
 
-} // namespace Victoria::Events
+} // namespace Victor::Events
