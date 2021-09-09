@@ -65,22 +65,10 @@ function buildDeps() {
   const libDeps = path.resolve(__dirname, "../.pio/libdeps");
   const envNames = fse.readdirSync(libDeps);
   for (const envName of envNames) {
-    const libNames = fse.readdirSync(path.resolve(libDeps, envName));
-    for (const libName of libNames) {
-      const libDir = path.resolve(libDeps, envName, libName);
-      const webDir = path.resolve(libDir, "web");
-      if (fse.existsSync(path.resolve(webDir, "gulpfile.js"))) {
-        cp.execSync("npm install && npm run build", {
-          cwd: webDir,
-          stdio: "inherit",
-        });
-        fse.copySync(
-          path.resolve(libDir, "data"),
-          path.resolve(rootDir, "data"),
-          { overwrite: true }
-        );
-      }
-    }
+    const libDir = path.resolve(libDeps, envName, "home-esp8266");
+    fse.copySync(path.resolve(libDir, "data"), path.resolve(rootDir, "data"), {
+      overwrite: true,
+    });
   }
   return Promise.resolve();
 }
