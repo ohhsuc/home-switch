@@ -123,7 +123,7 @@ void setup(void) {
 
   timesTrigger.onTimesOut = []() { console.log(F("times out!")); };
   timer.setInterval(30 * 60 * 1000, []() { HomeKitMain::heartbeat(); });
-  timer.setInterval(10 * 1000, []() {
+  timer.setInterval(30 * 1000, []() {
     // https://github.com/Mixiaoxiao/Arduino-HomeKit-ESP8266/issues/9
     if (MDNS.isRunning()) {
       MDNS.announce();
@@ -145,7 +145,7 @@ void setup(void) {
         service->onStateChange = onStateChange;
       }
     }
-    auto hostName = VictorWifi::getHostName(false);
+    auto hostName = VictorWifi::getLocalHostName();
     HomeKitMain::setup(hostName);
   }
 
