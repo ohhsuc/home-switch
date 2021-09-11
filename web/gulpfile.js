@@ -10,7 +10,7 @@ const rename = require("gulp-rename");
 const resource = {
   css: ["src/*.css"],
   js: ["src/*.js"],
-  copy: ["src/fav.ico"],
+  copy: ["src/fav.*"],
 };
 
 const paths = {

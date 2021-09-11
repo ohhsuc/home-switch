@@ -271,11 +271,11 @@ const RadioCommandView = (() => {
     }
   };
   const save = () => {
-    const entryActionIdEls = vic.queryAll("select[name=EntryIdActionId]");
+    const entryActionEls = vic.queryAll("select[name=EntryAction]");
     const pressIdEls = vic.queryAll("select[name=PressId]");
     const serviceIdEls = vic.queryAll("select[name=ServiceId]");
-    const commands = entryActionIdEls.map((entryActionIdEl, i) => {
-      const entryAction = entryActionIdEl.value.split("-");
+    const commands = entryActionEls.map((el, i) => {
+      const entryAction = el.value.split("-");
       return {
         entry: entryAction[0],
         action: entryAction[1],
@@ -332,7 +332,7 @@ const RadioCommandView = (() => {
                 "Remove"
               ),
               vic.mSelect(
-                "EntryIdActionId",
+                "EntryAction",
                 "" + command.entry + "-" + command.action,
                 state.entryActionOptions.map((x) => ({
                   value: x[0],

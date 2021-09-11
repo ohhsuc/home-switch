@@ -9,7 +9,7 @@ namespace Victor::Components {
 
   void WebPortal::_registerHandlers() {
     VictorWeb::_registerHandlers();
-    _server->serveStatic("/fav.ico", LittleFS, "/web/fav.ico", "max-age=43200");
+    _server->serveStatic("/fav.svg", LittleFS, "/web/fav.svg", "max-age=43200");
     _server->serveStatic("/victoria.min.js", LittleFS, "/web/victoria.min.js");
     _server->on(F("/service/list"), HTTP_GET, std::bind(&WebPortal::_handleServiceList, this));
     _server->on(F("/service/add"), HTTP_POST, std::bind(&WebPortal::_handleServiceAdd, this));
@@ -30,7 +30,7 @@ namespace Victor::Components {
   void WebPortal::_solvePageTokens(String& html) {
     VictorWeb::_solvePageTokens(html);
     html.replace(F("{appendHead}"), F("\
-      <link rel=\"icon\" href=\"fav.ico\">\
+      <link rel=\"icon\" href=\"fav.svg\" type=\"image/svg+xml\">\
       <script src=\"victoria.min.js\"></script>\
     "));
   }
