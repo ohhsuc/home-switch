@@ -1,10 +1,10 @@
 #include <Arduino.h>
+#include <Ticker.h>
 #include <ESP8266mDNS.h>
 
 #include "BuiltinLed.h"
 #include "VictorOTA.h"
 #include "VictorWifi.h"
-#include "Timer.h"
 #include "TimesTrigger.h"
 #include "Mesher.h"
 
@@ -17,6 +17,7 @@ using namespace Victor::Events;
 using namespace Victor::Components;
 using namespace Victor::HomeKit;
 
+Ticker ticker;
 BuiltinLed* builtinLed;
 WebPortal webPortal(80);
 RadioPortal radioPortal;
@@ -122,8 +123,8 @@ void setup(void) {
   radioPortal.setup();
 
   timesTrigger.onTimesOut = []() { console.log(F("times out!")); };
-  timer.setInterval(30 * 60 * 1000, []() { HomeKitMain::heartbeat(); });
-  timer.setInterval(30 * 1000, []() {
+  ticker.attach(30 * 60, []() { HomeKitMain::heartbeat(); });
+  ticker.attach(15, []() {
     // https://github.com/Mixiaoxiao/Arduino-HomeKit-ESP8266/issues/9
     if (MDNS.isRunning()) {
       MDNS.announce();
@@ -154,7 +155,6 @@ void setup(void) {
 }
 
 void loop(void) {
-  timer.loop();
   webPortal.loop();
   radioPortal.loop();
   HomeKitMain::loop();

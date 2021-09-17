@@ -431,7 +431,7 @@ const ServicesView = (() => {
         ),
         m("p", [
           m("button.btn", { onclick: add }, "Add+"),
-          m("button.btn.weak", { onclick: reset }, "Reset Accessory"),
+          m("button.btn.weak", { onclick: reset }, "Reset HomeKit"),
         ]),
       ];
     },
