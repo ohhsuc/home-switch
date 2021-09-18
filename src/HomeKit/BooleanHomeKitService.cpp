@@ -80,7 +80,6 @@ namespace Victor::HomeKit {
         return isPressed;
       });
       _buttonEvents->onClick = [this](int times)->void {
-        console.log().write(F("[ButtonEvents] > times ")).write(String(times)).newline();
         if (times == 1) {
           auto state = this->getState();
           state.boolValue = !state.boolValue;

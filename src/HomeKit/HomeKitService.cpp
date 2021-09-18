@@ -15,7 +15,6 @@ namespace Victor::HomeKit {
       delete serviceCharacteristic;
       serviceCharacteristic = NULL;
     }
-    console.log().write(F("service disposed ")).write(serviceId).newline();
   }
 
   void HomeKitService::setup() {}

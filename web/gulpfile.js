@@ -65,10 +65,12 @@ function buildDeps() {
   const libDeps = path.resolve(__dirname, "../.pio/libdeps");
   const envNames = fse.readdirSync(libDeps);
   for (const envName of envNames) {
-    const libDir = path.resolve(libDeps, envName, "home-esp8266");
-    fse.copySync(path.resolve(libDir, "data"), path.resolve(rootDir, "data"), {
-      overwrite: true,
-    });
+    const libDir = path.resolve(libDeps, envName, "home-esp8266/data");
+    if (fse.existsSync(libDir)) {
+      fse.copySync(libDir, path.resolve(rootDir, "data"), {
+        overwrite: true,
+      });
+    }
   }
   return Promise.resolve();
 }

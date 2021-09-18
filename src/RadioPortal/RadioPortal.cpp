@@ -18,7 +18,7 @@ namespace Victor::Components {
       // ESP8266 or ESP32: do not use pin 11 or 2
       _rf = new RH_ASK(2000, model.inputPin);
       if (!_rf->init()) {
-        console.error(F("[RadioHead] init failed"));
+        console.error().type(F("RadioHead")).write(F("init failed")).newline();
       }
     }
   }
@@ -82,7 +82,7 @@ namespace Victor::Components {
     // log states
     _lastMessage = message;
     _lastPressState = press;
-    console.log().write(F("[RadioPortal] > detected pressed ")).write(String(press)).newline();
+    console.log().type(F("RadioPortal")).write(F("detected pressed ")).write(String(press)).newline();
     // check rules
     auto model = radioStorage.load();
     for (const auto& rule : model.rules) {

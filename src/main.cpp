@@ -88,14 +88,16 @@ void setRadioCommand(const RadioCommandParsed& command) {
 void onStateChange(const ServiceState& state) {
   builtinLed->flash();
   timesTrigger.count();
-  console.log().write(F("boolean value ")).write(String(state.boolValue)).newline();
-  console.log().write(F("integer value ")).write(String(state.intValue)).newline();
+  console.log().type(F("Service"))
+    .write(F("boolean ")).write(String(state.boolValue))
+    .write(F("integer ")).write(String(state.intValue))
+    .newline();
 }
 
 void setup(void) {
   console.begin(115200);
   if (!LittleFS.begin()) {
-    console.error(F("LittleFS mount failed"));
+    console.error(F("[LittleFS] mount failed"));
   }
 
   builtinLed = new BuiltinLed();
@@ -113,8 +115,8 @@ void setup(void) {
   webPortal.setup();
 
   radioPortal.onMessage = [](const RadioMessage& message) {
-    console.log()
-      .write(F("[Radio] > received [")).write(message.id).write(F("!")).write(message.value).write(F("]"))
+    console.log().type(F("Radio"))
+      .write(F(" received [")).write(message.id).write(F("!")).write(message.value).write(F("]"))
       .write(F(" from channel [")).write(String(message.channel)).write(F("]")).newline();
     builtinLed->flash();
   };
@@ -150,7 +152,7 @@ void setup(void) {
     HomeKitMain::setup(hostName);
   }
 
-  console.log(F("setup complete"));
+  console.log(F("[setup] complete"));
   builtinLed->flash();
 }
 
