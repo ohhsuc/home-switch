@@ -110,13 +110,14 @@ namespace Victor::Components {
     DynamicJsonDocument res(512);
     JsonObject serviceObj = res.createNestedObject(F("service"));
     if (found.first) {
+      auto service = found.second;
       serviceObj[F("id")] = id;
-      serviceObj[F("name")] = found.second.name;
-      serviceObj[F("type")] = found.second.type;
-      serviceObj[F("inputPin")] = found.second.inputPin;
-      serviceObj[F("outputPin")] = found.second.outputPin;
-      serviceObj[F("inputTrueValue")] = found.second.inputTrueValue;
-      serviceObj[F("outputTrueValue")] = found.second.outputTrueValue;
+      serviceObj[F("name")] = service.name;
+      serviceObj[F("type")] = service.type;
+      serviceObj[F("inputPin")] = service.inputPin;
+      serviceObj[F("outputPin")] = service.outputPin;
+      serviceObj[F("inputTrueValue")] = service.inputTrueValue;
+      serviceObj[F("outputTrueValue")] = service.outputTrueValue;
     } else {
       res[F("error")] = String(F("Can't find the service"));
     }
@@ -242,12 +243,12 @@ namespace Victor::Components {
     DynamicJsonDocument res(512);
     auto model = radioStorage.load();
     auto lastReceived = radioStorage.getLastReceived();
+    res[F("millis")] = millis();
     res[F("inputPin")] = model.inputPin;
     JsonObject lastReceivedObj = res.createNestedObject(F("lastReceived"));
     lastReceivedObj[F("value")] = lastReceived.value;
     lastReceivedObj[F("channel")] = lastReceived.channel;
     lastReceivedObj[F("timestamp")] = lastReceived.timestamp;
-    lastReceivedObj[F("timeSince")] = GlobalHelpers::timeSince(lastReceived.timestamp);
     _sendJson(res);
     _dispatchRequestEnd();
   }

@@ -1,12 +1,12 @@
 const RadioView = (() => {
   const state = {
     loading: true,
+    millis: 0,
     inputPin: -1,
     lastReceived: {
       value: "",
       channel: 0,
       timestamp: 1,
-      timeSince: "",
     },
   };
   const save = () => {
@@ -30,6 +30,7 @@ const RadioView = (() => {
       url: "/radio",
     }).then((res) => {
       state.loading = false;
+      state.millis = res.millis;
       state.inputPin = res.inputPin;
       state.lastReceived = res.lastReceived;
       m.redraw();
@@ -55,7 +56,7 @@ const RadioView = (() => {
             [
               "Last Received",
               state.lastReceived.value
-                ? state.lastReceived.timeSince + " ago"
+                ? vic.ago(state.millis, state.lastReceived.timestamp) + " ago"
                 : "-",
             ],
             [
