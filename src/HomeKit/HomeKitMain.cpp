@@ -9,9 +9,6 @@ namespace Victor::HomeKit {
   extern "C" homekit_characteristic_t accessoryVersion;
   extern "C" homekit_server_config_t boolServerConfig;
 
-  static String _forKeepingHostName;
-  static std::map<String, HomeKitService*> _idServiceMap;
-
   HomeKitService* HomeKitMain::createService(const String& serviceId, const ServiceSetting& serviceSetting) {
     if (serviceSetting.type == BooleanServiceType) {
       auto booleanService = new BooleanHomeKitService(serviceId, serviceSetting);
@@ -46,7 +43,6 @@ namespace Victor::HomeKit {
 
   void HomeKitMain::clear() {
     _idServiceMap.clear();
-    _forKeepingHostName = F("");
   }
 
   void HomeKitMain::setup(String hostName) {
@@ -55,8 +51,8 @@ namespace Victor::HomeKit {
     }
 
     // accessory information
-    _forKeepingHostName = hostName;
-    accessoryName.value.string_value         = const_cast<char*>(_forKeepingHostName.c_str());
+    _hostName = hostName;
+    accessoryName.value.string_value         = const_cast<char*>(_hostName.c_str());
     accessoryManufacturer.value.string_value = const_cast<char*>(AccessoryInformationManufacturer.c_str());
     accessoryModel.value.string_value        = const_cast<char*>(AccessoryInformationModel.c_str());
     accessorySerialNumber.value.string_value = const_cast<char*>(AccessoryInformationSerialNumber.c_str());

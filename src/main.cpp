@@ -22,13 +22,14 @@ BuiltinLed* builtinLed;
 WebPortal webPortal(80);
 RadioPortal radioPortal;
 TimesTrigger timesTrigger(10, 5 * 1000);
+HomeKitMain homeKitMain;
 
 void deleteService(const String& serviceId, const ServiceSetting& setting) {
-  HomeKitMain::removeService(serviceId);
+  homeKitMain.removeService(serviceId);
 }
 
 ServiceState getServiceState(const String& serviceId, const ServiceSetting& setting) {
-  auto service = HomeKitMain::findServiceById(serviceId);
+  auto service = homeKitMain.findServiceById(serviceId);
   if (service) {
     return service->getState();
   }
@@ -36,14 +37,14 @@ ServiceState getServiceState(const String& serviceId, const ServiceSetting& sett
 }
 
 void setServiceState(const String& serviceId, const ServiceSetting& setting, ServiceState& state) {
-  auto service = HomeKitMain::findServiceById(serviceId);
+  auto service = homeKitMain.findServiceById(serviceId);
   if (service) {
     service->setState(state);
   }
 }
 
 void setSwitchAction(const String& serviceId, const int& action) {
-  auto service = HomeKitMain::findServiceById(serviceId);
+  auto service = homeKitMain.findServiceById(serviceId);
   if (service) {
     auto state = service->getState();
     switch (action) {
@@ -111,7 +112,7 @@ void setup(void) {
   webPortal.onSetServiceState = setServiceState;
   webPortal.onRequestStart = []() { builtinLed->turnOn(); };
   webPortal.onRequestEnd = []() { builtinLed->turnOff(); };
-  webPortal.onResetAccessory = []() { HomeKitMain::reset(); };
+  webPortal.onResetAccessory = []() { homeKitMain.reset(); };
   webPortal.setup();
 
   radioPortal.onMessage = [](const RadioMessage& message) {
@@ -125,8 +126,8 @@ void setup(void) {
   radioPortal.setup();
 
   timesTrigger.onTimesOut = []() { console.log(F("times out!")); };
-  ticker.attach(30 * 60, []() { HomeKitMain::heartbeat(); });
-  ticker.attach(15, []() {
+  ticker.attach(30 * 60, []() { homeKitMain.heartbeat(); });
+  ticker.attach(30, []() {
     // https://github.com/Mixiaoxiao/Arduino-HomeKit-ESP8266/issues/9
     if (MDNS.isRunning()) {
       MDNS.announce();
@@ -137,19 +138,19 @@ void setup(void) {
   auto loader = RadioFrequencyMeshLoader(10);
   mesher.setLoader(&loader);
 
-  HomeKitMain::clear();
+  homeKitMain.clear();
   auto model = serviceStorage.load();
   if (model.services.size() > 0) {
     for (const auto& pair : model.services) {
       auto serviceId = pair.first;
       auto serviceSetting = pair.second;
-      auto service = HomeKitMain::createService(serviceId, serviceSetting);
+      auto service = homeKitMain.createService(serviceId, serviceSetting);
       if (service) {
         service->onStateChange = onStateChange;
       }
     }
     auto hostName = VictorWifi::getLocalHostName();
-    HomeKitMain::setup(hostName);
+    homeKitMain.setup(hostName);
   }
 
   console.log(F("[setup] complete"));
@@ -159,5 +160,5 @@ void setup(void) {
 void loop(void) {
   webPortal.loop();
   radioPortal.loop();
-  HomeKitMain::loop();
+  homeKitMain.loop();
 }
