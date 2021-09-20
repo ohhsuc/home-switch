@@ -108,14 +108,16 @@ namespace Victor::HomeKit {
     }
   }
 
-  void BooleanHomeKitService::_notifyCallback(homekit_characteristic_t *ch, homekit_value_t value, void *context) {
+  void BooleanHomeKitService::_notifyCallback(homekit_characteristic_t* ch, homekit_value_t value, void* context) {
     auto service = (BooleanHomeKitService*)context;
-    auto state = service->getState();
-    if (service->_outputPin) {
-      service->_outputPin->setValue(state.boolValue);
+    if (service->serviceCharacteristic == ch) {
+      auto state = service->getState();
+      if (service->_outputPin) {
+        service->_outputPin->setValue(state.boolValue);
+      }
+      // fire event
+      service->_fireStateChange(state);
     }
-    // fire event
-    service->_fireStateChange(state);
   }
 
 } // namespace Victor::HomeKit

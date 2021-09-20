@@ -90,8 +90,8 @@ void onStateChange(const ServiceState& state) {
   builtinLed->flash();
   timesTrigger.count();
   console.log().type(F("Service"))
-    .write(F("boolean ")).write(String(state.boolValue))
-    .write(F("integer ")).write(String(state.intValue))
+    .write(F(" boolean:")).write(String(state.boolValue))
+    .write(F(" integer:")).write(String(state.intValue))
     .newline();
 }
 
@@ -128,7 +128,7 @@ void setup(void) {
 
   timesTrigger.onTimesOut = []() { console.log(F("times out!")); };
   ticker.attach(30 * 60, []() { homeKitMain.heartbeat(); });
-  ticker.attach(30, []() {
+  ticker.attach(10, []() {
     // https://github.com/Mixiaoxiao/Arduino-HomeKit-ESP8266/issues/9
     if (MDNS.isRunning()) {
       MDNS.announce();
