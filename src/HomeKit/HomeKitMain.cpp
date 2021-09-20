@@ -75,4 +75,8 @@ namespace Victor::HomeKit {
     homekit_server_reset();
   }
 
+  int HomeKitMain::countClients() {
+    return arduino_homekit_connected_clients_count();
+  }
+
 } // namespace Victor::HomeKit

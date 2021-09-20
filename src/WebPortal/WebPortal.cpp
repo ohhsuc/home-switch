@@ -67,6 +67,7 @@ namespace Victor::Components {
   void WebPortal::_handleServiceList() {
     _dispatchRequestStart();
     DynamicJsonDocument res(512);
+    res[F("clientNumber")] = onCountClients ? onCountClients() : -1;
     JsonArray serviceArr = res.createNestedArray(F("services"));
     auto model = serviceStorage.load();
     for (const auto& pair : model.services) {

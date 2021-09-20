@@ -22,6 +22,7 @@ namespace Victor::HomeKit {
     void setup(String hostName);
     void loop();
     void reset();
+    int countClients();
 
    private:
     String _hostName;

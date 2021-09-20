@@ -113,6 +113,7 @@ void setup(void) {
   webPortal.onRequestStart = []() { builtinLed->turnOn(); };
   webPortal.onRequestEnd = []() { builtinLed->turnOff(); };
   webPortal.onResetAccessory = []() { homeKitMain.reset(); };
+  webPortal.onCountClients = []() { return homeKitMain.countClients(); };
   webPortal.setup();
 
   radioPortal.onMessage = [](const RadioMessage& message) {

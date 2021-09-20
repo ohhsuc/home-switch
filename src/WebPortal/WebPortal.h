@@ -14,6 +14,7 @@ namespace Victor::Components {
     typedef std::function<void(const String&, const ServiceSetting&)> TServiceSettingHandler;
     typedef std::function<ServiceState(const String&, const ServiceSetting&)> TGetServiceStateHandler;
     typedef std::function<void(const String&, const ServiceSetting&, ServiceState&)> TSetServiceStateHandler;
+    typedef std::function<int()> TCountClientsHandler;
 
    public:
     WebPortal(int port = 80);
@@ -25,6 +26,7 @@ namespace Victor::Components {
     TSetServiceStateHandler onSetServiceState;
     // server events
     TServerEventHandler onResetAccessory;
+    TCountClientsHandler onCountClients;
 
    private:
     void _registerHandlers() override;

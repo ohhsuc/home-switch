@@ -368,6 +368,7 @@ const RadioCommandView = (() => {
 const ServicesView = (() => {
   const state = {
     loading: true,
+    clientNumber: -1,
     services: [],
   };
   const add = () => {
@@ -403,6 +404,7 @@ const ServicesView = (() => {
       url: "/service/list",
     }).then((res) => {
       state.loading = false;
+      state.clientNumber = res.clientNumber;
       state.services = res.services;
       m.redraw();
     });
@@ -430,6 +432,9 @@ const ServicesView = (() => {
             ])
           )
         ),
+        vic.mTable({
+          rows: [["Clients", state.clientNumber]],
+        }),
         m("p", [
           m("button.btn", { onclick: add }, "Add+"),
           m("button.btn.weak", { onclick: reset }, "Reset HomeKit"),
