@@ -17,7 +17,6 @@ namespace Victor::HomeKit {
     HomeKitService* createService(const String& serviceId, const ServiceSetting& serviceSetting);
     HomeKitService* findServiceById(const String& serviceId);
     void removeService(const String& serviceId);
-    void heartbeat();
     void clear();
     void setup(String hostName);
     void loop();

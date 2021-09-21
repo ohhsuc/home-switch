@@ -6,7 +6,7 @@
 #include "VictorOTA.h"
 #include "VictorWifi.h"
 #include "TimesTrigger.h"
-#include "Mesher.h"
+// #include "Mesher.h"
 
 #include "WebPortal/WebPortal.h"
 #include "RadioPortal/RadioPortal.h"
@@ -127,7 +127,6 @@ void setup(void) {
   radioPortal.setup();
 
   timesTrigger.onTimesOut = []() { console.log(F("times out!")); };
-  ticker.attach(30 * 60, []() { homeKitMain.heartbeat(); });
   ticker.attach(10, []() {
     // https://github.com/Mixiaoxiao/Arduino-HomeKit-ESP8266/issues/9
     if (MDNS.isRunning()) {
@@ -135,9 +134,9 @@ void setup(void) {
     }
   });
 
-  auto mesher = Mesher();
-  auto loader = RadioFrequencyMeshLoader(10);
-  mesher.setLoader(&loader);
+  // auto mesher = Mesher();
+  // auto loader = RadioFrequencyMeshLoader(10);
+  // mesher.setLoader(&loader);
 
   homeKitMain.clear();
   auto model = serviceStorage.load();

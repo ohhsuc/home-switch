@@ -35,12 +35,6 @@ namespace Victor::HomeKit {
     }
   }
 
-  void HomeKitMain::heartbeat() {
-    for (const auto& pair : _idServiceMap) {
-      pair.second->notifyState();
-    }
-  }
-
   void HomeKitMain::clear() {
     _idServiceMap.clear();
   }
