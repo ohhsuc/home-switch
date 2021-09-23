@@ -28,11 +28,11 @@ namespace Victor::Components {
   }
 
   void WebPortal::_solvePageTokens(String& html) {
-    VictorWeb::_solvePageTokens(html);
     html.replace(F("{appendHead}"), F("\
-      <link rel=\"icon\" href=\"fav.svg\" type=\"image/svg+xml\">\
-      <script src=\"victoria.min.js\"></script>\
+      <link rel=\"icon\" href=\"fav.svg?v={version}\" type=\"image/svg+xml\">\
+      <script src=\"victoria.min.js?v={version}\"></script>\
     "));
+    VictorWeb::_solvePageTokens(html);
   }
 
   std::pair<bool, ServiceSetting> WebPortal::_getService(const String& serviceId) {
