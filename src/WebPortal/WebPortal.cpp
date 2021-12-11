@@ -262,9 +262,11 @@ namespace Victor::Components {
     deserializeJson(payload, payloadJson);
     // read
     auto inputPin = String(payload[F("inputPin")]);
+    auto outputPin = String(payload[F("outputPin")]);
     // action
     auto model = radioStorage.load();
     model.inputPin = inputPin.toInt();
+    model.outputPin = outputPin.toInt();
     radioStorage.save(model);
     // res
     DynamicJsonDocument res(64);

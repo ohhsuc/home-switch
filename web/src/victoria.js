@@ -11,10 +11,11 @@ const RadioView = (() => {
   };
   const save = () => {
     const inputPin = vic.query("#txtInputPin").value;
+    const outputPin = vic.query("#txtOutputPin").value;
     m.request({
       method: "POST",
       url: "/radio",
-      body: { inputPin },
+      body: { inputPin, outputPin },
     }).then((res) => {
       if (res.error) {
         alert(res.error);
@@ -32,6 +33,7 @@ const RadioView = (() => {
       state.loading = false;
       state.millis = res.millis;
       state.inputPin = res.inputPin;
+      state.outputPin = res.outputPin;
       state.lastReceived = res.lastReceived;
       m.redraw();
     });
@@ -77,6 +79,15 @@ const RadioView = (() => {
               min: -1,
               max: 100,
               value: state.inputPin,
+            }),
+          ]),
+          m("p", [
+            m("label", { for: "txtOutputPin" }, "Output Pin"),
+            m("input[type=number]", {
+              id: "txtOutputPin",
+              min: -1,
+              max: 100,
+              value: state.outputPin,
             }),
           ]),
           m("p", [m("button.btn", { onclick: save }, "Save")]),

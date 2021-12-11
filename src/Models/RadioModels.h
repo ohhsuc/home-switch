@@ -84,6 +84,7 @@ namespace Victor {
 
   struct RadioModel {
     int8_t inputPin = -1;
+    int8_t outputPin = -1;
     std::vector<RadioRule> rules;
     std::vector<RadioCommand> commands;
   };
