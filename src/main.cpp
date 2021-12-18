@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <ESP8266mDNS.h>
+#include <RH_ASK.h>
 
 #include "BuiltinLed.h"
 #include "VictorOTA.h"
@@ -15,6 +15,7 @@ using namespace Victor::Events;
 using namespace Victor::Components;
 using namespace Victor::HomeKit;
 
+RH_ASK* ask;
 BuiltinLed* builtinLed;
 VictorRadio radioPortal;
 WebPortal webPortal(80);
@@ -99,7 +100,7 @@ void onStateChange(const ServiceState& state) {
 void setup(void) {
   console.begin(115200);
   if (!LittleFS.begin()) {
-    console.error(F("[LittleFS] mount failed"));
+    console.error().type(F("LittleFS")).write(F(" mount failed")).newline();
   }
 
   builtinLed = new BuiltinLed();
@@ -108,11 +109,19 @@ void setup(void) {
   victorOTA.setup();
   victorWifi.setup();
 
+  auto radioJson = radioStorage.load();
+  ask = new RH_ASK(2000, radioJson.inputPin, radioJson.outputPin, 0);
+  if (!ask->init()) {
+    console.error().type(F("RH_ASK")).write(F(" init failed")).newline();
+  }
+
   radioPortal.onAction = setRadioAction;
   radioPortal.onCommand = setRadioCommand;
   radioPortal.onEmit = [](const RadioEmit& emit) {
+    const char* payload = emit.value.c_str();
+    ask->send((uint8_t *)payload, strlen(payload));
+    ask->waitPacketSent();
     builtinLed->flash();
-    // emit via your radio tool
     console.log().type(F("Radio"))
       .write(F(" sent [")).write(emit.value).write(F("]"))
       .write(F(" via channel [")).write(String(emit.channel)).write(F("]")).newline();
@@ -125,14 +134,13 @@ void setup(void) {
   webPortal.onRequestEnd = []() { builtinLed->turnOff(); };
   webPortal.onResetAccessory = []() { homeKitMain.reset(); };
   webPortal.onCountClients = []() { return homeKitMain.countClients(); };
+  webPortal.onRadioEmit = [](int index) { radioPortal.emit(index); };
   webPortal.setup();
 
-  timesTrigger.onTimesOut = []() { console.log(F("times out!")); };
-
   homeKitMain.clear();
-  auto model = serviceStorage.load();
-  if (model.services.size() > 0) {
-    for (const auto& pair : model.services) {
+  auto serviceJson = serviceStorage.load();
+  if (serviceJson.services.size() > 0) {
+    for (const auto& pair : serviceJson.services) {
       auto serviceId = pair.first;
       auto serviceSetting = pair.second;
       auto service = homeKitMain.createService(serviceId, serviceSetting);
@@ -144,21 +152,27 @@ void setup(void) {
     homeKitMain.setup(hostName);
   }
 
-  console.log(F("[setup] complete"));
+  timesTrigger.onTimesOut = []() {
+    console.log(F("times out!"));
+  };
+
   builtinLed->flash();
+  console.log(F("[setup] complete"));
 }
 
 void loop(void) {
   webPortal.loop();
   homeKitMain.loop();
-  // receive from your radio tool
-  if (false) {
-    String value = "";
-    int channel = 1;
+  uint8_t buf[RH_ASK_MAX_MESSAGE_LEN];
+  uint8_t buflen = sizeof(buf);
+  if (ask->recv(buf, &buflen)) {
+    auto value = String((char*)buf);
+    value = value.substring(0, buflen);
+    auto channel = 1;
     radioPortal.receive(value, channel);
+    builtinLed->flash();
     console.log().type(F("Radio"))
       .write(F(" received [")).write(value).write(F("]"))
       .write(F(" from channel [")).write(String(channel)).write(F("]")).newline();
-    builtinLed->flash();
   }
 }
