@@ -5,7 +5,7 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 #include "Commons.h"
-#include "Models/ServiceModels.h"
+#include "ServiceModels.h"
 
 namespace Victor::HomeKit {
   class HomeKitService {

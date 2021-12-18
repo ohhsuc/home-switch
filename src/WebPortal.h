@@ -5,9 +5,8 @@
 #include <Arduino.h>
 #include "Commons.h"
 #include "VictorWeb.h"
-#include "Models/ServiceModels.h"
-#include "RadioStorage/RadioStorage.h"
-#include "ServiceStorage/ServiceStorage.h"
+#include "ServiceModels.h"
+#include "ServiceStorage.h"
 
 namespace Victor::Components {
   class WebPortal : public VictorWeb {
@@ -25,7 +24,7 @@ namespace Victor::Components {
     TGetServiceStateHandler onGetServiceState;
     TSetServiceStateHandler onSetServiceState;
     // server events
-    TServerEventHandler onResetAccessory;
+    TServerEvent onResetAccessory;
     TCountClientsHandler onCountClients;
 
    private:
@@ -42,12 +41,6 @@ namespace Victor::Components {
     void _handleServiceDelete();
     void _handleServiceStateGet();
     void _handleServiceStateSave();
-    void _handleRadioGet();
-    void _handleRadioSave();
-    void _handleRadioRuleGet();
-    void _handleRadioRuleSave();
-    void _handleRadioCommandGet();
-    void _handleRadioCommandSave();
   };
 } // namespace Victor::Components
 

@@ -4,11 +4,10 @@
 #include "BuiltinLed.h"
 #include "VictorOTA.h"
 #include "VictorWifi.h"
+#include "VictorRadio.h"
 #include "TimesTrigger.h"
-// #include "Mesher.h"
 
-#include "WebPortal/WebPortal.h"
-#include "RadioPortal/RadioPortal.h"
+#include "WebPortal.h"
 #include "HomeKit/HomeKitMain.h"
 
 using namespace Victor;
@@ -17,8 +16,8 @@ using namespace Victor::Components;
 using namespace Victor::HomeKit;
 
 BuiltinLed* builtinLed;
+VictorRadio radioPortal;
 WebPortal webPortal(80);
-RadioPortal radioPortal;
 TimesTrigger timesTrigger(10, 5 * 1000);
 HomeKitMain homeKitMain;
 
@@ -66,22 +65,26 @@ void setSwitchAction(const String& serviceId, const int& action) {
   }
 }
 
-void setRadioAction(const RadioRule& rule) {
+bool setRadioAction(const RadioRule& rule) {
   if (rule.serviceId) {
     int action = rule.action == RadioActionFalse ? 0
       : rule.action == RadioActionTrue ? 1
       : rule.action == RadioActionToggle ? 2 : -1;
     setSwitchAction(rule.serviceId, action);
+    return true;
   }
+  return false;
 }
 
-void setRadioCommand(const RadioCommandParsed& command) {
+bool setRadioCommand(const RadioCommandParsed& command) {
   if (command.serviceId && command.entry == EntryBoolean) {
     int action = command.action == EntryBooleanToggle ? 2
       : (command.action == EntryBooleanSet && command.parameters == "true") ? 1
       : (command.action == EntryBooleanSet && command.parameters == "false") ? 0 : -1;
     setSwitchAction(command.serviceId, action);
+    return true;
   }
+  return false;
 }
 
 void onStateChange(const ServiceState& state) {
@@ -102,8 +105,18 @@ void setup(void) {
   builtinLed = new BuiltinLed();
   builtinLed->turnOn();
 
-  VictorOTA::setup();
-  VictorWifi::setup();
+  victorOTA.setup();
+  victorWifi.setup();
+
+  radioPortal.onAction = setRadioAction;
+  radioPortal.onCommand = setRadioCommand;
+  radioPortal.onEmit = [](const RadioEmit& emit) {
+    builtinLed->flash();
+    // emit via your radio tool
+    console.log().type(F("Radio"))
+      .write(F(" sent [")).write(emit.value).write(F("]"))
+      .write(F(" via channel [")).write(String(emit.channel)).write(F("]")).newline();
+  };
 
   webPortal.onDeleteService = deleteService;
   webPortal.onGetServiceState = getServiceState;
@@ -114,21 +127,7 @@ void setup(void) {
   webPortal.onCountClients = []() { return homeKitMain.countClients(); };
   webPortal.setup();
 
-  radioPortal.onMessage = [](const RadioMessage& message) {
-    console.log().type(F("Radio"))
-      .write(F(" received [")).write(message.id).write(F("!")).write(message.value).write(F("]"))
-      .write(F(" from channel [")).write(String(message.channel)).write(F("]")).newline();
-    builtinLed->flash();
-  };
-  radioPortal.onAction = setRadioAction;
-  radioPortal.onCommand = setRadioCommand;
-  radioPortal.setup();
-
   timesTrigger.onTimesOut = []() { console.log(F("times out!")); };
-
-  // auto mesher = Mesher();
-  // auto loader = RadioFrequencyMeshLoader(10);
-  // mesher.setLoader(&loader);
 
   homeKitMain.clear();
   auto model = serviceStorage.load();
@@ -141,7 +140,7 @@ void setup(void) {
         service->onStateChange = onStateChange;
       }
     }
-    auto hostName = VictorWifi::getLocalHostName();
+    auto hostName = victorWifi.getLocalHostName();
     homeKitMain.setup(hostName);
   }
 
@@ -151,6 +150,15 @@ void setup(void) {
 
 void loop(void) {
   webPortal.loop();
-  radioPortal.loop();
   homeKitMain.loop();
+  // receive from your radio tool
+  if (false) {
+    String value = "";
+    int channel = 1;
+    radioPortal.receive(value, channel);
+    console.log().type(F("Radio"))
+      .write(F(" received [")).write(value).write(F("]"))
+      .write(F(" from channel [")).write(String(channel)).write(F("]")).newline();
+    builtinLed->flash();
+  }
 }
