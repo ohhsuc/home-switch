@@ -10,21 +10,21 @@ namespace Victor::Components {
     _messageHandler = handler;
   }
   void IMeshLoader::send(const MeshMessage& message) {
-    console.log(F("[IMeshLoader] send()"));
+    console.log().bracket("IMeshLoader").section("send()"));
   }
 
   // RadioFrequencyMeshLoader
   RadioFrequencyMeshLoader::RadioFrequencyMeshLoader(uint8_t inputPin) : IMeshLoader(inputPin) {
   }
   void RadioFrequencyMeshLoader::send(const MeshMessage& message) {
-    console.log(F("[RadioFrequencyMeshLoader] send()"));
+    console.log().bracket("RadioFrequencyMeshLoader").section("send()"));
   }
 
   // BluetoothMeshLoader
   BluetoothMeshLoader::BluetoothMeshLoader(uint8_t inputPin) : IMeshLoader(inputPin) {
   }
   void BluetoothMeshLoader::send(const MeshMessage& message) {
-    console.log(F("[BluetoothMeshLoader] send()"));
+    console.log().bracket("BluetoothMeshLoader").section("send()"));
   }
 
   // Mesher

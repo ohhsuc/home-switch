@@ -91,16 +91,15 @@ bool setRadioCommand(const RadioCommandParsed& command) {
 void onStateChange(const ServiceState& state) {
   builtinLed->flash();
   timesTrigger.count();
-  console.log().type(F("Service"))
-    .write(F(" boolean:")).write(String(state.boolValue))
-    .write(F(" integer:")).write(String(state.intValue))
-    .newline();
+  console.log().bracket(F("Service"))
+    .section(F("boolean")).section(String(state.boolValue))
+    .section(F("integer")).section(String(state.intValue));
 }
 
 void setup(void) {
   console.begin(115200);
   if (!LittleFS.begin()) {
-    console.error().type(F("LittleFS")).write(F(" mount failed")).newline();
+    console.error(F("fs mount failed"));
   }
 
   builtinLed = new BuiltinLed();
@@ -112,7 +111,7 @@ void setup(void) {
   auto radioJson = radioStorage.load();
   ask = new RH_ASK(2000, radioJson.inputPin, radioJson.outputPin, 0);
   if (!ask->init()) {
-    console.error().type(F("RH_ASK")).write(F(" init failed")).newline();
+    console.error(F("RH_ASK init failed"));
   }
 
   radioPortal.onAction = setRadioAction;
@@ -122,9 +121,9 @@ void setup(void) {
     ask->send((uint8_t *)payload, strlen(payload));
     ask->waitPacketSent();
     builtinLed->flash();
-    console.log().type(F("Radio"))
-      .write(F(" sent [")).write(emit.value).write(F("]"))
-      .write(F(" via channel [")).write(String(emit.channel)).write(F("]")).newline();
+    console.log().bracket(F("radio"))
+      .section(F("sent")).section(emit.value)
+      .section(F("via channel")).section(String(emit.channel));
   };
 
   webPortal.onDeleteService = deleteService;
@@ -157,7 +156,7 @@ void setup(void) {
   };
 
   builtinLed->flash();
-  console.log(F("[setup] complete"));
+  console.log(F("setup complete"));
 }
 
 void loop(void) {
@@ -171,8 +170,8 @@ void loop(void) {
     auto channel = 1;
     radioPortal.receive(value, channel);
     builtinLed->flash();
-    console.log().type(F("Radio"))
-      .write(F(" received [")).write(value).write(F("]"))
-      .write(F(" from channel [")).write(String(channel)).write(F("]")).newline();
+    console.log().bracket(F("radio"))
+      .section(F("received")).section(value)
+      .section(F("from channel")).section(String(channel));
   }
 }
