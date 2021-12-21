@@ -1,5 +1,5 @@
-# Home Victoria
-Apple HomeKit firmware for Victoria 9#
+# Home Switch
+Apple HomeKit switch firmware for Victoria 9# (base on esp8266)
 
 ### Development Tools
 - [Visual Studio Code](https://code.visualstudio.com/)
