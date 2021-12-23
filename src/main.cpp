@@ -117,12 +117,13 @@ void setup(void) {
   radioPortal.onAction = setRadioAction;
   radioPortal.onCommand = setRadioCommand;
   radioPortal.onEmit = [](const RadioEmit& emit) {
-    const char* payload = emit.value.c_str();
+    auto value = emit.name + F("!") + emit.value;
+    const char* payload = value.c_str();
     ask->send((uint8_t *)payload, strlen(payload));
     ask->waitPacketSent();
     builtinLed->flash();
     console.log().bracket(F("radio"))
-      .section(F("sent")).section(emit.value)
+      .section(F("sent")).section(value)
       .section(F("via channel")).section(String(emit.channel));
   };
 
@@ -147,7 +148,7 @@ void setup(void) {
         service->onStateChange = onStateChange;
       }
     }
-    auto hostName = victorWifi.getLocalHostName();
+    auto hostName = victorWifi.getHostName();
     homeKitMain.setup(hostName);
   }
 
