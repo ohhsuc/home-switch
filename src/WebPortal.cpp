@@ -62,10 +62,10 @@ namespace Victor::Components {
     _dispatchRequestStart();
     DynamicJsonDocument res(512);
     res[F("clientNumber")] = onCountClients ? onCountClients() : -1;
-    JsonArray serviceArr = res.createNestedArray(F("services"));
-    auto model = serviceStorage.load();
+    const JsonArray serviceArr = res.createNestedArray(F("services"));
+    const auto model = serviceStorage.load();
     for (const auto& pair : model.services) {
-      JsonObject serviceObj = serviceArr.createNestedObject();
+      const JsonObject serviceObj = serviceArr.createNestedObject();
       serviceObj[F("id")] = pair.first;
       serviceObj[F("name")] = pair.second.name;
     }
@@ -75,8 +75,8 @@ namespace Victor::Components {
 
   void WebPortal::_handleServiceAdd() {
     _dispatchRequestStart();
-    auto serviceId = GlobalHelpers::randomString(4);
-    ServiceSetting newSetting = {
+    const auto serviceId = GlobalHelpers::randomString(4);
+    const ServiceSetting newSetting = {
       .name = F("New-") + serviceId,
       .type = BooleanServiceType,
     };
@@ -100,12 +100,12 @@ namespace Victor::Components {
 
   void WebPortal::_handleServiceGet() {
     _dispatchRequestStart();
-    auto id = _server->arg(F("id"));
-    auto found = _getService(id);
+    const auto id = _server->arg(F("id"));
+    const auto found = _getService(id);
     DynamicJsonDocument res(512);
-    JsonObject serviceObj = res.createNestedObject(F("service"));
+    const JsonObject serviceObj = res.createNestedObject(F("service"));
     if (found.first) {
-      auto service = found.second;
+      const auto service = found.second;
       serviceObj[F("id")] = id;
       serviceObj[F("name")] = service.name;
       serviceObj[F("type")] = service.type;
@@ -123,22 +123,22 @@ namespace Victor::Components {
   void WebPortal::_handleServiceSave() {
     _dispatchRequestStart();
     DynamicJsonDocument res(64);
-    auto id = _server->arg(F("id"));
-    auto found = _getService(id);
+    const auto id = _server->arg(F("id"));
+    const auto found = _getService(id);
     if (found.first) {
       // payload
-      auto payloadJson = _server->arg(F("plain"));
+      const auto payloadJson = _server->arg(F("plain"));
       DynamicJsonDocument payload(512);
       deserializeJson(payload, payloadJson);
       // read
-      auto name = String(payload[F("name")]);
-      auto type = String(payload[F("type")]);
-      auto inputPin = String(payload[F("inputPin")]);
-      auto outputPin = String(payload[F("outputPin")]);
-      auto inputTrueValue = String(payload[F("inputTrueValue")]);
-      auto outputTrueValue = String(payload[F("outputTrueValue")]);
+      const auto name = String(payload[F("name")]);
+      const auto type = String(payload[F("type")]);
+      const auto inputPin = String(payload[F("inputPin")]);
+      const auto outputPin = String(payload[F("outputPin")]);
+      const auto inputTrueValue = String(payload[F("inputTrueValue")]);
+      const auto outputTrueValue = String(payload[F("outputTrueValue")]);
       // save
-      ServiceSetting service = found.second;
+      auto service = found.second;
       service.name = name;
       service.type = ServiceType(type.toInt());
       service.inputPin = inputPin.toInt();
@@ -157,8 +157,8 @@ namespace Victor::Components {
   void WebPortal::_handleServiceDelete() {
     _dispatchRequestStart();
     DynamicJsonDocument res(64);
-    auto id = _server->arg(F("id"));
-    auto found = _getService(id);
+    const auto id = _server->arg(F("id"));
+    const auto found = _getService(id);
     if (found.first) {
       _deleteService(id, found.second);
       res[F("message")] = String(F("success"));
@@ -172,10 +172,10 @@ namespace Victor::Components {
   void WebPortal::_handleServiceStateGet() {
     _dispatchRequestStart();
     DynamicJsonDocument res(512);
-    auto id = _server->arg(F("id"));
-    auto found = _getService(id);
+    const auto id = _server->arg(F("id"));
+    const auto found = _getService(id);
     if (found.first) {
-      ServiceSetting service = found.second;
+      const ServiceSetting service = found.second;
       ServiceState state = {
         .boolValue = false,
         .intValue = 0,
@@ -183,11 +183,11 @@ namespace Victor::Components {
       if (onGetServiceState) {
         state = onGetServiceState(id, service);
       }
-      JsonObject serviceObj = res.createNestedObject(F("service"));
+      const JsonObject serviceObj = res.createNestedObject(F("service"));
       serviceObj[F("id")] = id;
       serviceObj[F("name")] = service.name;
       serviceObj[F("type")] = service.type;
-      JsonObject valueObj = res.createNestedObject(F("value"));
+      const JsonObject valueObj = res.createNestedObject(F("value"));
       valueObj[F("boolValue")] = state.boolValue;
       valueObj[F("intValue")] = state.intValue;
       res[F("message")] = String(F("success"));
@@ -201,25 +201,25 @@ namespace Victor::Components {
   void WebPortal::_handleServiceStateSave() {
     _dispatchRequestStart();
     DynamicJsonDocument res(512);
-    auto id = _server->arg(F("id"));
-    auto found = _getService(id);
+    const auto id = _server->arg(F("id"));
+    const auto found = _getService(id);
     if (found.first) {
-      ServiceSetting service = found.second;
+      const ServiceSetting service = found.second;
       ServiceState state = {
         .boolValue = false,
         .intValue = 0,
       };
       // payload
-      auto payloadJson = _server->arg(F("plain"));
+      const auto payloadJson = _server->arg(F("plain"));
       DynamicJsonDocument payload(64);
       deserializeJson(payload, payloadJson);
       // action
       if (service.type == BooleanServiceType) {
-        auto boolValue = String(payload[F("boolValue")]);
+        const auto boolValue = String(payload[F("boolValue")]);
         state.boolValue = (boolValue == F("true"));
       }
       if (service.type == IntegerServiceType) {
-        auto intValue = String(payload[F("intValue")]);
+        const auto intValue = String(payload[F("intValue")]);
         state.intValue = intValue.toInt();
       }
       if (onSetServiceState) {

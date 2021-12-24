@@ -11,7 +11,7 @@ namespace Victor::Events {
   }
 
   void ButtonEvents::loop() {
-    auto state = _loadState();
+    const auto state = _loadState();
     if (state != _lastState) {
       _lastState = state;
       if (onClick) {

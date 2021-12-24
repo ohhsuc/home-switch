@@ -9,9 +9,9 @@ namespace Victor::Events {
   }
 
   void OnOffEvents::loop() {
-    auto now = millis();
+    const auto now = millis();
     if (now - _lastTime > DEBOUNCE_TIMESPAN) {
-      auto state = digitalRead(_inputPin) == LOW;
+      const auto state = digitalRead(_inputPin) == LOW;
       if (state != _lastState) {
         _lastState = state;
         _lastTime = now;

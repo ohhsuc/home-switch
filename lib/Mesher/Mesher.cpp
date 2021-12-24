@@ -65,7 +65,7 @@ namespace Victor::Components {
     send(type, F(""));
   }
   void Mesher::send(MeshMessageType type, const String& content) {
-    MeshMessage message = {
+    const MeshMessage message = {
       .type = type,
       .sourceId = _id,
       .replyId = F(""),

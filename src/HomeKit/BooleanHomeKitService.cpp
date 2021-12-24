@@ -63,20 +63,18 @@ namespace Victor::HomeKit {
 
     // setup output
     if (serviceSetting.outputPin > -1) {
-      auto trueValue = serviceSetting.outputTrueValue == 0 ? LOW : HIGH;
-      _outputPin = new DigitalOutput(serviceSetting.outputPin, trueValue);
+      _outputPin = new DigitalOutput(serviceSetting.outputPin, serviceSetting.outputTrueValue);
       _outputPin->setValue(false); // off by default
     }
 
     // setup input
     if (serviceSetting.inputPin > -1) {
-      auto trueValue = serviceSetting.inputTrueValue == 0 ? LOW : HIGH;
-      _inputPin = new DigitalInput(serviceSetting.inputPin, trueValue);
+      _inputPin = new DigitalInput(serviceSetting.inputPin, serviceSetting.inputTrueValue);
     }
 
     if (_inputPin) {
       _buttonEvents = new ButtonEvents([&]()->bool {
-        auto isPressed = _inputPin->getValue() == true;
+        const auto isPressed = _inputPin->getValue() == true;
         return isPressed;
       });
       _buttonEvents->onClick = [this](int times)->void {
@@ -109,9 +107,9 @@ namespace Victor::HomeKit {
   }
 
   void BooleanHomeKitService::_notifyCallback(homekit_characteristic_t* ch, homekit_value_t value, void* context) {
-    auto service = (BooleanHomeKitService*)context;
+    const auto service = (BooleanHomeKitService*)context;
     if (service->serviceCharacteristic == ch) {
-      auto state = service->getState();
+      const auto state = service->getState();
       if (service->_outputPin) {
         service->_outputPin->setValue(state.boolValue);
       }

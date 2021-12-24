@@ -11,7 +11,7 @@ namespace Victor::HomeKit {
 
   HomeKitService* HomeKitMain::createService(const String& serviceId, const ServiceSetting& serviceSetting) {
     if (serviceSetting.type == BooleanServiceType) {
-      auto booleanService = new BooleanHomeKitService(serviceId, serviceSetting);
+      const auto booleanService = new BooleanHomeKitService(serviceId, serviceSetting);
       _idServiceMap[booleanService->serviceId] = booleanService;
       return booleanService;
     } else if (serviceSetting.type == IntegerServiceType) {
@@ -29,7 +29,7 @@ namespace Victor::HomeKit {
 
   void HomeKitMain::removeService(const String& serviceId) {
     if (_idServiceMap.count(serviceId) > 0) {
-      auto service = _idServiceMap[serviceId];
+      const auto service = _idServiceMap[serviceId];
       _idServiceMap.erase(serviceId);
       delete service;
     }
@@ -53,7 +53,7 @@ namespace Victor::HomeKit {
     accessoryVersion.value.string_value      = const_cast<char*>(FirmwareVersion.c_str());
 
     // server configuration
-    auto password = const_cast<char*>(HomekitServerPassword.c_str());
+    const auto password = const_cast<char*>(HomekitServerPassword.c_str());
     boolServerConfig.password = password;
     arduino_homekit_setup(&boolServerConfig);
   }

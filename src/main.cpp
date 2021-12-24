@@ -27,7 +27,7 @@ void deleteService(const String& serviceId, const ServiceSetting& setting) {
 }
 
 ServiceState getServiceState(const String& serviceId, const ServiceSetting& setting) {
-  auto service = homeKitMain.findServiceById(serviceId);
+  const auto service = homeKitMain.findServiceById(serviceId);
   if (service) {
     return service->getState();
   }
@@ -35,14 +35,14 @@ ServiceState getServiceState(const String& serviceId, const ServiceSetting& sett
 }
 
 void setServiceState(const String& serviceId, const ServiceSetting& setting, ServiceState& state) {
-  auto service = homeKitMain.findServiceById(serviceId);
+  const auto service = homeKitMain.findServiceById(serviceId);
   if (service) {
     service->setState(state);
   }
 }
 
 void setSwitchAction(const String& serviceId, const int& action) {
-  auto service = homeKitMain.findServiceById(serviceId);
+  const auto service = homeKitMain.findServiceById(serviceId);
   if (service) {
     auto state = service->getState();
     switch (action) {

@@ -11,13 +11,13 @@ namespace Victor::Events {
   }
 
   void ShakeEvents::loop() {
-    auto state = digitalRead(_inputPin);
+    const auto state = digitalRead(_inputPin);
     if (_inputState != state) {
       _inputState = state;
       _shaked = true;
     }
     if (_shaked) {
-      auto now = millis();
+      const auto now = millis();
       if (now - _lastFire > DEFAULT_DEBOUNCE_MILLIS) {
         _lastFire = now;
         _shaked = false;
