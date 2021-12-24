@@ -91,9 +91,9 @@ bool setRadioCommand(const RadioCommandParsed& command) {
 void onStateChange(const ServiceState& state) {
   builtinLed->flash();
   timesTrigger.count();
-  console.log().bracket(F("Service"))
-    .section(F("boolean")).section(String(state.boolValue))
-    .section(F("integer")).section(String(state.intValue));
+  console.log().bracket(F("service"))
+    .section(F("boolean"), String(state.boolValue))
+    .section(F("integer"), String(state.intValue));
 }
 
 void setup(void) {
@@ -123,8 +123,8 @@ void setup(void) {
     ask->waitPacketSent();
     builtinLed->flash();
     console.log().bracket(F("radio"))
-      .section(F("sent")).section(value)
-      .section(F("via channel")).section(String(emit.channel));
+      .section(F("sent"), value)
+      .section(F("via channel"), String(emit.channel));
   };
 
   webPortal.onDeleteService = deleteService;
@@ -172,7 +172,7 @@ void loop(void) {
     radioPortal.receive(value, channel);
     builtinLed->flash();
     console.log().bracket(F("radio"))
-      .section(F("received")).section(value)
-      .section(F("from channel")).section(String(channel));
+      .section(F("received"), value)
+      .section(F("from channel"), String(channel));
   }
 }

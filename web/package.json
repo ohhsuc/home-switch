@@ -1,5 +1,5 @@
 {
-  "name": "home-esp8266",
+  "name": "home-switch",
   "version": "0.0.1",
   "description": "ESP8266 foundation associated web resource",
   "main": "",
@@ -7,7 +7,14 @@
     "build": "gulp build",
     "watch": "gulp watch"
   },
-  "author": "Rulee Chen",
+  "author": {
+    "name": "Rulee Chen",
+    "email": "rulee@live.cn"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruleechen/home-switch.git"
+  },
   "license": "MIT",
   "devDependencies": {
     "del": "^6.0.0",
