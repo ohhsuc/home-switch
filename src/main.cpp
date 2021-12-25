@@ -1,99 +1,77 @@
 #include <Arduino.h>
 #include <RH_ASK.h>
+#include <arduino_homekit_server.h>
 
-#include "BuiltinLed.h"
-#include "VictorOTA.h"
-#include "VictorWifi.h"
-#include "VictorRadio.h"
+#include <BuiltinLed.h>
+#include <VictorOTA.h>
+#include <VictorWifi.h>
+#include <VictorRadio.h>
+#include <VictorWeb.h>
+
+#include "SwitchStorage.h"
+#include "SwitchIO.h"
 #include "TimesTrigger.h"
-
-#include "WebPortal.h"
-#include "HomeKit/HomeKitMain.h"
 
 using namespace Victor;
 using namespace Victor::Events;
 using namespace Victor::Components;
-using namespace Victor::HomeKit;
 
 RH_ASK* ask;
 BuiltinLed* builtinLed;
 VictorRadio radioPortal;
-WebPortal webPortal(80);
+VictorWeb webPortal(80);
+SwitchIO* switchIO;
 TimesTrigger timesTrigger(10, 5 * 1000);
-HomeKitMain homeKitMain;
+String hostName;
 
-void deleteService(const String& serviceId, const ServiceSetting& setting) {
-  homeKitMain.removeService(serviceId);
+extern "C" homekit_characteristic_t switchName;
+extern "C" homekit_characteristic_t switchState;
+extern "C" homekit_server_config_t switchConfig;
+
+String parseStateName(bool state) {
+  return state ? "On" : "Off";
 }
 
-ServiceState getServiceState(const String& serviceId, const ServiceSetting& setting) {
-  const auto service = homeKitMain.findServiceById(serviceId);
-  if (service) {
-    return service->getState();
-  }
-  return {};
+void switchStateSetter(const homekit_value_t value) {
+  builtinLed->flash();
+  timesTrigger.count();
+  switchState.value.bool_value = value.bool_value;
+  switchIO->outputState(value.bool_value);
+  console.log().section(F("switch"), parseStateName(value.bool_value));
 }
 
-void setServiceState(const String& serviceId, const ServiceSetting& setting, ServiceState& state) {
-  const auto service = homeKitMain.findServiceById(serviceId);
-  if (service) {
-    service->setState(state);
-  }
+void setSwitchState(const bool value) {
+  switchState.value.bool_value = value;
+  homekit_characteristic_notify(&switchState, switchState.value);
+  switchIO->outputState(value);
+  console.log().section(F("switch"), parseStateName(value));
 }
 
-void setSwitchAction(const String& serviceId, const int& action) {
-  const auto service = homeKitMain.findServiceById(serviceId);
-  if (service) {
-    auto state = service->getState();
-    switch (action) {
-      case 0: {
-        state.boolValue = false;
-        break;
-      }
-      case 1: {
-        state.boolValue = true;
-        break;
-      }
-      case 2: {
-        state.boolValue = !state.boolValue;
-        break;
-      }
-      default: {
-        break;
-      }
-    }
-    service->setState(state);
-  }
+void setSwitchAction(const int& action) {
+  const auto value = action == 0 ? false
+    : action == 1 ? true
+    : action == 2 ? !switchState.value.bool_value
+    : switchState.value.bool_value;
+  setSwitchState(value);
 }
 
 bool setRadioAction(const RadioRule& rule) {
-  if (rule.serviceId) {
-    int action = rule.action == RadioActionFalse ? 0
-      : rule.action == RadioActionTrue ? 1
-      : rule.action == RadioActionToggle ? 2 : -1;
-    setSwitchAction(rule.serviceId, action);
-    return true;
-  }
-  return false;
+  const int action = rule.action == RadioActionFalse ? 0
+    : rule.action == RadioActionTrue ? 1
+    : rule.action == RadioActionToggle ? 2 : -1;
+  setSwitchAction(action);
+  return true;
 }
 
 bool setRadioCommand(const RadioCommandParsed& command) {
-  if (command.serviceId && command.entry == EntryBoolean) {
-    int action = command.action == EntryBooleanToggle ? 2
+  if (command.entry == EntryBoolean) {
+    const int action = command.action == EntryBooleanToggle ? 2
       : (command.action == EntryBooleanSet && command.parameters == "true") ? 1
       : (command.action == EntryBooleanSet && command.parameters == "false") ? 0 : -1;
-    setSwitchAction(command.serviceId, action);
+    setSwitchAction(action);
     return true;
   }
   return false;
-}
-
-void onStateChange(const ServiceState& state) {
-  builtinLed->flash();
-  timesTrigger.count();
-  console.log().bracket(F("service"))
-    .section(F("boolean"), String(state.boolValue))
-    .section(F("integer"), String(state.intValue));
 }
 
 void setup(void) {
@@ -108,12 +86,13 @@ void setup(void) {
   victorOTA.setup();
   victorWifi.setup();
 
-  auto radioJson = radioStorage.load();
+  const auto radioJson = radioStorage.load();
   ask = new RH_ASK(2000, radioJson.inputPin, radioJson.outputPin, 0);
   if (!ask->init()) {
     console.error(F("RH_ASK init failed"));
   }
 
+  // setup radio
   radioPortal.onAction = setRadioAction;
   radioPortal.onCommand = setRadioCommand;
   radioPortal.onEmit = [](const RadioEmit& emit) {
@@ -127,30 +106,29 @@ void setup(void) {
       .section(F("via channel"), String(emit.channel));
   };
 
-  webPortal.onDeleteService = deleteService;
-  webPortal.onGetServiceState = getServiceState;
-  webPortal.onSetServiceState = setServiceState;
+  // setup web
   webPortal.onRequestStart = []() { builtinLed->turnOn(); };
   webPortal.onRequestEnd = []() { builtinLed->turnOff(); };
-  webPortal.onResetAccessory = []() { homeKitMain.reset(); };
-  webPortal.onCountClients = []() { return homeKitMain.countClients(); };
   webPortal.onRadioEmit = [](int index) { radioPortal.emit(index); };
+  webPortal.onResetService = []() { homekit_server_reset(); };
+  webPortal.onGetServiceState = [](std::vector<KeyValueModel>& items) {
+    const auto stateName = parseStateName(switchState.value.bool_value);
+    const auto count = arduino_homekit_connected_clients_count();
+    items.push_back({ .key = "Switch", .value = stateName });
+    items.push_back({ .key = "Clients", .value = String(count) });
+  };
   webPortal.setup();
 
-  homeKitMain.clear();
-  auto serviceJson = serviceStorage.load();
-  if (serviceJson.services.size() > 0) {
-    for (const auto& pair : serviceJson.services) {
-      auto serviceId = pair.first;
-      auto serviceSetting = pair.second;
-      auto service = homeKitMain.createService(serviceId, serviceSetting);
-      if (service) {
-        service->onStateChange = onStateChange;
-      }
-    }
-    auto hostName = victorWifi.getHostName();
-    homeKitMain.setup(hostName);
-  }
+  // setup homekit server
+  hostName = victorWifi.getHostName();
+  switchName.value.string_value = const_cast<char*>(hostName.c_str());
+  switchState.setter = switchStateSetter;
+  arduino_homekit_setup(&switchConfig);
+
+    // setup switch io
+  const auto switchJson = switchStorage.load();
+  switchIO = new SwitchIO(switchJson);
+  switchIO->onStateChange = setSwitchState;
 
   timesTrigger.onTimesOut = []() {
     console.log(F("times out!"));
@@ -162,7 +140,9 @@ void setup(void) {
 
 void loop(void) {
   webPortal.loop();
-  homeKitMain.loop();
+  switchIO->loop();
+  arduino_homekit_loop();
+  // loop radio
   uint8_t buf[RH_ASK_MAX_MESSAGE_LEN];
   uint8_t buflen = sizeof(buf);
   if (ask->recv(buf, &buflen)) {
