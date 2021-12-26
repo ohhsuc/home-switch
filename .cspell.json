@@ -5,6 +5,7 @@
     "chen",
     "platformio",
     "espressif",
+    "libdeps",
     "littlefs",
     "gpio",
     "millis",

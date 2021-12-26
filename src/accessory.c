@@ -54,5 +54,5 @@ homekit_accessory_t* accessories[] = {
 
 homekit_server_config_t serverConfig = {
   .accessories = accessories,
-  .password = VICTOR_HOMEKIT_SERVER_PASSWORD,
+  .password = VICTOR_ACCESSORY_SERVER_PASSWORD,
 };

@@ -7,3 +7,5 @@
 
 node_modules
 data/web
+data/app.json
+data/radio.json
