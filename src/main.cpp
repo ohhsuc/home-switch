@@ -24,9 +24,9 @@ SwitchIO* switchIO;
 TimesTrigger timesTrigger(10, 5 * 1000);
 String hostName;
 
-extern "C" homekit_characteristic_t switchName;
 extern "C" homekit_characteristic_t switchState;
-extern "C" homekit_server_config_t switchConfig;
+extern "C" homekit_characteristic_t accessoryName;
+extern "C" homekit_server_config_t serverConfig;
 
 String parseStateName(bool state) {
   return state ? "On" : "Off";
@@ -121,9 +121,9 @@ void setup(void) {
 
   // setup homekit server
   hostName = victorWifi.getHostName();
-  switchName.value.string_value = const_cast<char*>(hostName.c_str());
+  accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
   switchState.setter = switchStateSetter;
-  arduino_homekit_setup(&switchConfig);
+  arduino_homekit_setup(&serverConfig);
 
     // setup switch io
   const auto switchJson = switchStorage.load();
