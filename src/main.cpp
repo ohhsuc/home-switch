@@ -112,16 +112,15 @@ void setup(void) {
   webPortal.onRadioEmit = [](int index) { radioPortal.emit(index); };
   webPortal.onResetService = []() { homekit_server_reset(); };
   webPortal.onGetServiceState = [](std::vector<KeyValueModel>& items) {
-    const auto stateName = parseStateName(switchState.value.bool_value);
-    const auto count = arduino_homekit_connected_clients_count();
-    items.push_back({ .key = "Switch", .value = stateName });
-    items.push_back({ .key = "Clients", .value = String(count) });
+    items.push_back({ .key = "Name", .value = VICTOR_ACCESSORY_SERVICE_NAME });
+    items.push_back({ .key = "State", .value = parseStateName(switchState.value.bool_value) });
+    items.push_back({ .key = "Clients", .value = String(arduino_homekit_connected_clients_count()) });
   };
   webPortal.setup();
 
   // setup homekit server
   hostName = victorWifi.getHostName();
-  accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
+  strcpy(accessoryName.value.string_value, &hostName[0]);
   switchState.setter = switchStateSetter;
   arduino_homekit_setup(&serverConfig);
 
