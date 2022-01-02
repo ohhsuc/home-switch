@@ -112,7 +112,7 @@ void setup(void) {
   webPortal.onRadioEmit = [](int index) { radioPortal.emit(index); };
   webPortal.onResetService = []() { homekit_server_reset(); };
   webPortal.onGetServiceState = [](std::vector<KeyValueModel>& items) {
-    items.push_back({ .key = "Name", .value = VICTOR_ACCESSORY_SERVICE_NAME });
+    items.push_back({ .key = "Service", .value = VICTOR_ACCESSORY_SERVICE_NAME });
     items.push_back({ .key = "State", .value = parseStateName(switchState.value.bool_value) });
     items.push_back({ .key = "Clients", .value = String(arduino_homekit_connected_clients_count()) });
   };
