@@ -4,8 +4,7 @@
   "description": "ESP8266 foundation associated web resource",
   "main": "",
   "scripts": {
-    "build": "gulp build",
-    "watch": "gulp watch"
+    "build": "gulp build"
   },
   "author": {
     "name": "Rulee Chen",
