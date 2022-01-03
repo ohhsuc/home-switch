@@ -83,9 +83,6 @@ void setup(void) {
   builtinLed = new BuiltinLed();
   builtinLed->turnOn();
 
-  victorOTA.setup();
-  victorWifi.setup();
-
   const auto radioJson = radioStorage.load();
   ask = new RH_ASK(2000, radioJson.inputPin, radioJson.outputPin, 0);
   if (!ask->init()) {
@@ -128,6 +125,9 @@ void setup(void) {
   const auto switchJson = switchStorage.load();
   switchIO = new SwitchIO(switchJson);
   switchIO->onStateChange = setSwitchState;
+
+  victorOTA.setup();
+  victorWifi.setup();
 
   timesTrigger.onTimesOut = []() {
     console.log(F("times out!"));
