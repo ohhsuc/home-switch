@@ -8,7 +8,7 @@
 #include <VictorRadio.h>
 #include <VictorWeb.h>
 
-#include "TimesTrigger.h"
+#include "TimesCounter.h"
 #include "SwitchStorage.h"
 #include "SwitchIO.h"
 
@@ -19,7 +19,7 @@ using namespace Victor::Components;
 RH_ASK* ask;
 VictorRadio radioPortal;
 VictorWeb webPortal(80);
-TimesTrigger timesTrigger(10, 5 * 1000);
+TimesCounter times(10, 5 * 1000);
 SwitchIO* switchIO;
 String hostName;
 
@@ -33,7 +33,7 @@ String parseStateName(bool state) {
 
 void switchStateSetter(const homekit_value_t value) {
   builtinLed.flash();
-  timesTrigger.count();
+  times.count();
   switchState.value.bool_value = value.bool_value;
   switchIO->outputState(value.bool_value);
   console.log().section(F("switch"), parseStateName(value.bool_value));
@@ -96,7 +96,8 @@ void setup(void) {
     ask->send((uint8_t *)payload, strlen(payload));
     ask->waitPacketSent();
     builtinLed.flash();
-    console.log().bracket(F("radio"))
+    console.log()
+      .bracket(F("radio"))
       .section(F("sent"), value)
       .section(F("via channel"), String(emit.channel));
   };
@@ -124,8 +125,8 @@ void setup(void) {
   switchIO = new SwitchIO(switchJson);
   switchIO->onStateChange = setSwitchState;
 
-  // trigger
-  timesTrigger.onTimesOut = []() {
+  // counter
+  times.onOut = []() {
     console.log(F("times out!"));
   };
 
@@ -150,7 +151,8 @@ void loop(void) {
     auto channel = 1;
     radioPortal.receive(value, channel);
     builtinLed.flash();
-    console.log().bracket(F("radio"))
+    console.log()
+      .bracket(F("radio"))
       .section(F("received"), value)
       .section(F("from channel"), String(channel));
   }

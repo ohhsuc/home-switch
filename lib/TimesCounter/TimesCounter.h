@@ -1,19 +1,20 @@
-#ifndef TimesTrigger_h
-#define TimesTrigger_h
+#ifndef TimesCounter_h
+#define TimesCounter_h
 
 #include <functional>
 #include <Arduino.h>
 
 namespace Victor::Events {
-  class TimesTrigger {
+  class TimesCounter {
     typedef std::function<void()> TTimesOutHandler;
 
    public:
-    TimesTrigger(int times, unsigned long resetMillis);
-    TTimesOutHandler onTimesOut;
+    TimesCounter(int times, unsigned long resetMillis);
+    TTimesOutHandler onOut;
     void count();
 
    private:
+    // args
     int _times;
     unsigned long _resetMillis;
     // state
@@ -22,4 +23,4 @@ namespace Victor::Events {
   };
 } // namespace Victor::Events
 
-#endif // TimesTrigger_h
+#endif // TimesCounter_h
