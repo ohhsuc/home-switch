@@ -17,7 +17,6 @@ using namespace Victor::Events;
 using namespace Victor::Components;
 
 RH_ASK* ask;
-BuiltinLed* builtinLed;
 VictorRadio radioPortal;
 VictorWeb webPortal(80);
 SwitchIO* switchIO;
@@ -33,7 +32,7 @@ String parseStateName(bool state) {
 }
 
 void switchStateSetter(const homekit_value_t value) {
-  builtinLed->flash();
+  builtinLed.flash();
   timesTrigger.count();
   switchState.value.bool_value = value.bool_value;
   switchIO->outputState(value.bool_value);
@@ -80,16 +79,15 @@ void setup(void) {
     console.error(F("fs mount failed"));
   }
 
-  builtinLed = new BuiltinLed();
-  builtinLed->turnOn();
+  builtinLed.setup();
+  builtinLed.turnOn();
 
+  // setup radio
   const auto radioJson = radioStorage.load();
   ask = new RH_ASK(2000, radioJson.inputPin, radioJson.outputPin, 0);
   if (!ask->init()) {
     console.error(F("RH_ASK init failed"));
   }
-
-  // setup radio
   radioPortal.onAction = setRadioAction;
   radioPortal.onCommand = setRadioCommand;
   radioPortal.onEmit = [](const RadioEmit& emit) {
@@ -97,15 +95,15 @@ void setup(void) {
     const char* payload = value.c_str();
     ask->send((uint8_t *)payload, strlen(payload));
     ask->waitPacketSent();
-    builtinLed->flash();
+    builtinLed.flash();
     console.log().bracket(F("radio"))
       .section(F("sent"), value)
       .section(F("via channel"), String(emit.channel));
   };
 
   // setup web
-  webPortal.onRequestStart = []() { builtinLed->turnOn(); };
-  webPortal.onRequestEnd = []() { builtinLed->turnOff(); };
+  webPortal.onRequestStart = []() { builtinLed.turnOn(); };
+  webPortal.onRequestEnd = []() { builtinLed.turnOff(); };
   webPortal.onRadioEmit = [](int index) { radioPortal.emit(index); };
   webPortal.onResetService = []() { homekit_server_reset(); };
   webPortal.onGetServiceState = [](std::vector<KeyValueModel>& items) {
@@ -126,14 +124,16 @@ void setup(void) {
   switchIO = new SwitchIO(switchJson);
   switchIO->onStateChange = setSwitchState;
 
-  victorOTA.setup();
-  victorWifi.setup();
-
+  // trigger
   timesTrigger.onTimesOut = []() {
     console.log(F("times out!"));
   };
 
-  builtinLed->flash();
+  // setup wifi
+  victorOTA.setup();
+  victorWifi.setup();
+
+  // done
   console.log(F("setup complete"));
 }
 
@@ -149,7 +149,7 @@ void loop(void) {
     value = value.substring(0, buflen);
     auto channel = 1;
     radioPortal.receive(value, channel);
-    builtinLed->flash();
+    builtinLed.flash();
     console.log().bracket(F("radio"))
       .section(F("received"), value)
       .section(F("from channel"), String(channel));
