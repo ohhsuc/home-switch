@@ -8,9 +8,9 @@
 #include <VictorRadio.h>
 #include <VictorWeb.h>
 
+#include "TimesTrigger.h"
 #include "SwitchStorage.h"
 #include "SwitchIO.h"
-#include "TimesTrigger.h"
 
 using namespace Victor;
 using namespace Victor::Events;
@@ -19,8 +19,8 @@ using namespace Victor::Components;
 RH_ASK* ask;
 VictorRadio radioPortal;
 VictorWeb webPortal(80);
-SwitchIO* switchIO;
 TimesTrigger timesTrigger(10, 5 * 1000);
+SwitchIO* switchIO;
 String hostName;
 
 extern "C" homekit_characteristic_t switchState;
