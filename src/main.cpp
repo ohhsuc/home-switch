@@ -2,6 +2,7 @@
 #include <RH_ASK.h>
 #include <arduino_homekit_server.h>
 
+#include <Console.h>
 #include <BuiltinLed.h>
 #include <VictorOTA.h>
 #include <VictorWifi.h>
