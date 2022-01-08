@@ -116,16 +116,16 @@ void setup(void) {
   };
   webPortal.setup();
 
+  // setup switch io
+  const auto switchJson = switchStorage.load();
+  switchIO = new SwitchIO(switchJson);
+  switchIO->onStateChange = setSwitchState;
+
   // setup homekit server
   hostName = victorWifi.getHostName();
   accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
   switchState.setter = switchStateSetter;
   arduino_homekit_setup(&serverConfig);
-
-    // setup switch io
-  const auto switchJson = switchStorage.load();
-  switchIO = new SwitchIO(switchJson);
-  switchIO->onStateChange = setSwitchState;
 
   // counter
   times.onOut = []() {
