@@ -106,13 +106,17 @@ void setup(void) {
   // setup web
   webPortal.onRequestStart = []() { builtinLed.turnOn(); };
   webPortal.onRequestEnd = []() { builtinLed.turnOff(); };
-  webPortal.onRadioEmit = [](int index) { radioPortal.emit(index); };
-  webPortal.onResetService = []() { homekit_server_reset(); };
-  webPortal.onGetServiceState = [](std::vector<KeyValueModel>& items) {
+  webPortal.onRadioEmit = [](const int index) { radioPortal.emit(index); };
+  webPortal.onServiceGet = [](std::vector<KeyValueModel>& items) {
     items.push_back({ .key = "Service", .value = VICTOR_ACCESSORY_SERVICE_NAME });
     items.push_back({ .key = "State", .value = parseStateName(switchState.value.bool_value) });
     items.push_back({ .key = "Paired", .value = homekit_is_paired() ? "Yes" : "No" });
     items.push_back({ .key = "Clients", .value = String(arduino_homekit_connected_clients_count()) });
+  };
+  webPortal.onServicePost = [](const String type) {
+    if (type == "reset") {
+      homekit_server_reset();
+    }
   };
   webPortal.setup();
 
@@ -120,6 +124,7 @@ void setup(void) {
   const auto switchJson = switchStorage.load();
   switchIO = new SwitchIO(switchJson);
   switchIO->onStateChange = setSwitchState;
+  setSwitchState(switchIO->readState());
 
   // setup homekit server
   hostName = victorWifi.getHostName();

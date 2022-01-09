@@ -14,13 +14,13 @@ namespace Victor::Components {
     void outputState(bool state);
     // events
     typedef std::function<void(bool state)> TStateHandler;
-    TStateHandler onStateChange;
+    TStateHandler onStateChange = nullptr;
 
    private:
-    DigitalInput* _input;
-    DigitalOutput* _output;
+    DigitalInput* _input = nullptr;
+    DigitalOutput* _output = nullptr;
     bool _lastState = false;
-    unsigned long _lastLoop;
+    unsigned long _lastLoop = 0;
   };
 
 } // namespace Victor::Components
