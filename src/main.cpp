@@ -124,7 +124,6 @@ void setup(void) {
   const auto switchJson = switchStorage.load();
   switchIO = new SwitchIO(switchJson);
   switchIO->onStateChange = setSwitchState;
-  setSwitchState(switchIO->readState());
 
   // setup homekit server
   hostName = victorWifi.getHostName();
