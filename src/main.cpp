@@ -104,8 +104,8 @@ void setup(void) {
   };
 
   // setup web
-  webPortal.onRequestStart = []() { builtinLed.turnOn(); };
-  webPortal.onRequestEnd = []() { builtinLed.turnOff(); };
+  webPortal.onRequestStart = []() { builtinLed.toggle(); };
+  webPortal.onRequestEnd = []() { builtinLed.toggle(); };
   webPortal.onRadioEmit = [](const int index) { radioPortal.emit(index); };
   webPortal.onServiceGet = [](std::vector<KeyValueModel>& items) {
     items.push_back({ .key = "Service", .value = VICTOR_ACCESSORY_SERVICE_NAME });
