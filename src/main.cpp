@@ -29,7 +29,11 @@ extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_server_config_t serverConfig;
 
 String parseStateName(bool state) {
-  return state ? "On" : "Off";
+  return state ? F("On") : F("Off");
+}
+
+String parseYesNo(bool state) {
+  return state ? F("Yes") : F("No");
 }
 
 void switchStateSetter(const homekit_value_t value) {
@@ -66,8 +70,8 @@ bool setRadioAction(const RadioRule& rule) {
 bool setRadioCommand(const RadioCommandParsed& command) {
   if (command.entry == EntryBoolean) {
     const int action = command.action == EntryBooleanToggle ? 2
-      : (command.action == EntryBooleanSet && command.parameters == "true") ? 1
-      : (command.action == EntryBooleanSet && command.parameters == "false") ? 0 : -1;
+      : (command.action == EntryBooleanSet && command.parameters == F("true")) ? 1
+      : (command.action == EntryBooleanSet && command.parameters == F("false")) ? 0 : -1;
     setSwitchAction(action);
     return true;
   }
@@ -108,13 +112,13 @@ void setup(void) {
   webPortal.onRequestEnd = []() { builtinLed.toggle(); };
   webPortal.onRadioEmit = [](const int index) { radioPortal.emit(index); };
   webPortal.onServiceGet = [](std::vector<KeyValueModel>& items) {
-    items.push_back({ .key = "Service", .value = VICTOR_ACCESSORY_SERVICE_NAME });
-    items.push_back({ .key = "State", .value = parseStateName(switchState.value.bool_value) });
-    items.push_back({ .key = "Paired", .value = homekit_is_paired() ? "Yes" : "No" });
-    items.push_back({ .key = "Clients", .value = String(arduino_homekit_connected_clients_count()) });
+    items.push_back({ .key = F("Service"), .value = VICTOR_ACCESSORY_SERVICE_NAME });
+    items.push_back({ .key = F("State"),   .value = parseStateName(switchState.value.bool_value) });
+    items.push_back({ .key = F("Paired"),  .value = parseYesNo(homekit_is_paired()) });
+    items.push_back({ .key = F("Clients"), .value = String(arduino_homekit_connected_clients_count()) });
   };
   webPortal.onServicePost = [](const String type) {
-    if (type == "reset") {
+    if (type == F("reset")) {
       homekit_server_reset();
     }
   };
