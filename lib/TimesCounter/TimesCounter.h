@@ -9,16 +9,16 @@ namespace Victor::Events {
     typedef std::function<void()> TTimesOutHandler;
 
    public:
-    TimesCounter(int times, unsigned long resetMillis);
+    TimesCounter(uint8_t times, unsigned long resetMillis);
     TTimesOutHandler onOut;
     void count();
 
    private:
     // args
-    int _times;
+    uint8_t _times;
     unsigned long _resetMillis;
     // state
-    int _count = 0;
+    uint8_t _count = 0;
     unsigned long _lastTime = 0;
   };
 } // namespace Victor::Events

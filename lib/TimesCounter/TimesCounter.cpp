@@ -2,7 +2,7 @@
 
 namespace Victor::Events {
 
-  TimesCounter::TimesCounter(int times, unsigned long resetMillis) {
+  TimesCounter::TimesCounter(uint8_t times, unsigned long resetMillis) {
     _times = times;
     _resetMillis = resetMillis;
   }

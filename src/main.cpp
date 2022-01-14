@@ -41,18 +41,22 @@ void switchStateSetter(const homekit_value_t value) {
   times.count();
   switchState.value.bool_value = value.bool_value;
   switchIO->outputState(value.bool_value);
-  console.log().section(F("switch"), parseStateName(value.bool_value));
+  console.log()
+    .bracket(F("switch"))
+    .section(F("state"), parseStateName(value.bool_value));
 }
 
 void setSwitchState(const bool value) {
   switchState.value.bool_value = value;
   homekit_characteristic_notify(&switchState, switchState.value);
   switchIO->outputState(value);
-  console.log().section(F("switch"), parseStateName(value));
+  console.log()
+    .bracket(F("switch"))
+    .section(F("state"), parseStateName(value));
 }
 
 void setSwitchAction(const int& action) {
-  const auto value = action == 0 ? false
+  const bool value = action == 0 ? false
     : action == 1 ? true
     : action == 2 ? !switchState.value.bool_value
     : switchState.value.bool_value;
@@ -60,7 +64,7 @@ void setSwitchAction(const int& action) {
 }
 
 bool setRadioAction(const RadioRule& rule) {
-  const int action = rule.action == RadioActionFalse ? 0
+  const uint8_t action = rule.action == RadioActionFalse ? 0
     : rule.action == RadioActionTrue ? 1
     : rule.action == RadioActionToggle ? 2 : -1;
   setSwitchAction(action);
@@ -69,7 +73,7 @@ bool setRadioAction(const RadioRule& rule) {
 
 bool setRadioCommand(const RadioCommandParsed& command) {
   if (command.entry == EntryBoolean) {
-    const int action = command.action == EntryBooleanToggle ? 2
+    const uint8_t action = command.action == EntryBooleanToggle ? 2
       : (command.action == EntryBooleanSet && command.parameters == F("true")) ? 1
       : (command.action == EntryBooleanSet && command.parameters == F("false")) ? 0 : -1;
     setSwitchAction(action);
@@ -81,7 +85,9 @@ bool setRadioCommand(const RadioCommandParsed& command) {
 void setup(void) {
   console.begin(115200);
   if (!LittleFS.begin()) {
-    console.error(F("fs mount failed"));
+    console.error()
+      .bracket(F("fs"))
+      .section(F("mount failed"));
   }
 
   builtinLed.setup();
@@ -91,7 +97,9 @@ void setup(void) {
   const auto radioJson = radioStorage.load();
   ask = new RH_ASK(2000, radioJson.inputPin, radioJson.outputPin, 0);
   if (!ask->init()) {
-    console.error(F("RH_ASK init failed"));
+    console.error()
+      .bracket(F("radio"))
+      .section(F("init failed"));
   }
   radioPortal.onAction = setRadioAction;
   radioPortal.onCommand = setRadioCommand;
@@ -110,7 +118,7 @@ void setup(void) {
   // setup web
   webPortal.onRequestStart = []() { builtinLed.toggle(); };
   webPortal.onRequestEnd = []() { builtinLed.toggle(); };
-  webPortal.onRadioEmit = [](const int index) { radioPortal.emit(index); };
+  webPortal.onRadioEmit = [](const uint8_t index) { radioPortal.emit(index); };
   webPortal.onServiceGet = [](std::vector<KeyValueModel>& items) {
     items.push_back({ .key = F("Service"), .value = VICTOR_ACCESSORY_SERVICE_NAME });
     items.push_back({ .key = F("State"),   .value = parseStateName(switchState.value.bool_value) });
@@ -145,7 +153,9 @@ void setup(void) {
   victorWifi.setup();
 
   // done
-  console.log(F("setup complete"));
+  console.log()
+    .bracket(F("setup"))
+    .section(F("complete"));
 }
 
 void loop(void) {
