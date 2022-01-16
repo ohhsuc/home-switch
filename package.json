@@ -1,7 +1,6 @@
 {
   "name": "home-switch",
   "version": "0.0.1",
-  "description": "ESP8266 foundation associated web resource",
   "main": "",
   "scripts": {
     "build": "gulp build"

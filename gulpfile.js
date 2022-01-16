@@ -14,13 +14,15 @@ function clean() {
 function buildDeps() {
   const rootDir = path.resolve(__dirname, "./");
   const libDeps = path.resolve(__dirname, "./.pio/libdeps");
-  const envNames = fse.readdirSync(libDeps);
-  for (const envName of envNames) {
-    const libDir = path.resolve(libDeps, envName, "home-esp8266/data");
-    if (fse.existsSync(libDir)) {
-      fse.copySync(libDir, path.resolve(rootDir, "data"), {
-        overwrite: true,
-      });
+  if (fse.existsSync(libDeps)) {
+    const envNames = fse.readdirSync(libDeps);
+    for (const envName of envNames) {
+      const libDir = path.resolve(libDeps, envName, "home-esp8266/data");
+      if (fse.existsSync(libDir)) {
+        fse.copySync(libDir, path.resolve(rootDir, "data"), {
+          overwrite: true,
+        });
+      }
     }
   }
   return Promise.resolve();
