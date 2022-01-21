@@ -104,7 +104,7 @@ void setup(void) {
   radioPortal.onAction = setRadioAction;
   radioPortal.onCommand = setRadioCommand;
   radioPortal.onEmit = [](const RadioEmit& emit) {
-    auto value = emit.name + F("!") + emit.value;
+    const auto value = emit.name + F("!") + emit.value;
     const char* payload = value.c_str();
     ask->send((uint8_t *)payload, strlen(payload));
     ask->waitPacketSent();
@@ -125,7 +125,7 @@ void setup(void) {
     items.push_back({ .key = F("Paired"),  .value = parseYesNo(homekit_is_paired()) });
     items.push_back({ .key = F("Clients"), .value = String(arduino_homekit_connected_clients_count()) });
   };
-  webPortal.onServicePost = [](const String type) {
+  webPortal.onServicePost = [](const String& type) {
     if (type == F("reset")) {
       homekit_server_reset();
     }

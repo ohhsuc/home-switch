@@ -3,7 +3,7 @@
 namespace Victor::Components {
 
   SwitchStorage::SwitchStorage() {
-    _filePath = F("/switch.json");
+    _filePath = "/switch.json";
   }
 
   void SwitchStorage::_serializeTo(const SwitchSetting& model, DynamicJsonDocument& doc) {
