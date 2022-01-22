@@ -28,12 +28,12 @@ extern "C" homekit_characteristic_t switchState;
 extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_server_config_t serverConfig;
 
-String parseStateName(bool state) {
-  return state ? F("On") : F("Off");
+String toYesNoName(bool state) {
+  return state ? F("Yes") : F("No");
 }
 
-String parseYesNo(bool state) {
-  return state ? F("Yes") : F("No");
+String toSwitchStateName(bool state) {
+  return state ? F("On") : F("Off");
 }
 
 void switchStateSetter(const homekit_value_t value) {
@@ -43,7 +43,7 @@ void switchStateSetter(const homekit_value_t value) {
   switchIO->outputState(value.bool_value);
   console.log()
     .bracket(F("switch"))
-    .section(F("state"), parseStateName(value.bool_value));
+    .section(F("state"), toSwitchStateName(value.bool_value));
 }
 
 void setSwitchState(const bool value) {
@@ -52,7 +52,7 @@ void setSwitchState(const bool value) {
   switchIO->outputState(value);
   console.log()
     .bracket(F("switch"))
-    .section(F("state"), parseStateName(value));
+    .section(F("state"), toSwitchStateName(value));
 }
 
 void setSwitchAction(const int& action) {
@@ -118,11 +118,11 @@ void setup(void) {
   // setup web
   webPortal.onRequestStart = []() { builtinLed.toggle(); };
   webPortal.onRequestEnd = []() { builtinLed.toggle(); };
-  webPortal.onRadioEmit = [](const uint8_t index) { radioPortal.emit(index); };
+  webPortal.onRadioEmit = [](uint8_t index) { radioPortal.emit(index); };
   webPortal.onServiceGet = [](std::vector<KeyValueModel>& items) {
     items.push_back({ .key = F("Service"), .value = VICTOR_ACCESSORY_SERVICE_NAME });
-    items.push_back({ .key = F("State"),   .value = parseStateName(switchState.value.bool_value) });
-    items.push_back({ .key = F("Paired"),  .value = parseYesNo(homekit_is_paired()) });
+    items.push_back({ .key = F("State"),   .value = toSwitchStateName(switchState.value.bool_value) });
+    items.push_back({ .key = F("Paired"),  .value = toYesNoName(homekit_is_paired()) });
     items.push_back({ .key = F("Clients"), .value = String(arduino_homekit_connected_clients_count()) });
   };
   webPortal.onServicePost = [](const String& type) {
