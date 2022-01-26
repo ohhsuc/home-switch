@@ -37,6 +37,7 @@ String toSwitchStateName(bool state) {
 }
 
 void setSwitchState(const bool value) {
+  ESP.wdtFeed();
   builtinLed.flash();
   times.count();
   switchState.value.bool_value = value;
@@ -151,9 +152,9 @@ void setup(void) {
 }
 
 void loop(void) {
+  arduino_homekit_loop();
   webPortal.loop();
   switchIO->loop();
-  arduino_homekit_loop();
   // loop radio
   uint8_t buf[RH_ASK_MAX_MESSAGE_LEN];
   uint8_t buflen = sizeof(buf);
