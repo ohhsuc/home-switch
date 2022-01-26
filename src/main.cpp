@@ -36,17 +36,9 @@ String toSwitchStateName(bool state) {
   return state ? F("On") : F("Off");
 }
 
-void switchStateSetter(const homekit_value_t value) {
+void setSwitchState(const bool value) {
   builtinLed.flash();
   times.count();
-  switchState.value.bool_value = value.bool_value;
-  switchIO->outputState(value.bool_value);
-  console.log()
-    .bracket(F("switch"))
-    .section(F("state"), toSwitchStateName(value.bool_value));
-}
-
-void setSwitchState(const bool value) {
   switchState.value.bool_value = value;
   homekit_characteristic_notify(&switchState, switchState.value);
   switchIO->outputState(value);
@@ -140,7 +132,7 @@ void setup(void) {
   // setup homekit server
   hostName = victorWifi.getHostName();
   accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
-  switchState.setter = switchStateSetter;
+  switchState.setter = [](const homekit_value_t value) { setSwitchState(value.bool_value); };
   arduino_homekit_setup(&serverConfig);
 
   // counter
