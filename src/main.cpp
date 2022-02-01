@@ -1,12 +1,10 @@
 #include <Arduino.h>
-#include <RH_ASK.h>
 #include <arduino_homekit_server.h>
 
 #include <Console.h>
 #include <BuiltinLed.h>
 #include <VictorOTA.h>
 #include <VictorWifi.h>
-#include <VictorRadio.h>
 #include <VictorWeb.h>
 
 #include "TimesCounter.h"
@@ -17,8 +15,6 @@ using namespace Victor;
 using namespace Victor::Events;
 using namespace Victor::Components;
 
-RH_ASK* ask;
-VictorRadio radioPortal;
 VictorWeb webPortal(80);
 TimesCounter times(10, 5 * 1000);
 SwitchIO* switchIO;
@@ -56,25 +52,6 @@ void setSwitchAction(const int& action) {
   setSwitchState(value);
 }
 
-bool setRadioAction(const RadioRule& rule) {
-  const uint8_t action = rule.action == RadioActionFalse ? 0
-    : rule.action == RadioActionTrue ? 1
-    : rule.action == RadioActionToggle ? 2 : -1;
-  setSwitchAction(action);
-  return true;
-}
-
-bool setRadioCommand(const RadioCommandParsed& command) {
-  if (command.entry == EntryBoolean) {
-    const uint8_t action = command.action == EntryBooleanToggle ? 2
-      : (command.action == EntryBooleanSet && command.parameters == F("true")) ? 1
-      : (command.action == EntryBooleanSet && command.parameters == F("false")) ? 0 : -1;
-    setSwitchAction(action);
-    return true;
-  }
-  return false;
-}
-
 void setup(void) {
   console.begin(115200);
   if (!LittleFS.begin()) {
@@ -86,32 +63,10 @@ void setup(void) {
   builtinLed.setup();
   builtinLed.turnOn();
 
-  // setup radio
-  const auto radioJson = radioStorage.load();
-  ask = new RH_ASK(2000, radioJson.inputPin, radioJson.outputPin, 0);
-  if (!ask->init()) {
-    console.error()
-      .bracket(F("radio"))
-      .section(F("init failed"));
-  }
-  radioPortal.onAction = setRadioAction;
-  radioPortal.onCommand = setRadioCommand;
-  radioPortal.onEmit = [](const RadioEmit& emit) {
-    const auto value = emit.name + F("!") + emit.value;
-    const char* payload = value.c_str();
-    ask->send((uint8_t *)payload, strlen(payload));
-    ask->waitPacketSent();
-    builtinLed.flash();
-    console.log()
-      .bracket(F("radio"))
-      .section(F("sent"), value)
-      .section(F("via channel"), String(emit.channel));
-  };
-
   // setup web
   webPortal.onRequestStart = []() { builtinLed.toggle(); };
   webPortal.onRequestEnd = []() { builtinLed.toggle(); };
-  webPortal.onRadioEmit = [](uint8_t index) { radioPortal.emit(index); };
+  webPortal.onRadioEmit = [](uint8_t index) { };
   webPortal.onServiceGet = [](std::vector<KeyValueModel>& items) {
     items.push_back({ .key = F("Service"), .value = VICTOR_ACCESSORY_SERVICE_NAME });
     items.push_back({ .key = F("State"),   .value = toSwitchStateName(switchState.value.bool_value) });
@@ -155,18 +110,4 @@ void loop(void) {
   arduino_homekit_loop();
   webPortal.loop();
   switchIO->loop();
-  // loop radio
-  uint8_t buf[RH_ASK_MAX_MESSAGE_LEN];
-  uint8_t buflen = sizeof(buf);
-  if (ask->recv(buf, &buflen)) {
-    auto value = String((char*)buf);
-    value = value.substring(0, buflen);
-    auto channel = 1;
-    radioPortal.receive(value, channel);
-    builtinLed.flash();
-    console.log()
-      .bracket(F("radio"))
-      .section(F("received"), value)
-      .section(F("from channel"), String(channel));
-  }
 }
