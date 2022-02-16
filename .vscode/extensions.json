@@ -6,5 +6,8 @@
         "ms-vscode.cpptools",
         "platformio.platformio-ide",
         "streetsidesoftware.code-spell-checker"
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.cpptools-extension-pack"
     ]
 }
