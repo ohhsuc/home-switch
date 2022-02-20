@@ -2,8 +2,7 @@
 
 namespace Victor::Events {
 
-  TimesCounter::TimesCounter(uint8_t times, unsigned long resetMillis) {
-    _times = times;
+  TimesCounter::TimesCounter(unsigned long resetMillis) {
     _resetMillis = resetMillis;
   }
 
@@ -12,17 +11,18 @@ namespace Victor::Events {
     // Returns the number of milliseconds passed since the Arduino board began running the current program.
     // This number will overflow (go back to zero), after approximately 50 days.
     const auto now = millis();
-    if (now - _lastTime >= _resetMillis) {
-      _count = 0;
+    if (now - _last >= _resetMillis) {
+      reset();
     }
     _count++;
-    _lastTime = now;
-    if (_count >= _times) {
-      _count = 0;
-      if (onOut) {
-        onOut();
-      }
+    _last = now;
+    if (onCount) {
+      onCount(_count);
     }
+  }
+
+  void TimesCounter::reset() {
+    _count = 0;
   }
 
 } // namespace Victor::Events

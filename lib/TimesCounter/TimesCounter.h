@@ -6,20 +6,20 @@
 
 namespace Victor::Events {
   class TimesCounter {
-    typedef std::function<void()> TTimesOutHandler;
+    typedef std::function<void(uint8_t count)> TCountHandler;
 
    public:
-    TimesCounter(uint8_t times, unsigned long resetMillis);
-    TTimesOutHandler onOut;
+    TimesCounter(unsigned long resetMillis);
+    TCountHandler onCount;
     void count();
+    void reset();
 
    private:
     // args
-    uint8_t _times;
     unsigned long _resetMillis;
     // state
     uint8_t _count = 0;
-    unsigned long _lastTime = 0;
+    unsigned long _last = 0;
   };
 } // namespace Victor::Events
 

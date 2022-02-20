@@ -16,7 +16,7 @@ using namespace Victor::Events;
 using namespace Victor::Components;
 
 VictorWeb webPortal(80);
-TimesCounter times(10, 5 * 1000);
+TimesCounter times(1000);
 SwitchIO* switchIO;
 String hostName;
 
@@ -84,8 +84,11 @@ void setup(void) {
   arduino_homekit_setup(&serverConfig);
 
   // counter
-  times.onOut = []() {
-    console.log(F("times out!"));
+  times.onCount = [](uint8_t count) {
+    if (count == 10) {
+      homekit_server_reset();
+      ESP.restart();
+    }
   };
 
   // setup wifi
