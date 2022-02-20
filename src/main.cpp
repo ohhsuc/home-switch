@@ -44,14 +44,6 @@ void setSwitchState(const bool value) {
     .section(F("state"), toSwitchStateName(value));
 }
 
-void setSwitchAction(const int& action) {
-  const bool value = action == 0 ? false
-    : action == 1 ? true
-    : action == 2 ? !switchState.value.bool_value
-    : switchState.value.bool_value;
-  setSwitchState(value);
-}
-
 void setup(void) {
   console.begin(115200);
   if (!LittleFS.begin()) {
