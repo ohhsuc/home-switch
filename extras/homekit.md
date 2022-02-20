@@ -8,11 +8,3 @@
 ### Link
 1. https://github.com/Yurik72/ESPHap/blob/master/arduino_homekit_server.cpp
 2. https://github.com/m5stack/M5-ProductExampleCodes/blob/master/AtomBase/AtomHub/Arduino_LED_Hap/arduino_homekit_server.cpp
-
-## TYWE3S
-
-switch.json
-{"s":[4,5,0,1,0]}
-
-app.json
-{"name":"Dev","led":[12,0,1],"wifi":["104-2.4","18950098099",1]}
