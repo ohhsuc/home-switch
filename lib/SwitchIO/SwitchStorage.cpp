@@ -12,6 +12,7 @@ namespace Victor::Components {
     setting[1] = model.outputPin;
     setting[2] = model.inputTrueValue;
     setting[3] = model.outputTrueValue;
+    setting[4] = model.syncMode ? 1 : 0;
   }
 
   void SwitchStorage::_deserializeFrom(SwitchSetting& model, const DynamicJsonDocument& doc) {
@@ -20,6 +21,7 @@ namespace Victor::Components {
     model.outputPin = setting[1];
     model.inputTrueValue = setting[2];
     model.outputTrueValue = setting[3];
+    model.syncMode = setting[4] == 1;
   }
 
   // global

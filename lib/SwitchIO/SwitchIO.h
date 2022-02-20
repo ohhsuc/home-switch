@@ -19,6 +19,7 @@ namespace Victor::Components {
    private:
     DigitalInput* _input = nullptr;
     DigitalOutput* _output = nullptr;
+    bool _syncMode = false; // true for sync mode, false for toggle mode
     bool _lastState = false;
     unsigned long _lastLoop = 0;
   };

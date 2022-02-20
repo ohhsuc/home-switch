@@ -5,6 +5,7 @@ namespace Victor::Components {
   SwitchIO::SwitchIO(SwitchSetting model) {
     _input = new DigitalInput(model.inputPin, model.inputTrueValue);
     _output = new DigitalOutput(model.outputPin, model.outputTrueValue);
+    _syncMode = model.syncMode;
     _lastState = readState();
   }
 
@@ -16,8 +17,14 @@ namespace Victor::Components {
       if (state != _lastState) {
         _lastState = state;
         if (onStateChange) {
-          const auto outputState = _output->lastValue();
-          onStateChange(!outputState);
+          if (_syncMode) {
+            // sync mode
+            onStateChange(state);
+          } else if (state) {
+            // toggle mode
+            const auto outputState = _output->lastValue();
+            onStateChange(!outputState);
+          }
         }
       }
     }

@@ -10,6 +10,7 @@ namespace Victor {
     int8_t outputPin = -1;
     uint8_t inputTrueValue = 0;  // LOW
     uint8_t outputTrueValue = 0; // LOW
+    bool syncMode = false;
   };
 
 } // namespace Victor
