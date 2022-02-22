@@ -8,7 +8,6 @@
 #include <VictorWeb.h>
 
 #include "TimesCounter.h"
-#include "SwitchStorage.h"
 #include "SwitchIO.h"
 
 using namespace Victor;
@@ -38,7 +37,7 @@ void setSwitchState(const bool value) {
   times.count();
   switchState.value.bool_value = value;
   homekit_characteristic_notify(&switchState, switchState.value);
-  switchIO->outputState(value);
+  switchIO->setOutputState(value);
   console.log()
     .bracket(F("switch"))
     .section(F("state"), toSwitchStateName(value));
@@ -73,9 +72,8 @@ void setup(void) {
   webPortal.setup();
 
   // setup switch io
-  const auto switchJson = switchStorage.load();
-  switchIO = new SwitchIO(switchJson);
-  switchIO->onStateChange = setSwitchState;
+  switchIO = new SwitchIO();
+  switchIO->onInputChange = setSwitchState;
 
   // setup homekit server
   hostName = victorWifi.getHostName();

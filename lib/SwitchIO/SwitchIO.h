@@ -4,23 +4,23 @@
 #include <DigitalInput.h>
 #include <DigitalOutput.h>
 #include "SwitchModels.h"
+#include "SwitchStorage.h"
 
 namespace Victor::Components {
   class SwitchIO {
    public:
-    SwitchIO(SwitchSetting model);
+    SwitchIO();
     void loop();
-    bool readState();
-    void outputState(bool state);
+    bool getInputState();
+    void setOutputState(bool on);
     // events
-    typedef std::function<void(bool state)> TStateHandler;
-    TStateHandler onStateChange = nullptr;
+    typedef std::function<void(bool on)> TStateHandler;
+    TStateHandler onInputChange = nullptr;
 
    private:
     DigitalInput* _input = nullptr;
     DigitalOutput* _output = nullptr;
-    bool _syncMode = false; // true for sync mode, false for toggle mode
-    bool _lastState = false;
+    bool _inputState = false;
     unsigned long _lastLoop = 0;
   };
 
