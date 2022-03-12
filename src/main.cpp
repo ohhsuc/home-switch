@@ -18,9 +18,11 @@ VictorWeb webPortal(80);
 TimesCounter times(1000);
 SwitchIO* switchIO;
 String hostName;
+String serialNumber;
 
 extern "C" homekit_characteristic_t switchState;
 extern "C" homekit_characteristic_t accessoryName;
+extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
 String toYesNoName(bool state) {
@@ -77,7 +79,9 @@ void setup(void) {
 
   // setup homekit server
   hostName = victorWifi.getHostName();
+  serialNumber = String(VICTOR_ACCESSORY_INFORMATION_SERIAL_NUMBER) + "/" + victorWifi.getHostId();
   accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
+  accessorySerialNumber.value.string_value =const_cast<char*>(serialNumber.c_str());
   switchState.setter = [](const homekit_value_t value) { setSwitchState(value.bool_value); };
   arduino_homekit_setup(&serverConfig);
 
