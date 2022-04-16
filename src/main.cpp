@@ -67,10 +67,11 @@ void setup(void) {
     states.push_back({ .text = F("Paired"),  .value = toYesNoName(homekit_is_paired()) });
     states.push_back({ .text = F("Clients"), .value = String(arduino_homekit_connected_clients_count()) });
     // buttons
+    buttons.push_back({ .text = F("Unpair"), .value = F("Unpair") });
     buttons.push_back({ .text = F("Toggle"), .value = F("Toggle") });
   };
   webPortal.onServicePost = [](const String& value) {
-    if (value == F("Reset")) {
+    if (value == F("Unpair")) {
       homekit_server_reset();
     } else if (value == F("Toggle")) {
       setSwitchState(!switchState.value.bool_value);
