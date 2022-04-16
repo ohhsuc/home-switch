@@ -60,15 +60,20 @@ void setup(void) {
   webPortal.onRequestStart = []() { builtinLed.toggle(); };
   webPortal.onRequestEnd = []() { builtinLed.toggle(); };
   webPortal.onRadioEmit = [](uint8_t index) { };
-  webPortal.onServiceGet = [](std::vector<KeyValueModel>& items) {
-    items.push_back({ .key = F("Service"), .value = VICTOR_ACCESSORY_SERVICE_NAME });
-    items.push_back({ .key = F("State"),   .value = toSwitchStateName(switchState.value.bool_value) });
-    items.push_back({ .key = F("Paired"),  .value = toYesNoName(homekit_is_paired()) });
-    items.push_back({ .key = F("Clients"), .value = String(arduino_homekit_connected_clients_count()) });
+  webPortal.onServiceGet = [](std::vector<TextValueModel>& states, std::vector<TextValueModel>& buttons) {
+    // states
+    states.push_back({ .text = F("Service"), .value = VICTOR_ACCESSORY_SERVICE_NAME });
+    states.push_back({ .text = F("State"),   .value = toSwitchStateName(switchState.value.bool_value) });
+    states.push_back({ .text = F("Paired"),  .value = toYesNoName(homekit_is_paired()) });
+    states.push_back({ .text = F("Clients"), .value = String(arduino_homekit_connected_clients_count()) });
+    // buttons
+    buttons.push_back({ .text = F("Toggle"), .value = F("Toggle") });
   };
   webPortal.onServicePost = [](const String& value) {
-    if (value == F("reset")) {
+    if (value == F("Reset")) {
       homekit_server_reset();
+    } else if (value == F("Toggle")) {
+      setSwitchState(!switchState.value.bool_value);
     }
   };
   webPortal.setup();
