@@ -16,6 +16,7 @@
     "rssi",
     "mDNS",
     "mithril",
-    "oninit"
+    "oninit",
+    "tywe3s"
   ]
 }

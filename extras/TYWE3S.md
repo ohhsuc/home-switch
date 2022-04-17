@@ -1,14 +1,15 @@
 ## TYWE3S
 
-board = d1_mini_lite
+1. Copy platformio board `tywe3s.json` to `~/.platformio/platforms/espressif8266/boards`
 
-switch.json
-{"s":[4,5,0,1,0]}
+2. Set `platformio.ini` with `board = tywe3s`
 
-app.json
-{"name":"Dev","led":[12,0,1],"wifi":["104-2.4","18950098099",1]}
+3. Config `data/app.json` with `{"name":"Dev","led":[12,0,1],"wifi":["ssid","pass",1]}`
 
+4. Config `data/switch.json` with `{"pin":[4,5,0,1],"state":[0,0]}`
 
+5. Implement led indicator with following code in `main.cpp`
+```cpp
 #include <DigitalOutput.h>
 DigitalOutput* light;
 
@@ -20,3 +21,4 @@ void setup(void) {
 void setSwitchState(const bool value) {
   light->setValue(value);
 }
+```
