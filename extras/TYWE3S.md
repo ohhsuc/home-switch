@@ -4,7 +4,7 @@
 
 2. Set `platformio.ini` with `board = tywe3s`
 
-3. Config `data/app.json` with `{"name":"Dev","led":[12,0,1],"wifi":["ssid","pass",1]}`
+3. Config `data/app.json` with `{"name":"VIC","led":[12,0,1],"wifi":["ssid","pass",1]}`
 
 4. Config `data/switch.json` with `{"pin":[4,5,0,1],"state":[0,0]}`
 
