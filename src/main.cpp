@@ -1,17 +1,17 @@
 #include <Arduino.h>
 #include <arduino_homekit_server.h>
 
+#include <GlobalHelpers.h>
 #include <Console.h>
 #include <BuiltinLed.h>
 #include <VictorOTA.h>
 #include <VictorWifi.h>
 #include <VictorWeb.h>
 
-#include "TimesCounter.h"
-#include "SwitchIO.h"
+#include <TimesCounter.h>
+#include <SwitchIO/SwitchIO.h>
 
 using namespace Victor;
-using namespace Victor::Events;
 using namespace Victor::Components;
 
 VictorWeb webPortal(80);
@@ -25,14 +25,6 @@ extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
-String toYesNoName(bool state) {
-  return state ? F("Yes") : F("No");
-}
-
-String toOnOffName(bool state) {
-  return state ? F("On") : F("Off");
-}
-
 void setOnState(const bool value) {
   ESP.wdtFeed();
   builtinLed.flash();
@@ -40,7 +32,7 @@ void setOnState(const bool value) {
   onState.value.bool_value = value;
   homekit_characteristic_notify(&onState, onState.value);
   switchIO->setOutputState(value);
-  console.log().section(F("state"), toOnOffName(value));
+  console.log().section(F("state"), GlobalHelpers::toOnOffName(value));
 }
 
 void setup(void) {
@@ -61,8 +53,8 @@ void setup(void) {
   webPortal.onServiceGet = [](std::vector<TextValueModel>& states, std::vector<TextValueModel>& buttons) {
     // states
     states.push_back({ .text = F("Service"), .value = VICTOR_ACCESSORY_SERVICE_NAME });
-    states.push_back({ .text = F("State"),   .value = toOnOffName(onState.value.bool_value) });
-    states.push_back({ .text = F("Paired"),  .value = toYesNoName(homekit_is_paired()) });
+    states.push_back({ .text = F("State"),   .value = GlobalHelpers::toOnOffName(onState.value.bool_value) });
+    states.push_back({ .text = F("Paired"),  .value = GlobalHelpers::toYesNoName(homekit_is_paired()) });
     states.push_back({ .text = F("Clients"), .value = String(arduino_homekit_connected_clients_count()) });
     // buttons
     buttons.push_back({ .text = F("Unpair"), .value = F("Unpair") });
@@ -78,7 +70,8 @@ void setup(void) {
   webPortal.setup();
 
   // setup switch io
-  switchIO = new SwitchIO();
+  const auto storage = new SwitchStorage("/switch.json");
+  switchIO = new SwitchIO(storage);
   switchIO->onInputChange = setOnState;
 
   // setup homekit server
