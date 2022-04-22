@@ -28,16 +28,16 @@ homekit_service_t informationService = HOMEKIT_SERVICE_(
 );
 
 // format: bool; HAP section 9.70; true = On, false = Off
-homekit_characteristic_t switchState = HOMEKIT_CHARACTERISTIC_(ON, false);
+homekit_characteristic_t onState = HOMEKIT_CHARACTERISTIC_(ON, false);
 // format: string; HAP section 9.62; maximum length 64
-homekit_characteristic_t switchNameState = HOMEKIT_CHARACTERISTIC_(NAME, "Switch");
+homekit_characteristic_t nameState = HOMEKIT_CHARACTERISTIC_(NAME, "Switch");
 
 homekit_service_t stateService = HOMEKIT_SERVICE_(
   SWITCH,
   .primary = true,
   .characteristics = (homekit_characteristic_t*[]) {
-    &switchState,
-    &switchNameState,
+    &onState,
+    &nameState,
     NULL,
   },
 );
