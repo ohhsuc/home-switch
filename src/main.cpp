@@ -94,12 +94,12 @@ void setup(void) {
     if (action == ButtonActionPressed) {
       const auto outputValue = switchIO->getOutputState();
       setOnState(!outputValue); // toggle
-      times.count(); // count only for real button click
+    } else if (action == ButtonActionReleased) {
+      times.count(); // count only for real button released
     } else if (action == ButtonActionRestart) {
       ESP.restart();
     } else if (action == ButtonActionRestore) {
       homekit_server_reset();
-      ESP.eraseConfig();
       ESP.restart();
     }
   };
