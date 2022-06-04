@@ -2,6 +2,7 @@
 #include <arduino_homekit_server.h>
 
 #include <AppMain/AppMain.h>
+#include <GlobalHelpers.h>
 #include <TimesCounter.h>
 #include <SwitchIO/SwitchIO.h>
 
@@ -30,10 +31,7 @@ void setOnState(const bool value) {
 
 void setup(void) {
   appMain = new AppMain();
-  appMain->setup({
-    .web = true,
-    .radio = false,
-  });
+  appMain->setup();
 
   // counter
   times.onCount = [](uint8_t count) {
