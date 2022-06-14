@@ -14,17 +14,22 @@ extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
-AppMain* appMain;
+AppMain* appMain = nullptr;
+bool connective = false;
+
 TimesCounter times(1000);
-SwitchIO* switchIO;
+SwitchIO* switchIO = nullptr;
+
 String hostName;
 String serialNumber;
 
-void setOnState(const bool value) {
+void setOnState(const bool value, const bool notify) {
   ESP.wdtFeed();
   builtinLed.flash();
   onState.value.bool_value = value;
-  homekit_characteristic_notify(&onState, onState.value);
+  if (notify) {
+    homekit_characteristic_notify(&onState, onState.value);
+  }
   switchIO->setOutputState(value);
   console.log().section(F("state"), GlobalHelpers::toOnOffName(value));
 }
@@ -57,7 +62,7 @@ void setup(void) {
       homekit_server_reset();
       ESP.restart();
     } else if (value == F("Toggle")) {
-      setOnState(!onState.value.bool_value);
+      setOnState(!onState.value.bool_value, connective);
     }
   };
 
@@ -66,19 +71,19 @@ void setup(void) {
   serialNumber = String(VICTOR_ACCESSORY_INFORMATION_SERIAL_NUMBER) + "/" + victorWifi.getHostId();
   accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
   accessorySerialNumber.value.string_value = const_cast<char*>(serialNumber.c_str());
-  onState.setter = [](const homekit_value_t value) { setOnState(value.bool_value); };
+  onState.setter = [](const homekit_value_t value) { setOnState(value.bool_value, connective); };
   arduino_homekit_setup(&serverConfig);
 
   // setup switch io
   switchIO = new SwitchIO("/switch.json");
-  setOnState(switchIO->getOutputState());
+  setOnState(switchIO->getOutputState(), false);
   switchIO->input->onAction = [](const ButtonAction action) {
     console.log()
       .bracket(F("button"))
       .section(F("action"), String(action));
     if (action == BUTTON_ACTION_PRESSED) {
       const auto outputValue = switchIO->getOutputState();
-      setOnState(!outputValue); // toggle
+      setOnState(!outputValue, connective); // toggle
     } else if (action == BUTTON_ACTION_RELEASED) {
       times.count(); // count only for real button released
     } else if (action == BUTTON_ACTION_DOUBLE_PRESSED) {
@@ -100,7 +105,9 @@ void setup(void) {
 }
 
 void loop(void) {
-  appMain->loop();
-  switchIO->loop();
   arduino_homekit_loop();
+  const auto isPaired = arduino_homekit_get_running_server()->paired;
+  connective = victorWifi.isLightSleepMode() && isPaired;
+  appMain->loop(connective);
+  switchIO->loop();
 }
